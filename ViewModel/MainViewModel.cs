@@ -87,7 +87,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
             while (_isAnimating)
             {
-                await Task.Delay(500); // Adjust delay as needed
+                await Task.Delay(250); // Adjust delay as needed
 
                 if (!_isAnimating)
                     break;
