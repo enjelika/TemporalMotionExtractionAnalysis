@@ -5,14 +5,36 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="550" Width="800">
     <Grid>
 
-        <StackPanel>
-            <Image Source="{Binding CurrentImage.ImagePath}" Height="300" Width="300"/>
-            <Button Content="Load Images" Command="{Binding LoadImagesCommand}"/>
-            <Button Content="Start Animation" Command="{Binding StartAnimationCommand}"/>
-            <Button Content="Stop Animation" Command="{Binding StopAnimationCommand}"/>
+        <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Selected Folder Name: " Margin="10, 20, 5, 20" />
+                <Label Content="{Binding FolderName}" Margin="10, 20, 5, 20"/>
+                <Button Content="Load Images" Command="{Binding LoadImagesCommand}" Margin="20"/>
+            </StackPanel>
+                        
+            <Image Source="{Binding CurrentImage.ImagePath}" Height="350" Width="350"/>
+
+            <!-- Timeline thumbnails -->
+            <ListBox Grid.Row="1" ItemsSource="{Binding Images}" SelectionMode="Single">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Image Source="{Binding ImagePath}" Width="100" Height="100" Margin="5"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Start Animation" Command="{Binding StartAnimationCommand}" Margin="20, 10"/>
+                <Button Content="Stop Animation" Command="{Binding StopAnimationCommand}" Margin="20, 10"/>
+            </StackPanel>
         </StackPanel>
 
     </Grid>

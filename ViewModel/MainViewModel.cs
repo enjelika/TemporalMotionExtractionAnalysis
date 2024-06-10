@@ -20,6 +20,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ImageModel _currentImage;
         private int _currentIndex;
         private bool _isAnimating;
+        private string _folderName;
 
         public ObservableCollection<ImageModel> Images
         {
@@ -41,6 +42,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public string FolderName
+        {
+            get => _folderName;
+            set
+            {
+                _folderName = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ICommand LoadImagesCommand { get; }
         public ICommand StartAnimationCommand { get; }
         public ICommand StopAnimationCommand { get; }
@@ -51,6 +62,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             LoadImagesCommand = new RelayCommand(LoadImages);
             StartAnimationCommand = new RelayCommand(StartAnimation);
             StopAnimationCommand = new RelayCommand(StopAnimation);
+
+            FolderName = "No Selected Folder";
         }
 
         private void LoadImages()
@@ -76,6 +89,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         CurrentImage = Images.First();
                         _currentIndex = 0;
                     }
+
+                    FolderName = Path.GetFileName(selectedPath);
                 }
             }
         }
