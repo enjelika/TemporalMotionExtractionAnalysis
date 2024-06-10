@@ -4,21 +4,32 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis"
+        xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
-        Title="MainWindow" Height="550" Width="800">
+        Title="MainWindow" Height="700" Width="900">
+    <Window.Resources>
+        <models:IndexConverter x:Key="IndexConverter"/>
+    </Window.Resources>
     <Grid>
 
         <StackPanel Orientation="Vertical">
+            <!-- Select folder and load images controls -->
             <StackPanel Orientation="Horizontal">
                 <Label Content="Selected Folder Name: " Margin="10, 20, 5, 20" />
                 <Label Content="{Binding FolderName}" Margin="10, 20, 5, 20"/>
                 <Button Content="Load Images" Command="{Binding LoadImagesCommand}" Margin="20"/>
             </StackPanel>
-                        
-            <Image Source="{Binding CurrentImage.ImagePath}" Height="350" Width="350"/>
+
+            <!-- Animation of images in selected folder -->
+            <!-- Start/Stop Animation controls -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Image Source="{Binding CurrentImage.ImagePath}" Height="250" Width="350" Margin="0, 0, 20, 0"/>
+                <Button Content="Start Animation" Command="{Binding StartAnimationCommand}" Margin="20, 90"/>
+                <Button Content="Stop Animation" Command="{Binding StopAnimationCommand}" Margin="20, 90"/>
+            </StackPanel>
 
             <!-- Timeline thumbnails -->
-            <ListBox Grid.Row="1" ItemsSource="{Binding Images}" SelectionMode="Single">
+            <ListBox Grid.Row="1" ItemsSource="{Binding Images}" SelectionMode="Single" SelectedItem="{Binding CurrentImage}">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal"/>
@@ -26,15 +37,22 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Image Source="{Binding ImagePath}" Width="100" Height="100" Margin="5"/>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Converter={StaticResource IndexConverter}}" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="1"/>
+                            <Image Source="{Binding ImagePath}" Width="100" Height="100" Grid.Row="1" Margin="5, 2"/>
+                        </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <StackPanel Orientation="Horizontal">
-                <Button Content="Start Animation" Command="{Binding StartAnimationCommand}" Margin="20, 10"/>
-                <Button Content="Stop Animation" Command="{Binding StopAnimationCommand}" Margin="20, 10"/>
-            </StackPanel>
+            <!-- TODO: Comparison pane -->
+            
         </StackPanel>
 
     </Grid>
