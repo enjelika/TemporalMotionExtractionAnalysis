@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Forms;
 using TemporalMotionExtractionAnalysis.Models;
 using System.IO;
+using TemporalMotionExtractionAnalysis.Model;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -91,6 +92,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     }
 
                     FolderName = Path.GetFileName(selectedPath);
+
+                    MotionExtraction motionExtraction = new MotionExtraction();
                 }
             }
         }

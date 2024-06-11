@@ -1,0 +1,838 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.IO;
+using System.Linq;
+using System.Reflection.Metadata;
+using System.Reflection;
+using System.Security.Policy;
+using System.Text;
+using System.Threading.Tasks;
+using static System.Windows.Forms.DataFormats;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media.Media3D;
+using System.Windows;
+using ImageProcessor;
+using System.Windows.Media.Imaging;
+using ImageMagick;
+using MOIE = Microsoft.Office.Interop.Excel;
+
+namespace TemporalMotionExtractionAnalysis.Model
+{
+    internal class MotionExtraction
+    {
+        const string gif_root = "gifs";
+        const string moca_folder = "MoCA";
+        const string jpeg_images_folder = moca_folder + "\\JPEGImages";
+
+
+        //""" Helper function: Shows an image via the matplotlib plt.show() ability """ 
+        //def show_image(image):
+        //    plt.imshow(image)
+        //    plt.axis('off')  # Turn off axis labels
+        //    plt.show()
+
+        //def show_image_with_index(image, index) :
+        //    plt.imshow(image)
+        //    plt.axis('off')  # Turn off axis labels
+        //    plt.title(f'Index: {index}')
+        //    plt.show()  
+
+        private BitmapImage reduce_alpha(BitmapImage image)
+        {
+            //""" Helper function: Adjusts the alpha/opacity of the image even more - preparing it to be a mask for motion enhancement """ 
+            //def reduce_alpha(image):
+            //    # Convert to grayscale
+            //    img = ImageOps.grayscale(image)
+            //MagickImage img = new MagickImage(image);
+            //img.Grayscale(PixelIntensityMethod.Average);
+            //# Convert the image to RGBA mode (if it's not already in RGBA mode)
+            //    img = img.convert("RGBA")
+
+            //    # Get pixel data
+            //    pixels = img.load()
+            //    width, height = img.size
+
+            //    # Create a new image to store the modified pixels
+            //    modified_img = Image.new ('RGBA', (width, height), (0, 0, 0, 0))
+
+            //    # Iterate through each pixel and adjust opacity
+            //    for x in range(width) :
+            //        for y in range(height) :
+            //            pixel = pixels[x, y]
+            //# Reduce opacity based on the pixel intensity
+            //            modified_img.putpixel((x, y), (pixel[0], pixel[1], pixel[2], int(pixel[3]* 0.5)))  # Adjust the multiplier for opacity
+
+            //    # Show the modified image
+            //    show_image(modified_img)
+
+            //    return modified_img
+            return null;
+        }
+
+
+        //""" Helper function: Make GIF from images in a folder location """        
+        //def make_gif(frame_folder, class_name):
+        //    frames = [Image.open(image) for image in glob.glob(f"{frame_folder}/*.JPG")]
+        //        frame_one = frames[0]
+        //        frame_one.save(class_name+"_results.gif", format= "GIF", append_images= frames, save_all= True, duration= 100, loop= 0)
+
+
+        //""" Helper function: MAE evaluation of previous frame's motion vs current frame """    
+        //def calculate_mae(prev_mask, curr_mask):
+        //    # Convert images to numpy arrays for easier computation
+        //    prev_array = np.array(prev_mask)
+        //    curr_array = np.array(curr_mask)
+
+        //    # Compute the absolute difference between the two masks
+        //    absolute_diff = np.abs(prev_array - curr_array)
+
+        //    # Calculate the mean absolute error (MAE)
+        //    mae = np.mean(absolute_diff)
+
+        //    return mae
+
+
+        //""" Helper function: E_m evaluation of previous frame's motion vs current frame """
+        //def calculate_e_measure_pixelwise(prev_frame, curr_frame, threshold= 10):
+        //    """
+        //    Calculate the mean E-measure pixelwise between two frames.
+
+        //    Parameters:
+        //    - prev_mask_img: First frame (numpy array) in grayscale
+        //    - curr_mask_img: Second frame (numpy array) in grayscale
+        //    - threshold: Threshold for gradient difference (default: 25)
+
+        //    Returns:
+        //    - mean_e_measure: Mean E-measure value
+        //    """
+        //    # Compute the absolute pixel-wise difference between frames
+        //    abs_diff = np.abs(prev_frame.astype(np.float32) - curr_frame.astype(np.float32))
+
+        //    # Compute precision and recall based on the threshold
+        //    precision = np.mean(abs_diff<threshold)
+        //    recall = np.mean(curr_frame<threshold)
+
+        //    # Compute E-measure
+        //    alpha = 0.5
+        //    e_measure = 1 - alpha* (1 - precision) - (1 - alpha) * (1 - recall)
+
+        //    return e_measure
+
+
+        //""" Helper function: structural similarity index (SSIM) evaluation of previous frame's motion vs current frame """
+        //def calculate_ssim(prev_frame, curr_frame):
+        //    """
+        //    Calculate the structural similarity index (SSIM) between two sequential frames.
+
+        //    Parameters:
+        //    - prev_mask_img: First frame (numpy array) in grayscale
+        //    - curr_mask_img: Second frame (numpy array)) in grayscale
+
+        //    Returns:
+        //    - mean_e_measure: Mean E-measure value
+        //    """
+        //    # Calculate SSIM between two frames
+        //    ssim_index, _ = ssim(prev_frame, curr_frame, full= True)
+
+        //    return ssim_index
+
+
+        //""" Helper function: Make Motion Extracted GIF from images in a folder location """ 
+        //def motion_extraction(frame_folder, class_name, output_folder= "./output_masks"):
+        //    # Record the start time
+        //    start_time = time.time()
+
+        //# Get all of the current gif frames
+        //    frames = glob.glob(f"{frame_folder}/*.JPG")
+        //    num_frames = len(frames)
+        //    print(f"Number of frames: {num_frames}")
+
+        //    alpha = 50
+        //    index = 0
+
+        //    # Define a static blur radius for all frames
+        //    blur_radius = 5
+
+        //    # Create output folders
+        //    mask_imgs_folder = os.path.join(output_folder, f"{class_name}")
+        //    os.makedirs(mask_imgs_folder, exist_ok=True)
+        //    output_subfolder = os.path.join(output_folder, os.path.basename(frame_folder))
+        //    os.makedirs(output_subfolder, exist_ok=True)
+
+        //    # Pre-process frames with tqdm for a progress bar
+        //    for frame_path in tqdm(frames, desc= f"Pre-processing frames for {class_name}") :
+        //        image = Image.open(frame_path)
+
+        //# Check if the mask image already exists
+        //        mask_save_path = os.path.join(output_subfolder, f"mask_{index}.png")
+        //        if os.path.exists(mask_save_path):
+        //            # print(f"Skipping frame {index} as the mask already exists.")
+        //            index += 1
+        //            continue
+
+        //        # Step 1 - Invert colors      
+        //        inverted = ImageOps.invert(image)
+        //        blended = inverted.convert("RGBA")
+        //        # TODO: Save first frame's output
+        //        # Save first frame's output
+        //        if index == 60:
+        //            blended.save(os.path.join(output_subfolder, "step1_sixtith_frame.png"))
+
+        //        # Step 2 - Reduce opacity (aka alpha)
+        //        blended.putalpha(alpha)
+        //        semifinal = reduce_alpha(blended)
+        //        semifinal.putalpha(alpha)
+        //        # TODO: Save first frame's output
+        //        if index == 60:
+        //            semifinal.save(os.path.join(output_subfolder, "step2_sixtith_frame.png"))        
+
+        //        # Step 3 - Add blur
+        //        final = semifinal.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+        //        # TODO: Save first frame's output
+        //        if index == 60:
+        //            final.save(os.path.join(output_subfolder, "step3_sixtith_frame.png"))
+
+        //        # show_image_with_index(final, index) # For troubleshooting
+
+        //        # Save the mask image to disk
+        //        mask_save_path = os.path.join(mask_imgs_folder, f"mask_{index}.png")
+        //        final.save(mask_save_path)
+
+        //        index += 1
+
+        //    # Metrics calculation outside the loop
+        //    maes = []
+        //        ems = []
+        //        ssims = []
+        //        blended_imgs = []
+
+        //# Open one of the frames to get its dimensions
+        //        sample_frame = Image.open(os.path.join(mask_imgs_folder, "mask_0.png"))
+        //    width, height = sample_frame.size
+
+        //# Initialize an empty blended image folder
+        //    blended_imgs_folder = os.path.join("./blended_imgs", f"{class_name}")
+        //    os.makedirs(blended_imgs_folder, exist_ok=True)
+
+        //    # Initialize an empty composite image
+        //    # composite_image = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+        //    # composite_imgs_folder = os.path.join("./composite_masks", f"{class_name}")
+        //    # os.makedirs(composite_imgs_folder, exist_ok=True)
+
+        //    # Initialize the 'final' variable
+        //    final = Image.new ('RGBA', (width, height), (0, 0, 0, 0))
+
+        //    # Specify the total number of iterations for tqdm
+        //    total_iterations = num_frames - 1
+
+        //    # Process frames with tqdm for a progress bar
+        //    for index in tqdm(range(1, num_frames), total=total_iterations, desc=f"Processing frames for {class_name}"):
+        //        prev_mask_path = os.path.join(mask_imgs_folder, f"mask_{index - 1}.png")
+        //        curr_mask_path = os.path.join(mask_imgs_folder, f"mask_{index}.png")
+
+        //        # Load the mask images only when needed
+        //        prev_mask_img = Image.open(prev_mask_path)
+        //        curr_mask_img = Image.open(curr_mask_path)
+
+        //        # Convert the composite image to grayscale for metric calculations
+        //        prev_mask_array = np.array(prev_mask_img.convert('L'))
+
+        //        # Convert the current mask image to grayscale for metric calculations
+        //        curr_mask_array = np.array(curr_mask_img.convert('L'))
+
+        //        # Calculate MAE
+        //        mae = np.mean(np.abs(prev_mask_array - curr_mask_array))
+        //        maes.append(mae)
+
+        //# Calculate E-measure
+        //        em = calculate_e_measure_pixelwise(prev_mask_array, curr_mask_array)
+        //        ems.append(em)
+
+        //# Calculate SSIM
+        //        ssim = calculate_ssim(prev_mask_array, curr_mask_array)
+        //        ssims.append(ssim)
+
+        //# TODO: Overlay metrics on top of frame as a PCA scatter plot
+        //# Instead of a vanilla scatter plot - no axis, use glyphs for the values
+        //# triangle up - value increased from last frame
+        //# triangle down - value decreased from last frame
+        //# circle - value remained the same from last frame
+        //# use of colors to distinguish the different metrics:
+        //# purple - MAE
+        //# blue - E-measure
+        //# green - SSIM
+        //# -- labels for the exact value?
+
+        //# MAE
+
+        //# E-measure
+
+        //# SSIM
+
+
+        //# Append the current mask image directly to blended_imgs
+        //        blended_imgs.append(curr_mask_img)
+
+        //        # # Blend the current frame with the composite image
+        //# blended_frame = overlay_images(curr_mask_img, prev_mask_img)
+        //# blended_imgs.append(blended_frame)
+
+        //# # Update the composite image for the next iteration
+        //# composite_image = Image.blend(composite_image, curr_mask_img, alpha=0.5)
+
+        //# Save the final blended image to disk
+        //        blended_save_path = os.path.join(blended_imgs_folder, f"blended_{index}.png")
+        //        curr_mask_img.save(blended_save_path)
+
+        //    # Create Motion Results GIF
+        //    if blended_imgs:
+        //        output_gif_path = f"./results/{class_name}_motion_results.gif"
+        //        blended_imgs[0].save(
+        //            output_gif_path,
+        //            format= "GIF",
+        //            append_images= blended_imgs[1:],
+        //            save_all= True,
+        //            duration= 100,
+        //            loop= 0
+        //        )
+
+
+        //        with imageio.get_writer(output_gif_path, mode= 'I', duration= 0.1) as writer:
+        //            for img in blended_imgs:
+        //                writer.append_data(np.array(img))
+
+        //    # Save metrics to a dictionary
+        //    metrics_dict = {
+        //        'maes': maes,
+        //        'ems': ems,
+        //        'ssims': ssims
+        //    }
+
+        //# Specify the path for the JSON file
+        //    json_file_path = f"./results/{class_name}_metrics_results.json"
+
+        //    # Save the metrics dictionary to the JSON file
+        //    with open(json_file_path, 'w') as json_file:
+        //        json.dump(metrics_dict, json_file)
+
+        //# Calculate averages
+        //    average_MAE = np.nanmean(maes)
+        //    average_Em = np.nanmean(ems)
+        //    average_SSIM = np.nanmean(ssims)
+
+        //    # Check for NaN and Inf and replace with 0
+        //    average_MAE = 0 if np.isnan(average_MAE) or np.isinf(average_MAE) else average_MAE
+        //    average_Em = 0 if np.isnan(average_Em) or np.isinf(average_Em) else average_Em
+        //    average_SSIM = 0 if np.isnan(average_SSIM) or np.isinf(average_SSIM) else average_SSIM
+
+        //    print(f"Avg. MAE: {average_MAE}, Avg. E-measure: {average_Em}, Avg. SSIM: {average_SSIM}")
+
+        //    end_time = time.time()  # Record the end time
+        //    elapsed_time = end_time - start_time
+
+        //    print(f"Motion extraction for {class_name} completed in {elapsed_time:.2f} seconds.")
+
+        //    return average_MAE, average_Em, average_SSIM
+
+        //"""
+        //===================================================================================================
+        //    Helper function
+        //        - Visualization function
+        //        -- reads in a json file of MAE, E_m, and SSIM
+        //        -- accesses sequential frames in 'output_masks' folder
+        //===================================================================================================
+        //"""
+        //def results_visualization(json_file_path, output_masks_path, folder_name):
+        //    # Load metrics from the JSON file
+        //    with open(json_file_path, 'r') as json_file:
+        //        loaded_metrics = json.load(json_file)
+
+        //# Access the lists of metrics
+        //    loaded_maes = loaded_metrics['maes']
+        //    loaded_ems = loaded_metrics['ems']
+        //    loaded_ssims = loaded_metrics['ssims']
+
+        //    # Get the list of mask images from the 'output_masks' folder
+        //    mask_files = sorted(glob.glob(os.path.join(output_masks_path, '*.png')))
+
+        //    # Check if the number of loaded metrics matches the number of mask images
+        //    if len(loaded_maes) != len(mask_files) - 1 or len(loaded_ems) != len(mask_files) - 1 or len(loaded_ssims) != len(mask_files) - 1:
+        //        print("Mismatch between the number of metrics and mask images.")
+        //        return
+
+        //    # Create a DataFrame for Parallel Coordinates Plot
+        //    df = pd.DataFrame({
+        //        'Frame Index': range(1, len(mask_files)),
+        //        'MAE': loaded_maes, # Weak to no linear relationship
+        //        'E-measure': loaded_ems, # moderate to strong negative linear relationship
+        //        'SSIM': loaded_ssims #, # moderate to strong negative linear relationship
+        //        #'Thumbnail': mask_files[1:]  # Add a column for thumbnail file paths
+        //    })
+
+        //    # We need to transform the data from raw data to a normalized value
+        //    data = df[['Frame Index', 'MAE', 'E-measure', 'SSIM']]
+
+        //    #==========================================================================
+
+        //# Create a scatter plot
+        //# plt.scatter(data["Frame Index"], data["SSIM"])
+        //# plt.title('Scatter Plot of SSIM vs Frame Index')
+        //# plt.xlabel('Frame Index')
+        //# plt.ylabel('SSIM')
+        //# plt.show()
+
+        //# # Compute the correlation coefficient
+        //# correlation_coefficient = np.corrcoef(data["Frame Index"], data["SSIM"])[0, 1]
+        //# print(f'SSIM Correlation Coefficient: {correlation_coefficient}')
+
+        //#==========================================================================
+
+        //# Set up the figure and axes
+        //    fig, (ax_linear, ax_nonlinear) = plt.subplots(2, 1, sharex = True, figsize = (10, 6))
+
+        //    # Plot linear metrics (E-measure and SSIM)
+        //    sns.lineplot(x='Frame Index', y = 'E-measure', data = df, label = 'E-measure', ax = ax_linear)
+        //    sns.lineplot(x='Frame Index', y = 'SSIM', data = df, label = 'SSIM', ax = ax_linear)
+        //    ax_linear.set_title('Linear Metrics')
+
+        //    # Plot non-linear metric (MAE)
+        //    sns.barplot(x='Frame Index', y = 'MAE', data = df, ax = ax_nonlinear, color = 'skyblue')
+        //    ax_nonlinear.set_title('Non-linear Metric')
+
+        //    # Adjust layout
+        //    plt.tight_layout()
+        //    plt.show()
+
+        //    # Normalize values using Min-Max scaling
+        //    # scaler = MinMaxScaler()
+        //    # normalized_data = data.set_index('Frame Index')
+        //    # normalized_data = pd.DataFrame(scaler.fit_transform(normalized_data), columns=normalized_data.columns, index=normalized_data.index)
+
+        //    # # Make the plot
+        //    # plt.stackplot(normalized_data.index, normalized_data["MAE"], normalized_data["E-measure"], normalized_data["SSIM"], labels=['MAE', 'E-measure', 'SSIM'])
+        //    # plt.legend(loc='upper left')
+        //    # plt.margins(0, 0)
+        //    # plt.title('Normalized Stacked Area Chart')
+        //    # plt.xlabel('Frame Index')
+        //    # plt.ylabel('Normalized Value')
+
+        //    # plt.show()
+
+        //    # Resetting the index of normalized_data
+        //    # normalized_data_reset = normalized_data.reset_index()
+
+        //    # # Set up the matplotlib figure
+        //    # plt.figure(figsize=(10, 6))
+
+        //    # # Distplot
+        //    # group_labels = ['MAE', 'E-measure', 'SSIM']
+
+        //    # # Create distplot with Seaborn
+        //    # for label in group_labels:
+        //    #     sns.distplot(data[label], bins=20, kde=True, label=label)
+
+        //    # # Show legend
+        //    # plt.legend()
+
+        //    # # Add title and labels
+        //    # plt.title('Distribution of Metrics')
+        //    # plt.xlabel('Values')
+        //    # plt.ylabel('Density')
+
+        //    # # Show the plot
+        //    # plt.show()
+
+        //        # Create a subplot with four rows
+        //    # fig = make_subplots(rows=3, cols=1, shared_xaxes=True, subplot_titles=['Thumbnails', 'MAEs', 'E-measures', 'SSIMs'])
+
+        //    # # Add Thumbnails to the first row
+        //    # thumbnails = [Image.open(thumbnail_path).resize((50, 50)) for thumbnail_path in df['Thumbnail']]
+        //    # for i, thumbnail in enumerate(thumbnails, start=1):
+        //    #     # Convert the NumPy array to a PIL.Image.Image object
+        //    #     pil_image = Image.fromarray(np.array(thumbnail))
+
+        //    #     # Create a BytesIO object to store the image in memory
+        //    #     image_bytes = io.BytesIO()
+
+        //    #     # Save the PIL.Image.Image to the BytesIO object in PNG format
+        //    #     pil_image.save(image_bytes, format='PNG')
+
+        //    #     # Convert the BytesIO object to a base64-encoded image URI
+        //    #     image_uri = f"data:image/png;base64,{base64.b64encode(image_bytes.getvalue()).decode()}"
+
+        //    #     # Add image to the layout
+        //    #     fig.add_trace(go.Image(source=image_uri), row=1, col=1)
+
+        //    # Add Frame Index as a number line to the first row
+        //    # fig.add_trace(go.Scatter(x=df['Frame Index'], y=[0] * len(df['Frame Index']), mode='markers', marker=dict(size=10), showlegend=False), row=1, col=1)
+
+        //    # # Add MAEs as heatmap to the second row
+        //    # fig.add_trace(go.Histogram2d(x=df['Frame Index'], y=df['MAE'], colorscale='PRGn', showlegend=False), row=1, col=1)
+
+        //    # # Add E-measures as heatmap to the third row
+        //    # fig.add_trace(go.Histogram2d(x=df['Frame Index'], y=df['E-measure'], colorscale='PRGn', showlegend=False), row=2, col=1)
+
+        //    # # Add SSIMs as heatmap to the fourth row
+        //    # fig.add_trace(go.Histogram2d(x=df['Frame Index'], y=df['SSIM'], colorscale='PRGn', showlegend=False), row=3, col=1)
+
+        //    # # Update layout
+        //    # fig.update_layout(height=800, width=800)
+
+        //    # Save the interactive plot as an HTML file
+        //    # plot(fig, filename=f"./visualizations/{folder_name}_motion_extraction_interactive_visualization.html")
+
+        //    # # Create a subplot for Thumbnails
+        //    # fig_images = make_subplots(
+        //    #     rows=len(thumbnails), cols=1,
+        //    #     subplot_titles=[""] * len(thumbnails)
+        //    # )
+
+        //    # # Add Thumbnails
+        //    # for i, thumbnail in enumerate(tqdm(thumbnails, desc="Adding Thumbnails", unit="image", position=0, leave=True), start=1):
+        //    #     # Convert the NumPy array to a PIL.Image.Image object
+        //    #     pil_image = Image.fromarray(np.array(thumbnail))
+
+        //    #     # Create a BytesIO object to store the image in memory
+        //    #     image_bytes = io.BytesIO()
+
+        //    #     # Save the PIL.Image.Image to the BytesIO object in PNG format
+        //    #     pil_image.save(image_bytes, format='PNG')
+
+        //    #     # Convert the BytesIO object to a base64-encoded image URI
+        //    #     image_uri = f"data:image/png;base64,{base64.b64encode(image_bytes.getvalue()).decode()}"
+
+        //    #     # Add Image to subplot
+        //    #     # fig_images.add_trace(go.Image(source=image_uri),
+        //    #     #                      row=i, col=1)
+        //    #     # Add scatter trace with Image mode
+        //    #     fig_images.add_trace(go.Scatter(
+        //    #         x=[0],
+        //    #         y=[1 - i / len(thumbnails)],
+        //    #         mode='markers',
+        //    #         marker=dict(size=1, opacity=0),
+        //    #         hoverinfo='text',
+        //    #         text=[image_uri],
+        //    #     ), row=i, col=1)
+
+        //    # # Save Thumbnails as a separate HTML file
+        //    # thumbnails_html_path = f"./visualizations/{folder_name}_thumbnails_visualization.html"
+        //    # plot(fig_images, filename=thumbnails_html_path, auto_open=False)
+
+        //    # # Create a parallel coordinates plot using plotly.graph_objects
+        //    # parallel_plot = go.FigureWidget(
+        //    #     go.Parcoords(
+        //    #         line=dict(color=df['Frame Index'], colorscale='Viridis'),
+        //    #         dimensions=[
+        //    #             dict(label='MAE', values=df['MAE']),
+        //    #             dict(label='E-measure', values=df['E-measure']),
+        //    #             dict(label='SSIM', values=df['SSIM'])
+        //    #         ]
+        //    #     )
+        //    # )
+
+        //    # # Save Parallel Coordinates Plot as a separate HTML file
+        //    # parallel_plot_html_path = f"./visualizations/{folder_name}_parallel_coordinates_plot.html"
+        //    # plot(parallel_plot, filename=parallel_plot_html_path, auto_open=False)
+
+        //    # # Combine Thumbnails and Parallel Coordinates Plot in a single HTML file using custom HTML and CSS
+        //    # combined_html_content = f"""
+        //    # <html>
+        //    #     <head>
+        //    #         <style>
+        //    #             .container {{
+        //    #                 display: flex;
+        //    #                 flex-direction: column;
+        //    #             }}
+        //    #             .thumbnails {{
+        //    #                 width: 100%;
+        //    #                 flex: 1;
+        //    #             }}
+        //    #             .parallel-plot {{
+        //    #                 width: 100%;
+        //    #                 flex: 1;
+        //    #             }}
+        //    #         </style>
+        //    #     </head>
+        //    #     <body>
+        //    #        <div class="container">
+        //    #             <div class="thumbnails">
+        //    #                 {fig_images.to_html(full_html=False)}
+        //    #             </div>
+        //    #             <div class="parallel-plot">
+        //    #                 {parallel_plot.to_html(full_html=False)}
+        //    #             </div>
+        //    #         </div>
+        //    #     </body>
+        //    # </html>
+        //    # """
+
+        //    # # Save the combined HTML file
+        //    # combined_html_path = f"./visualizations/{folder_name}_combined_visualization.html"
+        //    # with open(combined_html_path, 'w', encoding='utf-8') as combined_html_file:
+        //    #     combined_html_file.write(combined_html_content)
+
+        //    # # Create figure with parallel coordinates plot
+        //    # fig = px.parallel_coordinates(
+        //    #     df,
+        //    #     color=df['Frame Index'],  # Use Frame Index for color
+        //    #     labels={'MAE': 'MAE', 'E-measure': 'E-measure', 'SSIM': 'SSIM', 'Frame Index': 'Frame Index'},
+        //    #     color_continuous_scale=px.colors.sequential.Viridis,
+        //    #     title='Motion Extraction Metrics - Parallel Coordinates Plot'
+        //    # )
+
+        //    # # Add Thumbnails
+        //    # thumbnails = [Image.open(thumbnail_path) for thumbnail_path in df['Thumbnail']]
+
+        //    # # Calculate the height needed for thumbnails
+        //    # thumbnail_height = 300 * len(thumbnails)
+
+        //    # # Add images as annotations to the figure
+        //    # for i, thumbnail in enumerate(tqdm(thumbnails, desc="Adding Thumbnails", unit="image", position=0, leave=True), start=1):
+        //    #     # Convert the NumPy array to a PIL.Image.Image object
+        //    #     pil_image = Image.fromarray(np.array(thumbnail))
+
+        //    #     # Create a BytesIO object to store the image in memory
+        //    #     image_bytes = io.BytesIO()
+
+        //    #     # Save the PIL.Image.Image to the BytesIO object in PNG format
+        //    #     pil_image.save(image_bytes, format='PNG')
+
+        //    #     # Convert the BytesIO object to a base64-encoded image URI
+        //    #     image_uri = f"data:image/png;base64,{base64.b64encode(image_bytes.getvalue()).decode()}"
+
+        //    #     fig.add_layout_image(
+        //    #         source=image_uri,
+        //    #         x=0,
+        //    #         y=1 - i / len(thumbnails),
+        //    #         xanchor='left',
+        //    #         yanchor='bottom',
+        //    #         sizex=1,
+        //    #         sizey=1 / len(thumbnails),
+        //    #         xref='paper',
+        //    #         yref='paper'
+        //    #     )
+
+        //    # # Update layout for the combined figure
+        //    # fig.update_layout(
+        //    #     height=thumbnail_height,
+        //    #     showlegend=False
+        //    # )
+
+        //    # Save the interactive plot as an HTML file
+        //    # plot(fig, filename=f"./visualizations/{folder_name}_motion_extraction_interactive_visualization.html")
+
+
+        //def extract_frames(input_gif, output_folder):
+        //    # Open the GIF file
+        //    gif = Image.open(input_gif)
+
+        //    # Iterate through each frame in the GIF
+        //    for frame_index in range(gif.n_frames):
+        //        gif.seek(frame_index)  # Go to the specific frame
+        //        frame = gif.copy()  # Copy the frame
+
+        //        # Convert the frame to RGB mode if it's in palette mode or RGBA mode
+        //        if frame.mode == 'P':
+        //            frame = frame.convert('RGB')
+        //        elif frame.mode == 'RGBA':
+        //            frame = frame.convert('RGB')  # Convert RGBA to RGB
+
+        //        # Save the frame as an individual image (JPEG)
+        //        output_path = os.path.join(output_folder, f"frame_{frame_index}.jpg")
+        //        frame.save(output_path, format = "JPEG")
+
+
+        //"""
+        //===================================================================================================
+        //    Helper function
+        //        - Segments the detected motion in yellow and green
+        //===================================================================================================
+        //"""
+        //def overlay_images(original_image, mask_image):
+        //    # Resize the mask image to match the original image's size
+        //    mask_image = mask_image.resize(original_image.size, Image.LANCZOS).convert("RGBA")
+
+
+        //    # Print dimensions for debugging
+        //# print("Original Image Dimensions:", original_image.size)
+        //# print("Mask Image Dimensions:", mask_image.size)
+        //# Convert both images to RGBA mode
+        //    original_image = original_image.convert("RGBA")
+        //    mask_image = mask_image.convert("RGBA")
+
+        //    # Blend the images
+        //    try:
+        //        blended_image = Image.blend(original_image, mask_image, alpha = 0.2)
+        //    except ValueError as e:
+        //        print(f"Error: {e}")
+        //        return None
+
+        //    # Save the resulting blended image (optional)
+        //    blended_image.save("blended_image.png")
+
+        //    return blended_image
+
+
+        //def is_folder_empty(folder_path):
+        //    return len(os.listdir(folder_path)) == 0
+
+
+        //def folder_has_multiple_files(folder_path):
+        //    if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+        //        return False  # If the folder doesn't exist or is not a directory
+
+        //    files = [file for file in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, file))]
+        //    return len(files) > 1
+
+
+        //def count_files_in_directory(directory):
+        //    return len([file for file in os.listdir(directory) if os.path.isfile(os.path.join(directory, file))])
+
+
+        //def combine_gif_frames_for_pub_figure(gif_path):
+        //    # Open the GIF and select the frames you want (0-indexed)
+        //    gif = Image.open(gif_path)
+
+        //    # Get the width and height of the GIF frames
+        //    width, height = gif.size
+
+        //    # Select the frames you want (assuming they are 4 sequential frames)
+        //    frame1 = gif.copy().convert("RGBA").resize((width, height))
+        //    gif.seek(1)
+        //    frame2 = gif.copy().convert("RGBA").resize((width, height))
+        //    gif.seek(2)
+        //    frame3 = gif.copy().convert("RGBA").resize((width, height))
+        //    gif.seek(3)
+        //    frame4 = gif.copy().convert("RGBA").resize((width, height))
+
+        //    # Create a new blank image to paste the frames
+        //    combined_image = Image.new('RGBA', (width * 2, height * 2))
+
+        //    # Paste frames onto the new image
+        //    combined_image.paste(frame1, (0, 0))
+        //    combined_image.paste(frame2, (width, 0))
+        //    combined_image.paste(frame3, (0, height))
+        //    combined_image.paste(frame4, (width, height))
+
+        //    # Save the combined image
+        //    combined_image.save("combined_image.png")
+
+
+        //"""
+        //===================================================================================================
+        //    Main
+        //===================================================================================================
+        //"""
+        public MotionExtraction()
+        {
+            //if __name__ == "__main__":
+            //    # Load the workbook outside the loop
+            //    # Create a workbook and add a worksheet.
+            //    workbook = xlsxwriter.Workbook('PIL_Motion_Analysis.xlsx')
+            //    worksheet = workbook.add_worksheet()
+            var app = new Microsoft.Office.Interop.Excel.Application();
+            MOIE.Workbook workbook = new MOIE.Workbook();
+            MOIE.Worksheet worksheet = (MOIE.Worksheet)workbook.Worksheets.Add();
+
+            //    # Add a bold format to use to highlight cells.
+            //    bold = workbook.add_format({ 'bold': 1})
+            MOIE.Range range = worksheet.get_Range("A1", "D1");
+            range.Cells.Font.Bold = true;
+
+            //    # Write some data headers.
+            //    worksheet.write('A1', 'Folder', bold)
+            //    worksheet.write('B1', 'Avg. MAE', bold)
+            //    worksheet.write('C1', 'Avg. Em', bold)
+            //    worksheet.write('D1', 'Avg. SSIM', bold)
+            var cell = ((MOIE.Range)worksheet.Cells[1, 1]).Value = "Folder";
+            cell = ((MOIE.Range)worksheet.Cells[1, 2]).Value = "Avg. MAE";
+            cell = ((MOIE.Range)worksheet.Cells[1, 3]).Value = "Avg. Em";
+            cell = ((MOIE.Range)worksheet.Cells[1, 4]).Value = "Avg. SSIM";
+
+            //    # Get the number of folders in the JPEGImages directory
+            //    num_folders = sum(os.path.isdir(os.path.join(jpeg_images_folder, item)) for item in os.listdir(jpeg_images_folder))
+            //    print("Number of Folders: " + str(num_folders))
+            var directories = Directory.GetDirectories(jpeg_images_folder);
+            int num_folders = directories.Length;
+            Console.WriteLine("Number of Folders: " + num_folders.ToString());
+            //    # Start from the first cell below the headers.
+            //    row = 1
+            //    col = 0
+            int row = 1;
+            int col = 0;
+
+            //    # Counter
+            //    counter = 0
+            int counter = 0;
+
+            //    # Iterate through each folder in the JPEGImages directory
+            DirectoryInfo di = new DirectoryInfo(jpeg_images_folder);
+            //    for folder in os.scandir(jpeg_images_folder):
+
+
+            foreach (DirectoryInfo dir in di.GetDirectories())
+            {
+                //        folder_path = folder.path  # Use folder.path to get the full path
+                string folder_path = dir.FullName;
+                //        # print(folder_path)
+
+                //        # Check if the item in JPEGImages folder is a directory
+                //        if os.path.isdir(folder_path):
+                if (Directory.Exists(folder_path))
+                {
+                    //            # Get folder name for image collection
+                    //            folder_name = folder.name
+                    string folder_name = dir.Name;
+                    //            print("Counter at: " + str(counter) + " with " + folder_name)
+                    Console.WriteLine("Counter at: " + counter.ToString() + " with " + folder_name);
+                    //            #if counter <= 9:
+                    //              # counter += 1
+                    //              # continue
+
+                    //              # Your existing logic for processing frames
+                    //            if counter < 2: #num_folders:   
+                    if (counter < 2)
+                    {
+                        //#if counter == 5: #8:
+                        //# extract_frames(gif_root + "/"+ file_name + ".gif", "./extracted_gif_frames/" + file_name)
+
+                        //#if is_folder_empty("./extracted_gif_frames/" + file_name) and folder_has_multiple_files("./extracted_gif_frames/" + file_name):
+                        //# extract_frames(gif_root + "/"+ file_name + ".gif", "./extracted_gif_frames/" + file_name)
+
+                        //                average_MAE, average_Em, average_SSIM = motion_extraction(folder_path, folder_name, output_folder="./output_masks")
+                        (double average_MAE, double average_Em, double average_SSIM) averages; // motion_extraction(folder_path, folder_name, output_folder = "output_masks");
+                        //                json_file_path = f"./results/{folder_name}_metrics_results.json"
+                        string json_file_path = "results\\" + folder_name + "_metrics_results.json";
+                        //                output_masks_path = f"./output_masks/{folder_name}"
+                        string output_masks_path = "output_masks\\" + folder_name;
+                        //                results_visualization(json_file_path, output_masks_path, folder_name)
+                        //results_visualization(json_file_path, output_masks_path, folder_name);
+                        //# make_gif(folder_name, folder_name)
+                        //make_gif(folder_name, folder_name);
+                        //# Row Data:    Folder_name     Avg. MAE    Avg. Em     Avg. SSIM
+                        //worksheet.write_string  (  row, col,      folder_name  )
+                        //worksheet.write_number  (  row, col + 1,  average_MAE  )
+                        //worksheet.write_number  (  row, col + 2,  average_Em   )
+                        //worksheet.write_number  (  row, col + 3,  average_SSIM )
+                        //row += 1
+                        ((MOIE.Range)worksheet.Cells[row, col]).Value = folder_name;
+                        //((MOIE.Range)worksheet.Cells[row, col + 1]).Value = averages.average_MAE;
+                        //((MOIE.Range)worksheet.Cells[row, col + 2]).Value = averages.average_Em;
+                        //((MOIE.Range)worksheet.Cells[row, col + 3]).Value = averages.average_SSIM;
+                        //# combine_gif_frames_for_pub_figure("./corgis_treadmill_motion_results.gif")
+                        //                counter += 1
+                        counter += 1;
+                    }
+                    else
+                        break;
+                }
+
+            }
+            // Save the updated workbook
+            workbook.Close();
+            Console.WriteLine("Spreadsheet with results saved.");
+        }
+    }
+}
