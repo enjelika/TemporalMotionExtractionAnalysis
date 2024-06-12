@@ -17,6 +17,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
     public class MainViewModel : INotifyPropertyChanged
     {
         private ObservableCollection<ImageModel> _images;
+        private int _imageCount;
         private ImageModel _currentImage;
         private int _currentIndex;
         private bool _isAnimating;
@@ -40,6 +41,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 _currentImage = value;
                 OnPropertyChanged();
+            }
+        }
+
+        public int ImageCount
+        {
+            get { return _imageCount; }
+            set
+            {
+                _imageCount = value;
+                OnPropertyChanged(nameof(ImageCount));
             }
         }
 
@@ -90,10 +101,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                                                           f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                                                           f.EndsWith(".png", StringComparison.OrdinalIgnoreCase));
 
+                    ImageCount = imageFiles.Count(); // Update image count
+
                     Images.Clear();
+                    int frameNumber = 1;
                     foreach (var file in imageFiles)
                     {
-                        Images.Add(new ImageModel { ImagePath = file });
+                        Images.Add(new ImageModel { ImagePath = file, FrameNumber = frameNumber++ });
                     }
 
                     if (Images.Any())

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis"
         xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
-        Title="MainWindow" 
+        Title="Temporal Motion Analysis App" 
         WindowState="Maximized"
         ResizeMode="NoResize">
     <Window.Resources>
@@ -15,32 +15,56 @@
     <Grid>
 
         <StackPanel Orientation="Vertical">
-            <!-- Select folder and load images controls -->
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Selected Folder Name: " Margin="10, 20, 5, 20" />
-                <Label Content="{Binding FolderName}" Margin="10, 20, 5, 20"/>
-                <Button Content="Load Images" Command="{Binding LoadImagesCommand}" Margin="20"/>
-            </StackPanel>
-                       
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <!-- Playback Controls -->
-                <StackPanel Orientation="Horizontal">
-                    <!-- Animation of images in selected folder -->
-                    <Image Source="{Binding CurrentImage.ImagePath}" Height="250" Width="350" Margin="0, 0, 20, 0"/>
 
-                    <!-- Start/Stop Animation controls -->
-                    <Button Content="Start Animation" Command="{Binding StartAnimationCommand}" Margin="20, 90"/>
-                    <Button Content="Stop Animation" Command="{Binding StopAnimationCommand}" Margin="20, 90"/> 
-                </StackPanel>
-                
-                <!-- Visual Encoding Options -->
-                <StackPanel Orientation="Horizontal">
-                    
-                </StackPanel>
+            <StackPanel Orientation="Horizontal"  HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="750">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Select Image Folder" HorizontalAlignment="Center" Margin="5"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Label Content="Selected Folder Name: " HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Label Content="{Binding FolderName}" MaxWidth="300" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Button Content="Browse" Command="{Binding LoadImagesCommand}" Width="100" Margin="5,20,10,20"/>
+                            
+                            <!-- Display Image Count -->
+                            <TextBlock Text="{Binding ImageCount, StringFormat='Number of Images: {0}'}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+            
+            <!-- Parent Control Pane -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                <!-- Playback Controls Border with Label -->
+                <Border BorderBrush="Black" BorderThickness="1" Margin="10">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Playback Controls" HorizontalAlignment="Center" Margin="5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <!-- Animation of images in selected folder -->
+                            <Image Source="{Binding CurrentImage.ImagePath}" Height="250" Width="350" Margin="10, 0, 5, 0"/>
+
+                            <!-- Start/Stop Animation controls -->
+                            <Button Content="Start Animation" Command="{Binding StartAnimationCommand}" Height="35" Width="100" Margin="10,0,5,0"/>
+                            <Button Content="Stop Animation" Command="{Binding StopAnimationCommand}" Height="35" Width="100" Margin="5,0,10,0"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Visual Encoding Options Border with Label -->
+                <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="300">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" HorizontalAlignment="Center" Margin="5"/>
+                        <StackPanel Orientation="Horizontal">
+                            <!-- TODO: Add your visual encoding options here -->
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
             </StackPanel>
 
             <!-- Overview Timeline thumbnails -->
-            <ListBox ItemsSource="{Binding Images}" SelectionMode="Multiple" MaxHeight="100" SelectionChanged="ListBox_SelectionChanged"> <!--SelectedItem="{Binding CurrentFrame}">-->
+            <ListBox ItemsSource="{Binding Images}" SelectionMode="Multiple" MaxHeight="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged">
+                <!--SelectedItem="{Binding CurrentFrame}">-->
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal"/>
@@ -62,20 +86,33 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <!-- Selected frames view -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-                <ItemsControl ItemsSource="{Binding SelectedFrames}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Image Source="{Binding ImagePath}" Width="150" Height="150" Margin="5"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
+            <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="1000">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Text="Analysis Pane" HorizontalAlignment="Center" Margin="5"/>
+                    <!-- Selected frames view -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                        <ItemsControl ItemsSource="{Binding SelectedFrames}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="5"/>
+                                        <Image Source="{Binding ImagePath}" Width="150" Height="150" Margin="5"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    
+                    <!-- TODO: Overlay View -->
+                    
+                    <!-- TODO: Metrics -->
+                    
+                    <!-- TODO: Visualization -->
+                </DockPanel>
+            </Border>
 
             <!-- TODO: Comparison pane -->
-            
+        
         </StackPanel>
-
     </Grid>
 </Window>
