@@ -19,6 +19,10 @@ using System.Collections;
 using System.Drawing.Imaging;
 using System.Drawing;
 using OpenCvSharp;
+using System.Windows.Media.Effects;
+using System.Windows.Media;
+using static OpenCvSharp.LineIterator;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -41,41 +45,49 @@ namespace TemporalMotionExtractionAnalysis.Model
         //    plt.title(f'Index: {index}')
         //    plt.show()  
 
-        public static BitmapImage reduce_alpha(Uri path)
+        public static Mat reduce_alpha(Uri path)
         {
+            Mat modifiedImage; 
+
             //""" Helper function: Adjusts the alpha/opacity of the image even more - preparing it to be a mask for motion enhancement """ 
             using (Mat image = Cv2.ImRead(path.AbsolutePath))
             {
                 // Convert to grayscale
                 Mat grayscale = Mat.Zeros(image.Width, image.Height);
                 Cv2.CvtColor(image, grayscale, ColorConversionCodes.BGR2GRAY);
-                Cv2.ImWrite("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\grayscale.jpg", grayscale);
+                //Cv2.ImWrite("C:\\grayscale.jpg", grayscale);
                 // Convert the image to RGBA mode (if it's not already in RGBA mode)
                 Cv2.CvtColor(grayscale, image, ColorConversionCodes.GRAY2RGBA);
-                Cv2.ImWrite("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\rgba.jpg", image);
-                // Create output image (bitmap) and set the new pixel format
+                //Cv2.ImWrite("C:\\rgba.jpg", image);
 
-                //    # Get pixel data
-                //    pixels = img.load()
-                //    width, height = img.size
+                // Get pixel data
+                int width = image.Width;
+                int height = image.Height;
 
-                //    # Create a new image to store the modified pixels
-                //    modified_img = Image.new ('RGBA', (width, height), (0, 0, 0, 0))
+                // Create a new image to store the modified pixels
+                modifiedImage = image;
 
-                //    # Iterate through each pixel and adjust opacity
-                //    for x in range(width) :
-                //        for y in range(height) :
-                //            pixel = pixels[x, y]
-                //# Reduce opacity based on the pixel intensity
-                //            modified_img.putpixel((x, y), (pixel[0], pixel[1], pixel[2], int(pixel[3]* 0.5)))  # Adjust the multiplier for opacity
+                // Iterate through each pixel and adjust opacity
+                for(int i = 0; i < height; i++)
+                {
+                    for (int j = 0; j < width; j++)
+                    {
+                        // Reduce opacity based on the pixel intensity
+                        if (modifiedImage.Channels() == 4)
+                        {
+                            Vec4b color = modifiedImage.At<Vec4b>(i, j);
+                            double colorValue = (double)color.Item3;
+                            color.Item3 = BitConverter.GetBytes((int)(colorValue * 0.5))[0];
+                            modifiedImage.Set<Vec4b>(i, j, color);
+                        }
+                    }
+                }
+                //Cv2.ImWrite("C:\\modifiedImage.jpg", modifiedImage);
 
-                //    # Show the modified image
-                //    show_image(modified_img)
+                // Show the modified image
+                // show_image(modified_img)
             }
-
-
-            //    return modified_img
-            return null;
+            return modifiedImage;
         }
 
 
