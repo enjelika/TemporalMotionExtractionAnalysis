@@ -93,7 +93,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
                     FolderName = Path.GetFileName(selectedPath);
 
-                    MotionExtraction motionExtraction = new MotionExtraction();
+                    MotionExtraction motionExtraction = new MotionExtraction(selectedPath);
                 }
             }
         }

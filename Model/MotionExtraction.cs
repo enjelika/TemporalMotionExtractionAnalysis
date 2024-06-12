@@ -725,15 +725,15 @@ namespace TemporalMotionExtractionAnalysis.Model
         //    Main
         //===================================================================================================
         //"""
-        public MotionExtraction()
+        public MotionExtraction(string selectedPath)
         {
             //if __name__ == "__main__":
             //    # Load the workbook outside the loop
             //    # Create a workbook and add a worksheet.
             //    workbook = xlsxwriter.Workbook('PIL_Motion_Analysis.xlsx')
             //    worksheet = workbook.add_worksheet()
-            var app = new Microsoft.Office.Interop.Excel.Application();
-            MOIE.Workbook workbook = new MOIE.Workbook();
+            var excelApp = new Microsoft.Office.Interop.Excel.Application();
+            MOIE.Workbook workbook = excelApp.Workbooks.Add(Type.Missing);
             MOIE.Worksheet worksheet = (MOIE.Worksheet)workbook.Worksheets.Add();
 
             //    # Add a bold format to use to highlight cells.
@@ -754,14 +754,15 @@ namespace TemporalMotionExtractionAnalysis.Model
             //    # Get the number of folders in the JPEGImages directory
             //    num_folders = sum(os.path.isdir(os.path.join(jpeg_images_folder, item)) for item in os.listdir(jpeg_images_folder))
             //    print("Number of Folders: " + str(num_folders))
+            string jpeg_images_folder = selectedPath; 
             var directories = Directory.GetDirectories(jpeg_images_folder);
             int num_folders = directories.Length;
             Console.WriteLine("Number of Folders: " + num_folders.ToString());
             //    # Start from the first cell below the headers.
             //    row = 1
             //    col = 0
-            int row = 1;
-            int col = 0;
+            int row = 2;
+            int col = 1;
 
             //    # Counter
             //    counter = 0
@@ -793,40 +794,41 @@ namespace TemporalMotionExtractionAnalysis.Model
 
                     //              # Your existing logic for processing frames
                     //            if counter < 2: #num_folders:   
-                    if (counter < 2)
-                    {
-                        //#if counter == 5: #8:
-                        //# extract_frames(gif_root + "/"+ file_name + ".gif", "./extracted_gif_frames/" + file_name)
+                    //if (counter < 2)
+                    //{
+                    //#if counter == 5: #8:
+                    //# extract_frames(gif_root + "/"+ file_name + ".gif", "./extracted_gif_frames/" + file_name)
 
-                        //#if is_folder_empty("./extracted_gif_frames/" + file_name) and folder_has_multiple_files("./extracted_gif_frames/" + file_name):
-                        //# extract_frames(gif_root + "/"+ file_name + ".gif", "./extracted_gif_frames/" + file_name)
+                    //#if is_folder_empty("./extracted_gif_frames/" + file_name) and folder_has_multiple_files("./extracted_gif_frames/" + file_name):
+                    //# extract_frames(gif_root + "/"+ file_name + ".gif", "./extracted_gif_frames/" + file_name)
 
-                        //                average_MAE, average_Em, average_SSIM = motion_extraction(folder_path, folder_name, output_folder="./output_masks")
-                        (double average_MAE, double average_Em, double average_SSIM) averages; // motion_extraction(folder_path, folder_name, output_folder = "output_masks");
-                        //                json_file_path = f"./results/{folder_name}_metrics_results.json"
-                        string json_file_path = "results\\" + folder_name + "_metrics_results.json";
-                        //                output_masks_path = f"./output_masks/{folder_name}"
-                        string output_masks_path = "output_masks\\" + folder_name;
-                        //                results_visualization(json_file_path, output_masks_path, folder_name)
-                        //results_visualization(json_file_path, output_masks_path, folder_name);
-                        //# make_gif(folder_name, folder_name)
-                        //make_gif(folder_name, folder_name);
-                        //# Row Data:    Folder_name     Avg. MAE    Avg. Em     Avg. SSIM
-                        //worksheet.write_string  (  row, col,      folder_name  )
-                        //worksheet.write_number  (  row, col + 1,  average_MAE  )
-                        //worksheet.write_number  (  row, col + 2,  average_Em   )
-                        //worksheet.write_number  (  row, col + 3,  average_SSIM )
-                        //row += 1
-                        ((MOIE.Range)worksheet.Cells[row, col]).Value = folder_name;
-                        //((MOIE.Range)worksheet.Cells[row, col + 1]).Value = averages.average_MAE;
-                        //((MOIE.Range)worksheet.Cells[row, col + 2]).Value = averages.average_Em;
-                        //((MOIE.Range)worksheet.Cells[row, col + 3]).Value = averages.average_SSIM;
-                        //# combine_gif_frames_for_pub_figure("./corgis_treadmill_motion_results.gif")
-                        //                counter += 1
-                        counter += 1;
-                    }
-                    else
-                        break;
+                    //                average_MAE, average_Em, average_SSIM = motion_extraction(folder_path, folder_name, output_folder="./output_masks")
+                    (double average_MAE, double average_Em, double average_SSIM) averages; // = motion_extraction(folder_path, folder_name, output_folder = "output_masks");
+                    //                json_file_path = f"./results/{folder_name}_metrics_results.json"
+                    string json_file_path = "results\\" + folder_name + "_metrics_results.json";
+                    //                output_masks_path = f"./output_masks/{folder_name}"
+                    string output_masks_path = "output_masks\\" + folder_name;
+                    //                results_visualization(json_file_path, output_masks_path, folder_name)
+                    //results_visualization(json_file_path, output_masks_path, folder_name);
+                    //# make_gif(folder_name, folder_name)
+                    //make_gif(folder_name, folder_name);
+                    //# Row Data:    Folder_name     Avg. MAE    Avg. Em     Avg. SSIM
+                    //worksheet.write_string  (  row, col,      folder_name  )
+                    //worksheet.write_number  (  row, col + 1,  average_MAE  )
+                    //worksheet.write_number  (  row, col + 2,  average_Em   )
+                    //worksheet.write_number  (  row, col + 3,  average_SSIM )
+                    //row += 1
+                    ((MOIE.Range)worksheet.Cells[row, col]).Value = folder_name;
+                    //((MOIE.Range)worksheet.Cells[row, col + 1]).Value = averages.average_MAE;
+                    //((MOIE.Range)worksheet.Cells[row, col + 2]).Value = averages.average_Em;
+                    //((MOIE.Range)worksheet.Cells[row, col + 3]).Value = averages.average_SSIM;
+                    //# combine_gif_frames_for_pub_figure("./corgis_treadmill_motion_results.gif")
+                    //                counter += 1
+                    row += 1;
+                    counter += 1;
+                    //}
+                    //else
+                    //    break;
                 }
 
             }
