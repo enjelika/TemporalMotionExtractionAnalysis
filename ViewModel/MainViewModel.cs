@@ -21,6 +21,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private int _currentIndex;
         private bool _isAnimating;
         private string _folderName;
+        private ObservableCollection<ImageModel> _selectedFrames;
 
         public ObservableCollection<ImageModel> Images
         {
@@ -52,6 +53,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public ObservableCollection<ImageModel> SelectedFrames
+        {
+            get => _selectedFrames;
+            set
+            {
+                _selectedFrames = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ICommand LoadImagesCommand { get; }
         public ICommand StartAnimationCommand { get; }
         public ICommand StopAnimationCommand { get; }
@@ -64,6 +75,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             StopAnimationCommand = new RelayCommand(StopAnimation);
 
             FolderName = "No Selected Folder";
+            SelectedFrames = new ObservableCollection<ImageModel>();
         }
 
         private void LoadImages()
@@ -122,6 +134,26 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        public void HandleSelectionChanged(System.Collections.IList selectedItems)
+        {
+            if (selectedItems.Count <= 2)
+            {
+                SelectedFrames.Clear();
+                foreach (var item in selectedItems)
+                {
+                    if (item is ImageModel imageModel)
+                    {
+                        SelectedFrames.Add(imageModel);
+                    }
+                }
+            }
+            else
+            {
+                // Handle the case where more than two items are selected (optional)
+                // For example, you can show a message to the user or automatically deselect items
+            }
         }
     }
 }
