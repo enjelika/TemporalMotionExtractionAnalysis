@@ -13,10 +13,12 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media.Media3D;
 using System.Windows;
-using ImageProcessor;
 using System.Windows.Media.Imaging;
-using ImageMagick;
 using MOIE = Microsoft.Office.Interop.Excel;
+using System.Collections;
+using System.Drawing.Imaging;
+using System.Drawing;
+using OpenCvSharp;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -39,33 +41,38 @@ namespace TemporalMotionExtractionAnalysis.Model
         //    plt.title(f'Index: {index}')
         //    plt.show()  
 
-        private BitmapImage reduce_alpha(BitmapImage image)
+        public static BitmapImage reduce_alpha(Uri path)
         {
             //""" Helper function: Adjusts the alpha/opacity of the image even more - preparing it to be a mask for motion enhancement """ 
-            //def reduce_alpha(image):
-            //    # Convert to grayscale
-            //    img = ImageOps.grayscale(image)
-            //MagickImage img = new MagickImage(image);
-            //img.Grayscale(PixelIntensityMethod.Average);
-            //# Convert the image to RGBA mode (if it's not already in RGBA mode)
-            //    img = img.convert("RGBA")
+            using (Mat image = Cv2.ImRead(path.AbsolutePath))
+            {
+                // Convert to grayscale
+                Mat grayscale = Mat.Zeros(image.Width, image.Height);
+                Cv2.CvtColor(image, grayscale, ColorConversionCodes.BGR2GRAY);
+                Cv2.ImWrite("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\grayscale.jpg", grayscale);
+                // Convert the image to RGBA mode (if it's not already in RGBA mode)
+                Cv2.CvtColor(grayscale, image, ColorConversionCodes.GRAY2RGBA);
+                Cv2.ImWrite("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\rgba.jpg", image);
+                // Create output image (bitmap) and set the new pixel format
 
-            //    # Get pixel data
-            //    pixels = img.load()
-            //    width, height = img.size
+                //    # Get pixel data
+                //    pixels = img.load()
+                //    width, height = img.size
 
-            //    # Create a new image to store the modified pixels
-            //    modified_img = Image.new ('RGBA', (width, height), (0, 0, 0, 0))
+                //    # Create a new image to store the modified pixels
+                //    modified_img = Image.new ('RGBA', (width, height), (0, 0, 0, 0))
 
-            //    # Iterate through each pixel and adjust opacity
-            //    for x in range(width) :
-            //        for y in range(height) :
-            //            pixel = pixels[x, y]
-            //# Reduce opacity based on the pixel intensity
-            //            modified_img.putpixel((x, y), (pixel[0], pixel[1], pixel[2], int(pixel[3]* 0.5)))  # Adjust the multiplier for opacity
+                //    # Iterate through each pixel and adjust opacity
+                //    for x in range(width) :
+                //        for y in range(height) :
+                //            pixel = pixels[x, y]
+                //# Reduce opacity based on the pixel intensity
+                //            modified_img.putpixel((x, y), (pixel[0], pixel[1], pixel[2], int(pixel[3]* 0.5)))  # Adjust the multiplier for opacity
 
-            //    # Show the modified image
-            //    show_image(modified_img)
+                //    # Show the modified image
+                //    show_image(modified_img)
+            }
+
 
             //    return modified_img
             return null;
