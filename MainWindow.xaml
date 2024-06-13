@@ -7,8 +7,10 @@
         xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
         Title="Temporal Motion Analysis App" 
-        WindowState="Maximized"
-        ResizeMode="NoResize">
+        Width="Auto"
+        Height="1035"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <models:IndexConverter x:Key="IndexConverter"/>
     </Window.Resources>
@@ -17,7 +19,7 @@
         <StackPanel Orientation="Vertical">
 
             <StackPanel Orientation="Horizontal"  HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="750">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="1000">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Select Image Folder" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -114,11 +116,10 @@
             </StackPanel>
 
             <!-- Overview Timeline thumbnails -->
-            <ListBox ItemsSource="{Binding Images}" SelectionMode="Multiple" MaxHeight="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged">
-                <!--SelectedItem="{Binding CurrentFrame}">-->
+            <ListBox ItemsSource="{Binding Images}" SelectionMode="Multiple" Height="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal"/>
+                        <WrapPanel />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
@@ -137,7 +138,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="1000">
+            <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="1000" Height="400">
                 <DockPanel>
                     <TextBlock DockPanel.Dock="Top" Text="Analysis Pane" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
