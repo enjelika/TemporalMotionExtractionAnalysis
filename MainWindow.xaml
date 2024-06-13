@@ -106,12 +106,9 @@
                     <!-- TODO: Overlay View -->
                     
                     <!-- TODO: Metrics -->
-                    
-                    <!-- TODO: Visualization -->
+
                 </DockPanel>
             </Border>
-
-            <!-- TODO: Comparison pane -->
         
         </StackPanel>
     </Grid>
