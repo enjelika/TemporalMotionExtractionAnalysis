@@ -19,10 +19,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
     public class MainViewModel : INotifyPropertyChanged
     {
         private ObservableCollection<ImageModel> _images;
+        private int _imageCount;
         private ImageModel _currentImage;
         private int _currentIndex;
         private bool _isAnimating;
         private string _folderName;
+        private ObservableCollection<ImageModel> _selectedFrames;
 
         public ObservableCollection<ImageModel> Images
         {
@@ -44,12 +46,32 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public int ImageCount
+        {
+            get { return _imageCount; }
+            set
+            {
+                _imageCount = value;
+                OnPropertyChanged(nameof(ImageCount));
+            }
+        }
+
         public string FolderName
         {
             get => _folderName;
             set
             {
                 _folderName = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<ImageModel> SelectedFrames
+        {
+            get => _selectedFrames;
+            set
+            {
+                _selectedFrames = value;
                 OnPropertyChanged();
             }
         }
@@ -66,6 +88,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             StopAnimationCommand = new RelayCommand(StopAnimation);
 
             FolderName = "No Selected Folder";
+            SelectedFrames = new ObservableCollection<ImageModel>();
         }
 
         private void LoadImages()
@@ -84,10 +107,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                                                           f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                                                           f.EndsWith(".png", StringComparison.OrdinalIgnoreCase));
 
+                    ImageCount = imageFiles.Count(); // Update image count
+
                     Images.Clear();
+                    int frameNumber = 1;
                     foreach (var file in imageFiles)
                     {
-                        Images.Add(new ImageModel { ImagePath = file });
+                        Images.Add(new ImageModel { ImagePath = file, FrameNumber = frameNumber++ });
                     }
 
                     if (Images.Any())
@@ -128,6 +154,26 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        public void HandleSelectionChanged(System.Collections.IList selectedItems)
+        {
+            if (selectedItems.Count <= 2)
+            {
+                SelectedFrames.Clear();
+                foreach (var item in selectedItems)
+                {
+                    if (item is ImageModel imageModel)
+                    {
+                        SelectedFrames.Add(imageModel);
+                    }
+                }
+            }
+            else
+            {
+                // Handle the case where more than two items are selected (optional)
+                // For example, you can show a message to the user or automatically deselect items
+            }
         }
     }
 }
