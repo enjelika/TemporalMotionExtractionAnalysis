@@ -8,6 +8,7 @@ namespace TemporalMotionExtractionAnalysis.Models
     public class ImageModel : INotifyPropertyChanged
     {
         private string _imagePath;
+        private int _frameNumber;
 
         public string ImagePath
         {
@@ -15,6 +16,16 @@ namespace TemporalMotionExtractionAnalysis.Models
             set
             {
                 _imagePath = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int FrameNumber
+        {
+            get => _frameNumber;
+            set
+            {
+                _frameNumber = value;
                 OnPropertyChanged();
             }
         }
