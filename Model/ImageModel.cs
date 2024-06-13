@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Security.Policy;
 
 namespace TemporalMotionExtractionAnalysis.Models
 {
@@ -9,6 +10,7 @@ namespace TemporalMotionExtractionAnalysis.Models
     {
         private string _imagePath;
         private int _frameNumber;
+        private string _modifiedPicturePath;
 
         public string ImagePath
         {
@@ -26,6 +28,16 @@ namespace TemporalMotionExtractionAnalysis.Models
             set
             {
                 _frameNumber = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string ModifiedPicturePath
+        {
+            get => _modifiedPicturePath;
+            set
+            {
+                _modifiedPicturePath = value;
                 OnPropertyChanged();
             }
         }
