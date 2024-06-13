@@ -13,6 +13,7 @@ using TemporalMotionExtractionAnalysis.Models;
 using System.IO;
 using TemporalMotionExtractionAnalysis.Model;
 using System.Windows.Media.Imaging;
+using OpenCvSharp;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -70,9 +71,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private void LoadImages()
         {
-            Uri path = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
-            BitmapImage bitmapImage = new BitmapImage();
-            MotionExtraction.reduce_alpha(path);
+            //Uri prev_mask = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
+            //Mat prev_mask = Cv2.ImRead(path1.AbsolutePath);
+            //Uri curr_mask = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00001.jpg");
+            //Mat curr_mask = Cv2.ImRead(path2.AbsolutePath);
+            //MotionExtraction.calculate_mae(prev_mask.AbsolutePath, curr_mask.AbsolutePath);
 
             using (var dialog = new FolderBrowserDialog())
             {
