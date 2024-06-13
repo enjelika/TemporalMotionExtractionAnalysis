@@ -7,6 +7,7 @@ using TemporalMotionExtractionAnalysis.Models;
 using System.IO;
 using TemporalMotionExtractionAnalysis.Model;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using OpenCvSharp;
 using System.Diagnostics;
 
@@ -126,7 +127,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         {
             _modifiedImageStream = new MemoryStream();
             // Create Temporary Folder Location
-            Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Temp"));
+            Directory.CreateDirectory(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Temp"));
 
             Images = new ObservableCollection<ImageModel>();
             LoadImagesCommand = new RelayCommand(LoadImages);
@@ -166,18 +167,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     }
 
                     FolderName = System.IO.Path.GetFileName(selectedPath);
-
-                    
                 }
             }
         }
 
         private void StartMotionExtraction()
         {
-            Uri path = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
-            BitmapImage bitmapImage = new BitmapImage();
-            MotionExtraction.reduce_alpha(path);
-            //MotionExtraction motionExtraction = new MotionExtraction(selectedPath);
+            //Uri path1 = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
+            //Mat prev_mask = Cv2.ImRead(path1.AbsolutePath);
+            //Uri path2 = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00001.jpg");
+            //Mat curr_mask = Cv2.ImRead(path2.AbsolutePath);
+            //MotionExtraction.calculate_e_measure_pixelwise(prev_mask, curr_mask, 10);
         }
 
         private async void StartAnimation()
@@ -243,10 +243,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     Cv2.CvtColor(newImage, newImage, ColorConversionCodes.HSV2BGR);
 
                     // Save modified image to a temporary folder
-                    string tempFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Temp");
+                    string tempFolderPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Temp");
                     Directory.CreateDirectory(tempFolderPath);
-                    string tempFileName = $"{Path.GetFileNameWithoutExtension(frame.ImagePath)}_mod{counter}.jpg";
-                    string tempFilePath = Path.Combine(tempFolderPath, tempFileName);
+                    string tempFileName = $"{System.IO.Path.GetFileNameWithoutExtension(frame.ImagePath)}_mod{counter}.jpg";
+                    string tempFilePath = System.IO.Path.Combine(tempFolderPath, tempFileName);
                     Cv2.ImWrite(tempFilePath, newImage);
 
                     // Update the ModifiedImagePath

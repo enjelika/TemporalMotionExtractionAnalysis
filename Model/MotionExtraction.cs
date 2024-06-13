@@ -23,6 +23,8 @@ using System.Windows.Media.Effects;
 using System.Windows.Media;
 using static OpenCvSharp.LineIterator;
 using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Shapes;
+using Microsoft.Office.Interop.Excel;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -45,11 +47,11 @@ namespace TemporalMotionExtractionAnalysis.Model
         //    plt.title(f'Index: {index}')
         //    plt.show()  
 
-        public static Mat reduce_alpha(Uri path)
+        public Mat reduce_alpha(Uri path)
         {
             Mat modifiedImage; 
 
-            //""" Helper function: Adjusts the alpha/opacity of the image even more - preparing it to be a mask for motion enhancement """ 
+            // Helper function: Adjusts the alpha/opacity of the image even more - preparing it to be a mask for motion enhancement
             using (Mat image = Cv2.ImRead(path.AbsolutePath))
             {
                 // Convert to grayscale
@@ -90,54 +92,55 @@ namespace TemporalMotionExtractionAnalysis.Model
             return modifiedImage;
         }
 
+        // Helper function: MAE evaluation of previous frame's motion vs current frame
+        public double calculate_mae(string prev_mask, string curr_mask)
+        {
+            // Convert images to arrays for easier computation
+            Mat prev_mask_mat = Cv2.ImRead(prev_mask);
+            Mat curr_mask_mat = Cv2.ImRead(curr_mask);
 
-        //""" Helper function: Make GIF from images in a folder location """        
-        //def make_gif(frame_folder, class_name):
-        //    frames = [Image.open(image) for image in glob.glob(f"{frame_folder}/*.JPG")]
-        //        frame_one = frames[0]
-        //        frame_one.save(class_name+"_results.gif", format= "GIF", append_images= frames, save_all= True, duration= 100, loop= 0)
+            // Compute the absolute difference between the two masks
+            Mat absolute_diff = Cv2.Abs(prev_mask_mat - curr_mask_mat);
 
-
-        //""" Helper function: MAE evaluation of previous frame's motion vs current frame """    
-        //def calculate_mae(prev_mask, curr_mask):
-        //    # Convert images to numpy arrays for easier computation
-        //    prev_array = np.array(prev_mask)
-        //    curr_array = np.array(curr_mask)
-
-        //    # Compute the absolute difference between the two masks
-        //    absolute_diff = np.abs(prev_array - curr_array)
-
-        //    # Calculate the mean absolute error (MAE)
-        //    mae = np.mean(absolute_diff)
-
-        //    return mae
+            // Calculate the mean absolute error (MAE)
+            double mae = (double)(Cv2.Mean(absolute_diff));
+            return mae;
+        }
 
 
-        //""" Helper function: E_m evaluation of previous frame's motion vs current frame """
-        //def calculate_e_measure_pixelwise(prev_frame, curr_frame, threshold= 10):
-        //    """
-        //    Calculate the mean E-measure pixelwise between two frames.
+        // Helper function: E_m evaluation of previous frame's motion vs current frame
+        public static double calculate_e_measure_pixelwise(Mat prev_frame, Mat curr_frame, double threshold = 10)
+        {
+            // Calculate the mean E-measure pixelwise between two frames.
 
-        //    Parameters:
-        //    - prev_mask_img: First frame (numpy array) in grayscale
-        //    - curr_mask_img: Second frame (numpy array) in grayscale
-        //    - threshold: Threshold for gradient difference (default: 25)
+            // Parameters:
+            // - prev_mask_img: First frame (numpy array) in grayscale
+            // - curr_mask_img: Second frame (numpy array) in grayscale
+            // - threshold: Threshold for gradient difference (default: 25)
 
-        //    Returns:
-        //    - mean_e_measure: Mean E-measure value
-        //    """
-        //    # Compute the absolute pixel-wise difference between frames
-        //    abs_diff = np.abs(prev_frame.astype(np.float32) - curr_frame.astype(np.float32))
+            // Returns:
+            // - mean_e_measure: Mean E-measure value
 
-        //    # Compute precision and recall based on the threshold
-        //    precision = np.mean(abs_diff<threshold)
-        //    recall = np.mean(curr_frame<threshold)
+            // Compute the absolute pixel-wise difference between frames
+            Mat prev_mask_f32 = new Mat();
+            prev_frame.ConvertTo(prev_mask_f32, MatType.CV_32F);
+            Mat curr_mask_f32 = new Mat();
+            curr_frame.ConvertTo(curr_mask_f32, MatType.CV_32F);
+            Mat absolute_diff = Cv2.Abs(prev_mask_f32 - curr_mask_f32);
 
-        //    # Compute E-measure
-        //    alpha = 0.5
-        //    e_measure = 1 - alpha* (1 - precision) - (1 - alpha) * (1 - recall)
+            // Compute precision and recall based on the threshold
+            //    precision = np.mean(abs_diff<threshold)
+            //    recall = np.mean(curr_frame<threshold)
+            double precision = (double)Cv2.Mean(absolute_diff.LessThan(threshold));
+            double recall = (double)Cv2.Mean(curr_frame.LessThan(threshold));
+            // Compute E-measure
+            //    alpha = 0.5
+            //    e_measure = 1 - alpha* (1 - precision) - (1 - alpha) * (1 - recall)
+            double alpha = 0.5;
+            double e_measure = 1 - alpha * (1 - precision) - (1 - alpha) * (1 - recall);
 
-        //    return e_measure
+            return e_measure;
+        }
 
 
         //""" Helper function: structural similarity index (SSIM) evaluation of previous frame's motion vs current frame """
@@ -788,14 +791,14 @@ namespace TemporalMotionExtractionAnalysis.Model
             int counter = 0;
 
             //    # Iterate through each folder in the JPEGImages directory
-            DirectoryInfo di = new DirectoryInfo(jpeg_images_folder);
+            DirectoryInfo directoryInfo = new DirectoryInfo(jpeg_images_folder);
             //    for folder in os.scandir(jpeg_images_folder):
 
 
-            foreach (DirectoryInfo dir in di.GetDirectories())
+            foreach (DirectoryInfo directory in directoryInfo.GetDirectories())
             {
                 //        folder_path = folder.path  # Use folder.path to get the full path
-                string folder_path = dir.FullName;
+                string folder_path = directory.FullName;
                 //        # print(folder_path)
 
                 //        # Check if the item in JPEGImages folder is a directory
@@ -804,7 +807,7 @@ namespace TemporalMotionExtractionAnalysis.Model
                 {
                     //            # Get folder name for image collection
                     //            folder_name = folder.name
-                    string folder_name = dir.Name;
+                    string folder_name = directory.Name;
                     //            print("Counter at: " + str(counter) + " with " + folder_name)
                     Console.WriteLine("Counter at: " + counter.ToString() + " with " + folder_name);
                     //            #if counter <= 9:
