@@ -13,6 +13,7 @@ using TemporalMotionExtractionAnalysis.Models;
 using System.IO;
 using TemporalMotionExtractionAnalysis.Model;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -93,10 +94,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private void LoadImages()
         {
-            Uri path = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
-            BitmapImage bitmapImage = new BitmapImage();
-            MotionExtraction.reduce_alpha(path);
-
             using (var dialog = new FolderBrowserDialog())
             {
                 if (dialog.ShowDialog() == DialogResult.OK)
@@ -122,12 +119,21 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         _currentIndex = 0;
                     }
 
-                    FolderName = Path.GetFileName(selectedPath);
+                    FolderName = System.IO.Path.GetFileName(selectedPath);
 
-                    //MotionExtraction motionExtraction = new MotionExtraction(selectedPath);
+                    
                 }
             }
         }
+
+        private void StartMotionExtraction()
+        {
+            Uri path = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
+            BitmapImage bitmapImage = new BitmapImage();
+            MotionExtraction.reduce_alpha(path);
+            //MotionExtraction motionExtraction = new MotionExtraction(selectedPath);
+        }
+
         private async void StartAnimation()
         {
             _isAnimating = true;
