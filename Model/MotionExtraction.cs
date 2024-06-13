@@ -25,6 +25,7 @@ using static OpenCvSharp.LineIterator;
 using static System.Net.Mime.MediaTypeNames;
 using System.Windows.Shapes;
 using Microsoft.Office.Interop.Excel;
+using OpenCvSharp.Quality;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -109,7 +110,7 @@ namespace TemporalMotionExtractionAnalysis.Model
 
 
         // Helper function: E_m evaluation of previous frame's motion vs current frame
-        public static double calculate_e_measure_pixelwise(Mat prev_frame, Mat curr_frame, double threshold = 10)
+        public double calculate_e_measure_pixelwise(Mat prev_frame, Mat curr_frame, double threshold = 10)
         {
             // Calculate the mean E-measure pixelwise between two frames.
 
@@ -129,13 +130,9 @@ namespace TemporalMotionExtractionAnalysis.Model
             Mat absolute_diff = Cv2.Abs(prev_mask_f32 - curr_mask_f32);
 
             // Compute precision and recall based on the threshold
-            //    precision = np.mean(abs_diff<threshold)
-            //    recall = np.mean(curr_frame<threshold)
             double precision = (double)Cv2.Mean(absolute_diff.LessThan(threshold));
             double recall = (double)Cv2.Mean(curr_frame.LessThan(threshold));
             // Compute E-measure
-            //    alpha = 0.5
-            //    e_measure = 1 - alpha* (1 - precision) - (1 - alpha) * (1 - recall)
             double alpha = 0.5;
             double e_measure = 1 - alpha * (1 - precision) - (1 - alpha) * (1 - recall);
 
@@ -143,22 +140,26 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
 
-        //""" Helper function: structural similarity index (SSIM) evaluation of previous frame's motion vs current frame """
-        //def calculate_ssim(prev_frame, curr_frame):
-        //    """
-        //    Calculate the structural similarity index (SSIM) between two sequential frames.
+        // Helper function: structural similarity index (SSIM) evaluation of previous frame's motion vs current frame
+        public double calculate_ssim(Mat prev_frame, Mat curr_frame)
+        {
+            //    Calculate the structural similarity index (SSIM) between two sequential frames.
 
-        //    Parameters:
-        //    - prev_mask_img: First frame (numpy array) in grayscale
-        //    - curr_mask_img: Second frame (numpy array)) in grayscale
+            //    Parameters:
+            //    - prev_mask_img: First frame (numpy array) in grayscale
+            //    - curr_mask_img: Second frame (numpy array)) in grayscale
 
-        //    Returns:
-        //    - mean_e_measure: Mean E-measure value
-        //    """
-        //    # Calculate SSIM between two frames
-        //    ssim_index, _ = ssim(prev_frame, curr_frame, full= True)
-
-        //    return ssim_index
+            //    Returns:
+            //    - mean_e_measure: Mean E-measure value
+            // Calculate SSIM between two frames
+            double score;
+            using (var ssim = QualitySSIM.Create(prev_frame))
+            {
+                var result = ssim.Compute(curr_frame);
+                score = result.Val0; // SSIM score
+            }
+            return score;
+        }
 
 
         //""" Helper function: Make Motion Extracted GIF from images in a folder location """ 
@@ -172,7 +173,7 @@ namespace TemporalMotionExtractionAnalysis.Model
         //    print(f"Number of frames: {num_frames}")
 
         //    alpha = 50
-        //    index = 0
+        //    index = prev_frame
 
         //    # Define a static blur radius for all frames
         //    blur_radius = 5

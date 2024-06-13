@@ -174,10 +174,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private void StartMotionExtraction()
         {
             //Uri path1 = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
-            //Mat prev_mask = Cv2.ImRead(path1.AbsolutePath);
+            //Mat prev_mask = Cv2.ImRead(path1.AbsolutePath, ImreadModes.Grayscale);
             //Uri path2 = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00001.jpg");
-            //Mat curr_mask = Cv2.ImRead(path2.AbsolutePath);
-            //MotionExtraction.calculate_e_measure_pixelwise(prev_mask, curr_mask, 10);
+            //Mat curr_mask = Cv2.ImRead(path2.AbsolutePath, ImreadModes.Grayscale);
+            //MotionExtraction.calculate_ssim(prev_mask, curr_mask);
         }
 
         private async void StartAnimation()
