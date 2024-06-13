@@ -1,19 +1,14 @@
-﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Forms;
 using TemporalMotionExtractionAnalysis.Models;
 using System.IO;
 using TemporalMotionExtractionAnalysis.Model;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using OpenCvSharp;
+using System.Diagnostics;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -26,6 +21,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isAnimating;
         private string _folderName;
         private ObservableCollection<ImageModel> _selectedFrames;
+
+        private int _sliderBrightness;
+        private int _sliderContrast;
+        private int _sliderSaturation;
+        private MemoryStream _modifiedImageStream;
+        private bool hasUserModifiedImage;
 
         public ObservableCollection<ImageModel> Images
         {
@@ -77,16 +78,61 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public int SliderBrightness
+        {
+            get
+            {
+                return _sliderBrightness;
+            }
+            set
+            {
+                _sliderBrightness = value;
+                UpdateSelectedImage(_sliderBrightness, _sliderContrast, _sliderSaturation);
+            }
+        }
+
+        public int SliderContrast
+        {
+            get
+            {
+                return _sliderContrast;
+            }
+            set
+            {
+                _sliderContrast = value;
+                UpdateSelectedImage(_sliderBrightness, _sliderContrast, _sliderSaturation);
+            }
+        }
+
+        public int SliderSaturation
+        {
+            get
+            {
+                return _sliderSaturation;
+            }
+            set
+            {
+                _sliderSaturation = value;
+                UpdateSelectedImage(_sliderBrightness, _sliderContrast, _sliderSaturation);
+            }
+        }
+
         public ICommand LoadImagesCommand { get; }
         public ICommand StartAnimationCommand { get; }
         public ICommand StopAnimationCommand { get; }
+        public ICommand StartMotionExtractionCommand { get; }
 
         public MainViewModel()
         {
+            _modifiedImageStream = new MemoryStream();
+            // Create Temporary Folder Location
+            Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Temp"));
+
             Images = new ObservableCollection<ImageModel>();
             LoadImagesCommand = new RelayCommand(LoadImages);
             StartAnimationCommand = new RelayCommand(StartAnimation);
             StopAnimationCommand = new RelayCommand(StopAnimation);
+            StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
 
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
@@ -155,13 +201,89 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             _isAnimating = false;
         }
 
+        /// <summary>
+        /// Updates the selected images by adjusting brightness, contrast, and saturation using OpenCV.
+        /// The modified images are saved to a temporary folder, and the ModifiedImagePath property
+        /// of each selected frame is updated accordingly.
+        /// </summary>
+        /// <param name="brightness">The brightness adjustment value (range: 0-100, where 50 means no change).</param>
+        /// <param name="contrast">The contrast adjustment value (range: 0-100, where 50 means no change).</param>
+        /// <param name="saturation">The saturation adjustment value (range: 0-100, where 50 means no change).</param>
+        /// <remarks>
+        /// This function processes the images using OpenCV for brightness, contrast, and saturation adjustments.
+        /// It converts the brightness and contrast values to OpenCV ranges, applies the adjustments, and saves the
+        /// modified images to a temporary folder. The ModifiedImagePath property of each ImageModel in SelectedFrames
+        /// is updated to point to the saved file.
+        /// </remarks>
+        private void UpdateSelectedImage(int brightness, int contrast, int saturation)
+        {
+            if (SelectedFrames != null && SelectedFrames.Any() && !string.IsNullOrEmpty(SelectedFrames[0].ImagePath))
+            {
+                int counter = 1;
+
+                foreach (var frame in SelectedFrames)
+                {
+                    Mat image = Cv2.ImRead(frame.ImagePath);
+
+                    // Convert brightness, contrast, and saturation to OpenCV ranges
+                    double alpha = contrast / 100.0 + 1.0; // Contrast factor (1.0 means no change)
+                    double beta = brightness - 50;         // Brightness offset (-255 to 255)
+                    double saturationFactor = saturation / 50.0; // Saturation factor (0 means grayscale, 1 means original, >1 means more saturated)
+
+                    // Apply brightness and contrast
+                    Mat newImage = new Mat();
+                    image.ConvertTo(newImage, MatType.CV_8UC3, alpha, beta);
+
+                    // Convert to HSV to adjust saturation
+                    Cv2.CvtColor(newImage, newImage, ColorConversionCodes.BGR2HSV);
+                    var channels = new Mat[3];
+                    Cv2.Split(newImage, out channels);
+                    channels[1] = channels[1] * saturationFactor;
+                    Cv2.Merge(channels, newImage);
+                    Cv2.CvtColor(newImage, newImage, ColorConversionCodes.HSV2BGR);
+
+                    // Save modified image to a temporary folder
+                    string tempFolderPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Temp");
+                    Directory.CreateDirectory(tempFolderPath);
+                    string tempFileName = $"{Path.GetFileNameWithoutExtension(frame.ImagePath)}_mod{counter}.jpg";
+                    string tempFilePath = Path.Combine(tempFolderPath, tempFileName);
+                    Cv2.ImWrite(tempFilePath, newImage);
+
+                    // Update the ModifiedImagePath
+                    frame.ModifiedPicturePath = tempFilePath;
+                    OnPropertyChanged(nameof(frame.ModifiedPicturePath));
+
+                    counter++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// Notifies listeners that a property value has changed.
+        /// This method is called by the Set accessor of each property.
+        /// </summary>
+        /// <param name="name">The name of the property that changed, which is optional and provided automatically by the CallerMemberName attribute.</param>
         protected void OnPropertyChanged([CallerMemberName] string name = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        /// <summary>
+        /// Handles the selection change event for a collection of selected items.
+        /// Clears and updates the SelectedFrames collection with new selected items,
+        /// ensuring that no more than two items are selected at a time.
+        /// </summary>
+        /// <param name="selectedItems">The collection of selected items.</param>
+        /// <remarks>
+        /// If the number of selected items is greater than two, this method can handle
+        /// the situation by either showing a message to the user or automatically
+        /// deselecting items (this part is currently optional and can be customized).
+        /// </remarks>
         public void HandleSelectionChanged(System.Collections.IList selectedItems)
         {
             if (selectedItems.Count <= 2)
@@ -172,13 +294,22 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     if (item is ImageModel imageModel)
                     {
                         SelectedFrames.Add(imageModel);
+
+                        // Check to see if there is an existing ModifiedPicturePath
+                        //   Set to the original image path if not modified yet
+                        if (imageModel.ModifiedPicturePath == null)
+                        {
+                            imageModel.ModifiedPicturePath = imageModel.ImagePath;
+                            OnPropertyChanged(imageModel.ModifiedPicturePath);
+                        }
                     }
                 }
             }
             else
             {
                 // Handle the case where more than two items are selected (optional)
-                // For example, you can show a message to the user or automatically deselect items
+                // Log an error
+                Debug.WriteLine("Error: More than two items were selected.");
             }
         }
     }
