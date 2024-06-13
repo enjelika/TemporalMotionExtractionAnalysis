@@ -91,16 +91,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
+
+            StartMotionExtraction();
         }
 
         private void LoadImages()
         {
-            //Uri prev_mask = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
-            //Mat prev_mask = Cv2.ImRead(path1.AbsolutePath);
-            //Uri curr_mask = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00001.jpg");
-            //Mat curr_mask = Cv2.ImRead(path2.AbsolutePath);
-            //MotionExtraction.calculate_mae(prev_mask.AbsolutePath, curr_mask.AbsolutePath);
-
             using (var dialog = new FolderBrowserDialog())
             {
                 if (dialog.ShowDialog() == DialogResult.OK)
@@ -127,18 +123,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     }
 
                     FolderName = System.IO.Path.GetFileName(selectedPath);
-
-                    
                 }
             }
         }
 
         private void StartMotionExtraction()
         {
-            Uri path = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
-            BitmapImage bitmapImage = new BitmapImage();
-            MotionExtraction.reduce_alpha(path);
-            //MotionExtraction motionExtraction = new MotionExtraction(selectedPath);
+            //Uri path1 = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
+            //Mat prev_mask = Cv2.ImRead(path1.AbsolutePath);
+            //Uri path2 = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00001.jpg");
+            //Mat curr_mask = Cv2.ImRead(path2.AbsolutePath);
+            //MotionExtraction.calculate_e_measure_pixelwise(prev_mask, curr_mask, 10);
         }
 
         private async void StartAnimation()

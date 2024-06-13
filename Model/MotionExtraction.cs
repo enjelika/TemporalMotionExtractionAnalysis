@@ -108,31 +108,39 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
 
-        //""" Helper function: E_m evaluation of previous frame's motion vs current frame """
-        //def calculate_e_measure_pixelwise(prev_frame, curr_frame, threshold= 10):
-        //    """
-        //    Calculate the mean E-measure pixelwise between two frames.
+        // Helper function: E_m evaluation of previous frame's motion vs current frame
+        public static double calculate_e_measure_pixelwise(Mat prev_frame, Mat curr_frame, double threshold = 10)
+        {
+            // Calculate the mean E-measure pixelwise between two frames.
 
-        //    Parameters:
-        //    - prev_mask_img: First frame (numpy array) in grayscale
-        //    - curr_mask_img: Second frame (numpy array) in grayscale
-        //    - threshold: Threshold for gradient difference (default: 25)
+            // Parameters:
+            // - prev_mask_img: First frame (numpy array) in grayscale
+            // - curr_mask_img: Second frame (numpy array) in grayscale
+            // - threshold: Threshold for gradient difference (default: 25)
 
-        //    Returns:
-        //    - mean_e_measure: Mean E-measure value
-        //    """
-        //    # Compute the absolute pixel-wise difference between frames
-        //    abs_diff = np.abs(prev_frame.astype(np.float32) - curr_frame.astype(np.float32))
+            // Returns:
+            // - mean_e_measure: Mean E-measure value
 
-        //    # Compute precision and recall based on the threshold
-        //    precision = np.mean(abs_diff<threshold)
-        //    recall = np.mean(curr_frame<threshold)
+            // Compute the absolute pixel-wise difference between frames
+            Mat prev_mask_f32 = new Mat();
+            prev_frame.ConvertTo(prev_mask_f32, MatType.CV_32F);
+            Mat curr_mask_f32 = new Mat();
+            curr_frame.ConvertTo(curr_mask_f32, MatType.CV_32F);
+            Mat absolute_diff = Cv2.Abs(prev_mask_f32 - curr_mask_f32);
 
-        //    # Compute E-measure
-        //    alpha = 0.5
-        //    e_measure = 1 - alpha* (1 - precision) - (1 - alpha) * (1 - recall)
+            // Compute precision and recall based on the threshold
+            //    precision = np.mean(abs_diff<threshold)
+            //    recall = np.mean(curr_frame<threshold)
+            double precision = (double)Cv2.Mean(absolute_diff.LessThan(threshold));
+            double recall = (double)Cv2.Mean(curr_frame.LessThan(threshold));
+            // Compute E-measure
+            //    alpha = 0.5
+            //    e_measure = 1 - alpha* (1 - precision) - (1 - alpha) * (1 - recall)
+            double alpha = 0.5;
+            double e_measure = 1 - alpha * (1 - precision) - (1 - alpha) * (1 - recall);
 
-        //    return e_measure
+            return e_measure;
+        }
 
 
         //""" Helper function: structural similarity index (SSIM) evaluation of previous frame's motion vs current frame """
