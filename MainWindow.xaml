@@ -19,14 +19,14 @@
             <StackPanel Orientation="Horizontal"  HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="750">
                     <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Select Image Folder" HorizontalAlignment="Center" Margin="5"/>
+                        <TextBlock DockPanel.Dock="Top" Text="Select Image Folder" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Label Content="Selected Folder Name: " HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Label Content="Selected Folder Name: " FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <Label Content="{Binding FolderName}" MaxWidth="300" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             <Button Content="Browse" Command="{Binding LoadImagesCommand}" Width="100" Margin="5,20,10,20"/>
                             
                             <!-- Display Image Count -->
-                            <TextBlock Text="{Binding ImageCount, StringFormat='Number of Images: {0}'}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ImageCount, StringFormat='Number of Images: {0}'}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -38,7 +38,7 @@
                 <!-- Playback Controls Border with Label -->
                 <Border BorderBrush="Black" BorderThickness="1" Margin="10">
                     <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Playback Controls" HorizontalAlignment="Center" Margin="5"/>
+                        <TextBlock DockPanel.Dock="Top" Text="Playback Controls" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Horizontal">
                             <!-- Animation of images in selected folder -->
                             <Image Source="{Binding CurrentImage.ImagePath}" Height="250" Width="350" Margin="10, 0, 5, 0"/>
@@ -53,9 +53,60 @@
                 <!-- Visual Encoding Options Border with Label -->
                 <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="300">
                     <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" HorizontalAlignment="Center" Margin="5"/>
-                        <StackPanel Orientation="Horizontal">
+                        <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                        <StackPanel Orientation="Vertical" Margin="20,0">
                             <!-- TODO: Add your visual encoding options here -->
+                            <StackPanel Orientation="Horizontal">
+                                <DockPanel VerticalAlignment="Center" Margin="5">
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Glyphs:</Label>
+                                    
+                                </DockPanel>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <DockPanel VerticalAlignment="Center" Margin="5">
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Option 2:</Label>
+
+                                </DockPanel>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <DockPanel VerticalAlignment="Center" Margin="5">
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Option 3:</Label>
+
+                                </DockPanel>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Horizontal">
+                                <DockPanel VerticalAlignment="Center" Margin="5">
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Option 4:</Label>
+
+                                </DockPanel>
+                            </StackPanel>
+
+                            <!-- Image Adjustment controls: Brightness, Contrast, Saturation -->
+                            <StackPanel VerticalAlignment="Center">
+                                <DockPanel VerticalAlignment="Center" Margin="5">
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Brightness:</Label>
+                                    <TextBox Text="{Binding ElementName=sliderBrightness, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Center" Width="40" />
+                                    <Slider Minimum ="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" Name="sliderBrightness" Value="{Binding SliderBrightness}" />
+                                </DockPanel>
+
+                                <DockPanel VerticalAlignment="Center" Margin="5">
+                                    <Label DockPanel.Dock="Left" Width="72" FontWeight="Bold">Contrast:</Label>
+                                    <TextBox Text="{Binding ElementName=sliderContrast, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Center" Width="40" />
+                                    <Slider Minimum ="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" Name="sliderContrast" Value="{Binding SliderContrast}"/>
+                                </DockPanel>
+
+                                <DockPanel VerticalAlignment="Center" Margin="5">
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Saturation:</Label>
+                                    <TextBox Text="{Binding ElementName=sliderSaturation, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Center" Width="40" />
+                                    <Slider Minimum ="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" Name="sliderSaturation" Value="{Binding SliderSaturation}"/>
+                                </DockPanel>
+                            </StackPanel>
+
+                            <!-- Button to kick off motion extraction -->
+                            <Button Content="Start Analysis" Command="{Binding StartMotionExtractionCommand}" Width="100" Margin="5,20,10,20"/>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -88,7 +139,8 @@
 
             <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="1000">
                 <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Analysis Pane" HorizontalAlignment="Center" Margin="5"/>
+                    <TextBlock DockPanel.Dock="Top" Text="Analysis Pane" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+
                     <!-- Selected frames view -->
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
                         <ItemsControl ItemsSource="{Binding SelectedFrames}">
@@ -102,7 +154,8 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
-                    
+
+
                     <!-- TODO: Overlay View -->
                     
                     <!-- TODO: Metrics -->
