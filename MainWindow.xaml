@@ -41,23 +41,23 @@
                         <TextBlock DockPanel.Dock="Top" Text="Playback Controls" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <!-- Previous Button -->
-                            <Button Command="{Binding PreviousCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                            <Button Command="{Binding PreviousCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
                                 <TextBlock Text="&#xE100;" />
                             </Button>
                             <!-- Play Button -->
-                            <Button Command="{Binding PlayCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                            <Button Command="{Binding PlayCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
                                 <TextBlock Text="&#xE102;" />
                             </Button>
                             <!-- Pause Button -->
-                            <Button Command="{Binding PauseCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                            <Button Command="{Binding PauseCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
                                 <TextBlock Text="&#xE103;" />
                             </Button>
                             <!-- Stop Button -->
-                            <Button Command="{Binding StopCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                            <Button Command="{Binding StopCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
                                 <TextBlock Text="&#xE15B;" />
                             </Button>
                             <!-- Next Button -->
-                            <Button Command="{Binding NextCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                            <Button Command="{Binding NextCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
                                 <TextBlock Text="&#xE101;" />
                             </Button>
                         </StackPanel>
