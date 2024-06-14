@@ -116,10 +116,10 @@
             </StackPanel>
 
             <!-- Overview Timeline thumbnails -->
-            <ListBox ItemsSource="{Binding Images}" SelectionMode="Multiple" Height="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged">
+            <ListBox ItemsSource="{Binding Images}" SelectionMode="Multiple" Height="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel />
+                        <WrapPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
                 <ListBox.ItemTemplate>
