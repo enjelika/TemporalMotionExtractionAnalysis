@@ -3,107 +3,98 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis"
         xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
         Title="Temporal Motion Analysis App" 
-        Width="Auto"
-        Height="1050"
+        Width="1120"
+        Height="980"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <models:IndexConverter x:Key="IndexConverter"/>
     </Window.Resources>
     <Grid>
+        <StackPanel Orientation="Horizontal">
+            <!-- Parent Control Pane : Left -->
+            <StackPanel Orientation="Vertical">
 
-        <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal"  HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="5,5,0,5" Width="250" Height="60">
+                        <DockPanel>
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Label Content="Folder Name: " FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Label Content="{Binding FolderName}" MaxWidth="300" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <Button Content="Browse" Command="{Binding LoadImagesCommand}" Width="100" Margin="5,0,10,0"/>
+                                <!-- Display Image Count -->
+                                <!--<TextBlock Text="{Binding ImageCount, StringFormat='Number of Images: {0}'}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/> -->
+                            </StackPanel>
 
-            <StackPanel Orientation="Horizontal"  HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="1000" Height="75">
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Select Image Folder" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Label Content="Selected Folder Name: " FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <Label Content="{Binding FolderName}" MaxWidth="300" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            <Button Content="Browse" Command="{Binding LoadImagesCommand}" Width="100" Margin="5,0,10,0"/>
-                            
-                            <!-- Display Image Count -->
-                            <TextBlock Text="{Binding ImageCount, StringFormat='Number of Images: {0}'}" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </DockPanel>
-                </Border>
-            </StackPanel>
-            
-            <!-- Parent Control Pane -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
 
                 <!-- Playback Controls Border with Label -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="10">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Playback Controls" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                        <StackPanel Orientation="Horizontal">
-                            <!-- Animation of images in selected folder -->
-                            <Image Source="{Binding CurrentImage.ImagePath}" Height="250" Width="350" Margin="10, 0, 5, 0"/>
-
-                            <!-- Start/Stop Animation controls -->
-                            <Button Content="Start Animation" Command="{Binding StartAnimationCommand}" Height="35" Width="100" Margin="10,0,5,0"/>
-                            <Button Content="Stop Animation" Command="{Binding StopAnimationCommand}" Height="35" Width="100" Margin="5,0,10,0"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <!-- Previous Button -->
+                            <Button Command="{Binding PreviousCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                                <TextBlock Text="&#xE100;" />
+                            </Button>
+                            <!-- Play Button -->
+                            <Button Command="{Binding PlayCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                                <TextBlock Text="&#xE102;" />
+                            </Button>
+                            <!-- Pause Button -->
+                            <Button Command="{Binding PauseCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                                <TextBlock Text="&#xE103;" />
+                            </Button>
+                            <!-- Stop Button -->
+                            <Button Command="{Binding StopCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                                <TextBlock Text="&#xE15B;" />
+                            </Button>
+                            <!-- Next Button -->
+                            <Button Command="{Binding NextCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24">
+                                <TextBlock Text="&#xE101;" />
+                            </Button>
                         </StackPanel>
                     </DockPanel>
                 </Border>
 
                 <!-- Visual Encoding Options Border with Label -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="300">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="600">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="20,0">
                             <!-- TODO: Add your visual encoding options here -->
                             <StackPanel Orientation="Horizontal">
                                 <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Glyphs:</Label>
-                                    
-                                </DockPanel>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal">
-                                <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Option 2:</Label>
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Pixel:</Label>
 
                                 </DockPanel>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
                                 <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Option 3:</Label>
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Marks:</Label>
 
                                 </DockPanel>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
                                 <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Option 4:</Label>
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Blur:</Label>
 
                                 </DockPanel>
                             </StackPanel>
 
-                            <!-- Image Adjustment controls: Brightness, Contrast, Saturation -->
-                            <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
                                 <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Brightness:</Label>
-                                    <TextBox Text="{Binding ElementName=sliderBrightness, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Center" Width="40" />
-                                    <Slider Minimum ="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" Name="sliderBrightness" Value="{Binding SliderBrightness}" />
-                                </DockPanel>
+                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Offset:</Label>
 
-                                <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" Width="72" FontWeight="Bold">Contrast:</Label>
-                                    <TextBox Text="{Binding ElementName=sliderContrast, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Center" Width="40" />
-                                    <Slider Minimum ="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" Name="sliderContrast" Value="{Binding SliderContrast}"/>
-                                </DockPanel>
-
-                                <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Saturation:</Label>
-                                    <TextBox Text="{Binding ElementName=sliderSaturation, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Center" Width="40" />
-                                    <Slider Minimum ="-100" Maximum="100" TickPlacement="BottomRight" TickFrequency="5" IsSnapToTickEnabled="True" Name="sliderSaturation" Value="{Binding SliderSaturation}"/>
                                 </DockPanel>
                             </StackPanel>
 
@@ -113,68 +104,88 @@
                     </DockPanel>
                 </Border>
 
+                <!-- Indication Frame Preview Pane -->
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="180">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Indication Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                        <!-- Animation of images in selected folder -->
+                        <StackPanel Orientation="Vertical">
+                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="200" VerticalAlignment="Top"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Label Content="Frame Index: "/>
+                                <Label Content="{Binding CurrentImage.FrameNumber, Converter={StaticResource IndexConverter}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
             </StackPanel>
 
-            <!-- Overview Timeline thumbnails -->
-            <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="1400" Height="Auto">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Frame Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                    
-                    <ListBox ItemsSource="{Binding Images}" SelectionMode="Multiple" Height="Auto" MinHeight="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel Orientation="Horizontal" />
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <TextBlock 
-                    Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Converter={StaticResource IndexConverter}}" 
-                    HorizontalAlignment="Center" Margin="0"/>
-                                    <Image Source="{Binding ImagePath}" Width="5" Height="5" Grid.Row="1" Margin="0"/>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </DockPanel>
-            </Border>
-
-            <Border BorderBrush="Black" BorderThickness="1" Margin="10" Width="1000" Height="350">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Analysis Pane" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-
-                    <!-- Selected frames view -->
-                    <Border BorderBrush="Black" BorderThickness="0.5" Margin="20,5,20,20" Width="200" MinHeight="150" Height="Auto" HorizontalAlignment="Left">
+            <!-- Parent Control Pane : Center/Right -->
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <!-- Offset Frame -->
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="300">
                         <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" Text="Selected Frames" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
-                                <ItemsControl ItemsSource="{Binding SelectedFrames}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"/>
-                                                <Image Source="{Binding ImagePath}" Width="150" Height="150" Margin="0,-5"/>
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         </DockPanel>
                     </Border>
-
-
-                    <!-- TODO: Overlay View -->
                     
-                    <!-- TODO: Metrics -->
+                    <!-- Animation Frame -->
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="300">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                </DockPanel>
-            </Border>
-        
+                            <!-- Animation of images in selected folder -->
+                            <Image Source="{Binding CurrentImage.ImagePath}" Height="350" Width="350" Margin="0"/>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Composite View -->
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="400" HorizontalAlignment="Left">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                    </DockPanel>
+                </Border>
+
+                <!-- TODO: Overview Timeline thumbnails -->
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="100">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+
+                        <ListBox ItemsSource="{Binding Images}" SelectionMode="Single" Height="Auto" MinHeight="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <TextBlock 
+        Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Converter={StaticResource IndexConverter}}" 
+        HorizontalAlignment="Center" Margin="0"/>
+                                        <Image Source="{Binding ImagePath}" Width="5" Height="5" Grid.Row="1" Margin="0"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </Border>
+
+                <!-- TODO: Zoomed Timeline View -->
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="100">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+
         </StackPanel>
     </Grid>
 </Window>

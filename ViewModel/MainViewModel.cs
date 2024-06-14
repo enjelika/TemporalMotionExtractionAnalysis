@@ -39,6 +39,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public int CurrentIndex
+        {
+            get => _currentIndex;
+            set
+            {
+                _currentIndex = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ImageModel CurrentImage
         {
             get => _currentImage;
@@ -79,48 +89,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public int SliderBrightness
-        {
-            get
-            {
-                return _sliderBrightness;
-            }
-            set
-            {
-                _sliderBrightness = value;
-                UpdateSelectedImage(_sliderBrightness, _sliderContrast, _sliderSaturation);
-            }
-        }
-
-        public int SliderContrast
-        {
-            get
-            {
-                return _sliderContrast;
-            }
-            set
-            {
-                _sliderContrast = value;
-                UpdateSelectedImage(_sliderBrightness, _sliderContrast, _sliderSaturation);
-            }
-        }
-
-        public int SliderSaturation
-        {
-            get
-            {
-                return _sliderSaturation;
-            }
-            set
-            {
-                _sliderSaturation = value;
-                UpdateSelectedImage(_sliderBrightness, _sliderContrast, _sliderSaturation);
-            }
-        }
-
         public ICommand LoadImagesCommand { get; }
-        public ICommand StartAnimationCommand { get; }
-        public ICommand StopAnimationCommand { get; }
+        public ICommand PlayCommand { get; }
+        public ICommand PauseCommand { get; }
+        public ICommand StopCommand { get; }
+        public ICommand PreviousCommand { get; }
+        public ICommand NextCommand { get; }
         public ICommand StartMotionExtractionCommand { get; }
 
         public MainViewModel()
@@ -131,8 +105,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
             Images = new ObservableCollection<ImageModel>();
             LoadImagesCommand = new RelayCommand(LoadImages);
-            StartAnimationCommand = new RelayCommand(StartAnimation);
-            StopAnimationCommand = new RelayCommand(StopAnimation);
+            PlayCommand = new RelayCommand(OnPlay);
+            PauseCommand = new RelayCommand(OnStop);
+            StopCommand = new RelayCommand(OnStop);
+            PreviousCommand = new RelayCommand(OnPrevious);
+            NextCommand = new RelayCommand(OnNext);
             StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
 
             FolderName = "No Selected Folder";
@@ -163,7 +140,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     if (Images.Any())
                     {
                         CurrentImage = Images.First();
-                        _currentIndex = 0;
+                        CurrentIndex = 0;
                     }
 
                     FolderName = System.IO.Path.GetFileName(selectedPath);
@@ -180,7 +157,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             //MotionExtraction.calculate_ssim(prev_mask, curr_mask);
         }
 
-        private async void StartAnimation()
+        private async void OnPlay()
         {
             _isAnimating = true;
 
@@ -191,15 +168,36 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 if (!_isAnimating)
                     break;
 
-                _currentIndex = (_currentIndex + 1) % Images.Count;
-                CurrentImage = Images[_currentIndex];
+                CurrentIndex = (CurrentIndex + 1) % Images.Count;
+                CurrentImage = Images[CurrentIndex];
             }
         }
 
-        private void StopAnimation()
+        private void OnStop()
         {
             _isAnimating = false;
         }
+
+        private void OnPrevious()
+        {
+            if (Images.Count == 0)
+                return;
+
+            _isAnimating = false;
+            CurrentIndex = (CurrentIndex - 1 + Images.Count) % Images.Count;
+            CurrentImage = Images[CurrentIndex];
+        }
+
+        private void OnNext()
+        {
+            if (Images.Count == 0)
+                return;
+
+            _isAnimating = false;
+            CurrentIndex = (CurrentIndex + 1) % Images.Count;
+            CurrentImage = Images[CurrentIndex];
+        }
+
 
         /// <summary>
         /// Updates the selected images by adjusting brightness, contrast, and saturation using OpenCV.
