@@ -473,7 +473,7 @@ namespace TemporalMotionExtractionAnalysis.Model
 
         // The areas of source and destination images that
         // are mutually exclusive are each displayed.
-        public static void XOR(Mat source, Mat destination)
+        public Mat XOR(Mat source, Mat destination)
         {
             // Get pixel data
             int width = source.Width;
@@ -510,8 +510,7 @@ namespace TemporalMotionExtractionAnalysis.Model
                     }
                 }
             }
-            //return composition;
-            Cv2.ImWrite("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\composition.jpg", composition);
+            return composition;
         }
 
         //""" Helper function: Make Motion Extracted GIF from images in a folder location """ 
