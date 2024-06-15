@@ -173,17 +173,13 @@
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
-                                <StackPanel Orientation="Horizontal">
-                                    <Label FontWeight="Bold">Blur:</Label>
-                                    <TextBox Width="100" Margin="5" />
-                                </StackPanel>
+                                <Label FontWeight="Bold">Blur:</Label>
+                                <TextBox Width="100" Margin="5" />
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
-                                <StackPanel Orientation="Horizontal">
-                                    <Label FontWeight="Bold">Offset:</Label>
-                                    <TextBox Width="100" Margin="5" />
-                                </StackPanel>
+                                <Label FontWeight="Bold">Offset:</Label>
+                                <TextBox Width="100" Margin="5" Text="{Binding OffsetValue, UpdateSourceTrigger=PropertyChanged}" />
                             </StackPanel>
                         </StackPanel>
                     </DockPanel>

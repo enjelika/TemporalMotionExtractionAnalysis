@@ -21,6 +21,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private int _currentIndex;
         private bool _isAnimating;
         private string _folderName;
+        private int _offsetValue;
         private ObservableCollection<ImageModel> _selectedFrames;
 
         public ObservableCollection<ImageModel> Images
@@ -39,6 +40,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _currentIndex = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int OffsetValue
+        {
+            get => _offsetValue;
+            set
+            {
+                _offsetValue = value;
                 OnPropertyChanged();
             }
         }
@@ -93,6 +104,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         public MainViewModel()
         {
+            OffsetValue = 0;
             Images = new ObservableCollection<ImageModel>();
             LoadImagesCommand = new RelayCommand(LoadImages);
             PlayCommand = new RelayCommand(OnPlay);
