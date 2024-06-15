@@ -161,6 +161,358 @@ namespace TemporalMotionExtractionAnalysis.Model
             return score;
         }
 
+        // Source image masks destination image in composition image.
+        // Source pixel is displayed if not black.
+        public Mat SourceOver (Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // Source image masks destination image in composition image.
+                    // Source pixel is displayed if not black.
+                    if (sourceColor.Item0 > 100 && sourceColor.Item3 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                    else
+                    {
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                }
+            }
+            return composition;
+        }
+
+        // Destination image masks source destination image in composition image.
+        // Destination pixel is displayed if not black.
+        public Mat DestinationOver(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // Destination image masks source destination image in composition image.
+                    // Destination pixel is displayed if not black.
+                    if (destinationColor.Item2 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                    else
+                    {
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                }
+            }
+            return composition;
+        }
+
+        // The intersection of source and destination images 
+        // is displayed as the source color.
+        public Mat SourceIn(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // The intersection of source and destination images 
+                    // is displayed as the source color.
+                    if (sourceColor.Item0 > 100 && destinationColor.Item2 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                    else
+                    {
+                        destinationColor.Item0 = 0;
+                        destinationColor.Item1 = 0;
+                        destinationColor.Item2 = 0;
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                }
+            }
+            return composition;
+        }
+
+        // The intersection of source and destination images 
+        // is displayed as the destination color.
+        public Mat DestinationIn(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // The intersection of source and destination images 
+                    // is displayed as the destination color.
+                    if (sourceColor.Item0 > 100 && destinationColor.Item2 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                    else
+                    {
+                        sourceColor.Item0 = 0;
+                        sourceColor.Item1 = 0;
+                        sourceColor.Item2 = 0;
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                }
+            }
+            return composition;
+        }
+
+        // The intersection of source and destination images 
+        // is displayed as the source color.
+        public Mat SourceOut(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // The intersection of source and destination images 
+                    // is displayed as the source color.
+                    if (sourceColor.Item0 > 100 && destinationColor.Item2 < 100)
+                    {
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                    else
+                    {
+                        destinationColor.Item0 = 0;
+                        destinationColor.Item1 = 0;
+                        destinationColor.Item2 = 0;
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                }
+            }
+            return composition;
+        }
+
+        // The area of the destination image not intersecting
+        // the source image is displayed as the destination color.
+        public Mat DestinationOut(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // The area of the destination image not intersecting
+                    // the source image is displayed as the destination color.
+                    if (sourceColor.Item0 < 100 && destinationColor.Item2 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                    else
+                    {
+                        sourceColor.Item0 = 0;
+                        sourceColor.Item1 = 0;
+                        sourceColor.Item2 = 0;
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                }
+            }
+            return composition;
+        }
+
+        // The intersection of source and destination images 
+        // is displayed as the source color and the remaining destination
+        // area is displayed also.
+        public Mat SourceAtop(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // The intersection of source and destination images 
+                    // is displayed as the source color and the remaining destination
+                    // area is displayed also.
+                    if (sourceColor.Item0 > 100 && destinationColor.Item2 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                    else if (sourceColor.Item0 < 100 && destinationColor.Item2 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                    else
+                    {
+                        sourceColor.Item0 = 0;
+                        sourceColor.Item1 = 0;
+                        sourceColor.Item2 = 0;
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                }
+            }
+            return composition;
+        }
+
+        // The intersection of source and destination images 
+        // is displayed as the destination color and the remaining source
+        // area is displayed also.
+        public Mat DestinationAtop(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // The intersection of source and destination images 
+                    // is displayed as the destination color and the remaining source
+                    // area is displayed also.
+                    if (sourceColor.Item0 > 100 && destinationColor.Item2 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                    else if (sourceColor.Item0 > 100 && destinationColor.Item2 < 100)
+                    {
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                    else
+                    {
+                        sourceColor.Item0 = 0;
+                        sourceColor.Item1 = 0;
+                        sourceColor.Item2 = 0;
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                }
+            }
+            return composition;
+        }
+
+        // The areas of source and destination images that
+        // are mutually exclusive are each displayed.
+        public static void XOR(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+
+                    // The areas of source and destination images that
+                    // are mutually exclusive are each displayed.
+                    if (sourceColor.Item0 > 100 && destinationColor.Item2 < 100)
+                    {
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                    else if (sourceColor.Item0 < 100 && destinationColor.Item2 > 100)
+                    {
+                        composition.Set<Vec4b>(i, j, destinationColor);
+                    }
+                    else
+                    {
+                        sourceColor.Item0 = 0;
+                        sourceColor.Item1 = 0;
+                        sourceColor.Item2 = 0;
+                        composition.Set<Vec4b>(i, j, sourceColor);
+                    }
+                }
+            }
+            //return composition;
+            Cv2.ImWrite("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\composition.jpg", composition);
+        }
 
         //""" Helper function: Make Motion Extracted GIF from images in a folder location """ 
         //def motion_extraction(frame_folder, class_name, output_folder= "./output_masks"):
