@@ -238,7 +238,7 @@
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                        <ListBox x:Name="TimelineListBox" ItemsSource="{Binding Images}" Height="90" VerticalAlignment="Center" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                        <ListBox x:Name="TimelineListBox" ItemsSource="{Binding Images}" Height="85" VerticalAlignment="Center" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" />
