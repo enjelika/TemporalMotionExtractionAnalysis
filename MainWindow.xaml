@@ -12,6 +12,7 @@
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <models:IndexConverter x:Key="IndexConverter"/>
+        <models:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Window.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
@@ -193,7 +194,7 @@
                         <StackPanel Orientation="Vertical">
                             <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="200" VerticalAlignment="Top"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label Content="Frame Index: "/>
+                                <Label FontWeight="Bold" Content="Frame Index: "/>
                                 <Label Content="{Binding CurrentImage.FrameNumber, Converter={StaticResource IndexConverter}}"/>
                             </StackPanel>
                         </StackPanel>
@@ -205,14 +206,14 @@
             <StackPanel Orientation="Vertical">
                 <StackPanel Orientation="Horizontal">
                     <!-- Offset Frame -->
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="300">
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="240">
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         </DockPanel>
                     </Border>
                     
                     <!-- Animation Frame -->
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="300">
+                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="240">
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
@@ -234,7 +235,7 @@
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                        <ListBox ItemsSource="{Binding Images}" SelectionMode="Single" Height="Auto" MinHeight="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged">
+                        <ListBox x:Name="TimelineListBox" ItemsSource="{Binding Images}" SelectionMode="Single" Height="Auto" MinHeight="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" />
@@ -247,19 +248,22 @@
                                             <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
-                                        <TextBlock 
-        Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Converter={StaticResource IndexConverter}}" 
-        HorizontalAlignment="Center" Margin="0"/>
-                                        <Image Source="{Binding ImagePath}" Width="5" Height="5" Grid.Row="1" Margin="0"/>
+                                        <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Converter={StaticResource IndexConverter}}" 
+                           HorizontalAlignment="Center" Margin="0"/>
+                                        <Image Source="{Binding ImagePath}" Width="60" Height="40" Grid.Row="1" Margin="0" Opacity="0.5"/>
+                                        <Border Background="Transparent" BorderBrush="Red" BorderThickness="2" Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                            <Image Source="{Binding ImagePath}" Width="60" Height="40" Grid.Row="1" Margin="0"/>
+                                        </Border>
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+
                     </DockPanel>
                 </Border>
 
                 <!-- TODO: Zoomed Timeline View -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="100">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="160">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
