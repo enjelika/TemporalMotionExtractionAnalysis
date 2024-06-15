@@ -13,6 +13,9 @@
     <Window.Resources>
         <models:IndexConverter x:Key="IndexConverter"/>
         <models:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <models:FrameIndexVisibilityConverter x:Key="FrameIndexVisibilityConverter"/>
+        <models:FrameIndexTickVisibilityConverter x:Key="FrameIndexTickVisibilityConverter"/>
+        <models:CurrentFrameIndicatorVisibilityConverter x:Key="CurrentFrameIndicatorVisibilityConverter"/>
     </Window.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
@@ -231,11 +234,11 @@
                 </Border>
 
                 <!-- TODO: Overview Timeline thumbnails -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="100">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="120">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                        <ListBox x:Name="TimelineListBox" ItemsSource="{Binding Images}" SelectionMode="Single" Height="Auto" MinHeight="90" VerticalAlignment="Center" SelectionChanged="ListBox_SelectionChanged">
+                        <ListBox x:Name="TimelineListBox" ItemsSource="{Binding Images}" Height="90" VerticalAlignment="Center" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" />
@@ -245,15 +248,24 @@
                                 <DataTemplate>
                                     <Grid>
                                         <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="55"/>
                                             <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
-                                        <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Converter={StaticResource IndexConverter}}" 
-                           HorizontalAlignment="Center" Margin="0"/>
-                                        <Image Source="{Binding ImagePath}" Width="60" Height="40" Grid.Row="1" Margin="0" Opacity="0.5"/>
-                                        <Border Background="Transparent" BorderBrush="Red" BorderThickness="2" Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <Image Source="{Binding ImagePath}" Width="60" Height="40" Grid.Row="1" Margin="0"/>
-                                        </Border>
+                                        <StackPanel Orientation="Vertical">
+                                            <!-- Image Preview of current image -->
+                                            <TextBlock Text="{Binding FrameNumber}" 
+                                                        HorizontalAlignment="Center" Margin="0.5"
+                                                        Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
+
+                                            <!-- Additional TextBlock for tick marks in between multiples of 6 -->
+                                            <TextBlock Text="|" HorizontalAlignment="Center" Margin="0.5"
+                                                        Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
+
+                                            <!-- Triangle shape for current frame indicator -->
+                                            <Path Data="M0,0 L10,0 L5,10 Z" Fill="Black" HorizontalAlignment="Center" Margin="0,-3,0,0"
+                                                        Visibility="{Binding FrameNumber, Converter={StaticResource CurrentFrameIndicatorVisibilityConverter}}"/>
+                                        </StackPanel>
+                                        
                                     </Grid>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>

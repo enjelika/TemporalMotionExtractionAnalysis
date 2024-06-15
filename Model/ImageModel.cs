@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Security.Policy;
 
-namespace TemporalMotionExtractionAnalysis.Models
+namespace TemporalMotionExtractionAnalysis.Model
 {
     public class ImageModel : INotifyPropertyChanged
     {

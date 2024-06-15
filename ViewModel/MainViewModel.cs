@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Windows.Forms;
-using TemporalMotionExtractionAnalysis.Models;
 using System.IO;
 using TemporalMotionExtractionAnalysis.Model;
 using System.Windows.Media.Imaging;

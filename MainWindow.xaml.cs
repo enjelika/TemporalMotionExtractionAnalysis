@@ -8,7 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TemporalMotionExtractionAnalysis.Models;
+using TemporalMotionExtractionAnalysis.Model;
 using TemporalMotionExtractionAnalysis.ViewModel;
 
 namespace TemporalMotionExtractionAnalysis
