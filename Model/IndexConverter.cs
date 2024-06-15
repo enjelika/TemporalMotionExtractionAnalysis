@@ -14,14 +14,28 @@ namespace TemporalMotionExtractionAnalysis.Model
             if (itemsControl != null)
             {
                 var index = itemsControl.ItemContainerGenerator.IndexFromContainer(item);
-                return index + 1; // Add 1 to start from 1 instead of 0
+                return index; // Start from 0
             }
             return 0;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            if (value is string stringValue)
+            {
+                if (int.TryParse(stringValue, out int result))
+                {
+                    return result; // Successfully parsed the string to an integer
+                }
+                else
+                {
+                    // Display error message or log the parsing error
+                    Console.WriteLine("Error: Invalid integer format");
+                    return -1; // Default value indicating parsing error
+                }
+            }
+
+            return 0; // Default value if conversion fails or value is not a string
         }
     }
 }

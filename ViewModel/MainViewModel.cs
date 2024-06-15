@@ -22,6 +22,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isReversePlayback;
         private string _folderName;
         private int _offsetValue;
+        private int _fpsValue;
+        private int _timeDelay;
         private ObservableCollection<ImageModel> _selectedFrames;
 
         public ObservableCollection<ImageModel> Images
@@ -51,9 +53,38 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _offsetValue = value;
+                Console.WriteLine(OffsetValue.ToString()); // Debugging
                 OnPropertyChanged(nameof(OffsetValue));
             }
         }
+        public int FpsValue
+        {
+            get => _fpsValue;
+            set
+            {
+                if (_fpsValue != value)
+                {
+                    _fpsValue = value;
+                    OnPropertyChanged(nameof(FpsValue)); // Notify property changed
+                                                         // Update the time delay based on the new FPS value
+                    TimeDelay = ConvertFPSToTimeDelay(FpsValue);
+                }
+            }
+        }
+
+        public int TimeDelay
+        {
+            get => _timeDelay;
+            set
+            {
+                if (_timeDelay != value)
+                {
+                    _timeDelay = value;
+                    OnPropertyChanged(nameof(TimeDelay)); // Notify property changed
+                }
+            }
+        }
+
 
         public ImageModel CurrentImage
         {
@@ -113,9 +144,15 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         public ICommand NextCommand { get; }
         public ICommand StartMotionExtractionCommand { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainViewModel"/> class.
+        /// Sets up initial state, commands, and collections.
+        /// </summary>
         public MainViewModel()
         {
-            OffsetValue = 0;
+            OffsetValue = 0; // Default value
+            TimeDelay = 250; // Default value
+            FpsValue = (int)ConvertTimeDelayToFPS(TimeDelay);
             Images = new ObservableCollection<ImageModel>();
             LoadImagesCommand = new RelayCommand(LoadImages);
             PlayCommand = new RelayCommand(OnPlay);
@@ -129,6 +166,36 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             SelectedFrames = new ObservableCollection<ImageModel>();
         }
 
+        /// <summary>
+        /// Converts frames per second (FPS) to a time delay in milliseconds.
+        /// </summary>
+        /// <param name="fps">The frames per second value to convert.</param>
+        /// <returns>The corresponding time delay in milliseconds.</returns>
+        public int ConvertFPSToTimeDelay(int fps)
+        {
+            return (int)(1000.0 / fps); // Convert FPS to time delay in milliseconds
+        }
+
+        /// <summary>
+        /// Converts a time delay in milliseconds to frames per second (FPS).
+        /// </summary>
+        /// <param name="timeDelay">The time delay in milliseconds.</param>
+        /// <returns>The FPS value calculated from the time delay.</returns>
+        /// <exception cref="ArgumentException">Thrown when the time delay is not a positive value greater than zero.</exception>
+        public double ConvertTimeDelayToFPS(int timeDelay)
+        {
+            if (timeDelay <= 0)
+            {
+                throw new ArgumentException("Time delay must be a positive value greater than zero.");
+            }
+
+            return 1000.0 / timeDelay;
+        }
+
+
+        /// <summary>
+        /// Loads image files from a selected folder into the Images collection.
+        /// </summary>
         private void LoadImages()
         {
             using (var dialog = new FolderBrowserDialog())
@@ -170,6 +237,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             //MotionExtraction.XOR(source, destination);
         }
 
+        /// <summary>
+        /// Updates the IsCurrent property of each ImageModel in the Images collection.
+        /// Sets IsCurrent to true for the ImageModel whose FrameNumber matches the CurrentIndex.
+        /// Sets IsCurrent to false for all other ImageModels.
+        /// </summary>
         private void UpdateCurrentFrameStatus()
         {
             foreach (var imageModel in Images)
@@ -178,13 +250,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        /// <summary>
+        /// Initiates the playback animation for the images in the Images collection.
+        /// The playback can be forward or reverse based on the IsReversePlayback property.
+        /// </summary>
         private async void OnPlay()
         {
             _isAnimating = true;
 
             while (_isAnimating)
             {
-                await Task.Delay(250); // TODO: Set this as user entered value
+                await Task.Delay(TimeDelay); // Default 250
 
                 if (!_isAnimating)
                     break;
@@ -202,11 +278,18 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        /// <summary>
+        /// Stops the playback animation by setting the animating flag to false.
+        /// </summary>
         private void OnStop()
         {
             _isAnimating = false;
         }
 
+        /// <summary>
+        /// Moves to the previous image in the Images collection.
+        /// Stops any ongoing playback animation.
+        /// </summary>
         private void OnPrevious()
         {
             if (Images.Count == 0)
@@ -217,6 +300,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CurrentImage = Images[CurrentIndex];
         }
 
+        /// <summary>
+        /// Moves to the next image in the Images collection.
+        /// Stops any ongoing playback animation.
+        /// </summary>
         private void OnNext()
         {
             if (Images.Count == 0)
