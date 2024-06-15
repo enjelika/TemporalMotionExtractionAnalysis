@@ -67,9 +67,10 @@
                                 </Button>
                             </StackPanel>
 
-                            <StackPanel Orientation="Vertical" Margin="10,0">
+                            <StackPanel Orientation="Vertical" Margin="10,0, 10,5">
                                 <StackPanel Orientation="Horizontal">
-                                    <CheckBox Content="Reverse Playback" IsChecked="{Binding IsReversePlayback}" Margin="5"/>
+                                    <Label Content="Playback Mode:" FontWeight="Bold"/>
+                                    <CheckBox Content="Reverse Playback" IsChecked="{Binding IsReversePlayback}" VerticalAlignment="Bottom" Margin="5"/>
                                 </StackPanel>
 
                                 <StackPanel Orientation="Horizontal">
@@ -84,7 +85,7 @@
                 </Border>
 
                 <!-- Visual Encoding Options Border with Label -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="565">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="490">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="5,0">
@@ -205,7 +206,7 @@
                 </Border>
 
                 <!-- Indication Frame Preview Pane -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="180">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="250">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Indication Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <!-- Animation of images in selected folder -->
