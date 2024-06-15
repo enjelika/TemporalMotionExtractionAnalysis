@@ -19,6 +19,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ImageModel _currentImage;
         private int _currentIndex;
         private bool _isAnimating;
+        private bool _isReversePlayback;
         private string _folderName;
         private int _offsetValue;
         private ObservableCollection<ImageModel> _selectedFrames;
@@ -29,7 +30,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _images = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(Images));
             }
         }
 
@@ -39,7 +40,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _currentIndex = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(CurrentIndex));
+                UpdateCurrentFrameStatus(); // Call method to update IsCurrent property
             }
         }
 
@@ -49,7 +51,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _offsetValue = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(OffsetValue));
             }
         }
 
@@ -59,7 +61,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _currentImage = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(CurrentImage));
+            }
+        }
+
+        public bool IsReversePlayback
+        {
+            get => _isReversePlayback;
+            set
+            {
+                _isReversePlayback = value;
+                OnPropertyChanged(nameof(IsReversePlayback));
             }
         }
 
@@ -79,7 +91,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _folderName = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(FolderName));
             }
         }
 
@@ -89,7 +101,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _selectedFrames = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedFrames));
             }
         }
 
@@ -158,18 +170,34 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             //MotionExtraction.XOR(source, destination);
         }
 
+        private void UpdateCurrentFrameStatus()
+        {
+            foreach (var imageModel in Images)
+            {
+                imageModel.IsCurrent = imageModel.FrameNumber == CurrentIndex;
+            }
+        }
+
         private async void OnPlay()
         {
             _isAnimating = true;
 
             while (_isAnimating)
             {
-                await Task.Delay(250); // Adjust delay as needed
+                await Task.Delay(250); // TODO: Set this as user entered value
 
                 if (!_isAnimating)
                     break;
 
-                CurrentIndex = (CurrentIndex + 1) % Images.Count;
+                if (IsReversePlayback)
+                {
+                    CurrentIndex = (CurrentIndex - 1 + Images.Count) % Images.Count; // Handle reverse playback
+                }
+                else
+                {
+                    CurrentIndex = (CurrentIndex + 1) % Images.Count; // Handle forward playback
+                }
+
                 CurrentImage = Images[CurrentIndex];
             }
         }

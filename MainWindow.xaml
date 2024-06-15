@@ -43,33 +43,48 @@
                 <Border BorderBrush="Black" BorderThickness="1" Margin="5">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Playback Controls" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,5">
-                            <!-- Previous Button -->
-                            <Button Command="{Binding PreviousCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
-                                <TextBlock Text="&#xE100;" />
-                            </Button>
-                            <!-- Play Button -->
-                            <Button Command="{Binding PlayCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
-                                <TextBlock Text="&#xE102;" />
-                            </Button>
-                            <!-- Pause Button -->
-                            <Button Command="{Binding PauseCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
-                                <TextBlock Text="&#xE103;" />
-                            </Button>
-                            <!-- Stop Button -->
-                            <Button Command="{Binding StopCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
-                                <TextBlock Text="&#xE15B;" />
-                            </Button>
-                            <!-- Next Button -->
-                            <Button Command="{Binding NextCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
-                                <TextBlock Text="&#xE101;" />
-                            </Button>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,5">
+                                <!-- Previous Button -->
+                                <Button Command="{Binding PreviousCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                    <TextBlock Text="&#xE100;" />
+                                </Button>
+                                <!-- Play Button -->
+                                <Button Command="{Binding PlayCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                    <TextBlock Text="&#xE102;" />
+                                </Button>
+                                <!-- Pause Button -->
+                                <Button Command="{Binding PauseCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                    <TextBlock Text="&#xE103;" />
+                                </Button>
+                                <!-- Stop Button -->
+                                <Button Command="{Binding StopCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                    <TextBlock Text="&#xE15B;" />
+                                </Button>
+                                <!-- Next Button -->
+                                <Button Command="{Binding NextCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                    <TextBlock Text="&#xE101;" />
+                                </Button>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Vertical" Margin="10,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox Content="Reverse Playback" IsChecked="{Binding IsReversePlayback}" Margin="5"/>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <Label FontWeight="Bold">FPS:</Label>
+                                    <TextBox Width="100" Margin="5" />
+                                </StackPanel>
+                            </StackPanel>
+                            
                         </StackPanel>
+                        
                     </DockPanel>
                 </Border>
 
                 <!-- Visual Encoding Options Border with Label -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="600">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="565">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="5,0">
