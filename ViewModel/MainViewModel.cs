@@ -23,12 +23,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private string _folderName;
         private ObservableCollection<ImageModel> _selectedFrames;
 
-        private int _sliderBrightness;
-        private int _sliderContrast;
-        private int _sliderSaturation;
-        private MemoryStream _modifiedImageStream;
-        private bool hasUserModifiedImage;
-
         public ObservableCollection<ImageModel> Images
         {
             get => _images;
@@ -99,10 +93,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         public MainViewModel()
         {
-            _modifiedImageStream = new MemoryStream();
-            // Create Temporary Folder Location
-            Directory.CreateDirectory(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Temp"));
-
             Images = new ObservableCollection<ImageModel>();
             LoadImagesCommand = new RelayCommand(LoadImages);
             PlayCommand = new RelayCommand(OnPlay);
