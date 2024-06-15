@@ -15,7 +15,11 @@ namespace TemporalMotionExtractionAnalysis.Model
         {
             if (value is int frameNumber)
             {
-                return frameNumber % 6 == 0 ? Visibility.Visible : Visibility.Collapsed;
+                // Check if the frame number is a multiple of 6 or if it is 0
+                if (frameNumber % 6 == 0 || frameNumber == 0)
+                {
+                    return Visibility.Visible;
+                }
             }
 
             return Visibility.Collapsed;

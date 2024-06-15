@@ -133,7 +133,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     ImageCount = imageFiles.Count(); // Update image count
 
                     Images.Clear();
-                    int frameNumber = 1;
+                    int frameNumber = 0;
                     foreach (var file in imageFiles)
                     {
                         Images.Add(new ImageModel { ImagePath = file, FrameNumber = frameNumber++ });
