@@ -21,7 +21,7 @@ namespace TemporalMotionExtractionAnalysis.Model
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string stringValue)
+            if (value is string stringValue && !string.IsNullOrWhiteSpace(stringValue))
             {
                 if (int.TryParse(stringValue, out int result))
                 {
@@ -35,7 +35,8 @@ namespace TemporalMotionExtractionAnalysis.Model
                 }
             }
 
-            return 0; // Default value if conversion fails or value is not a string
+            // Return a default value when the string is empty or null
+            return -1; // Default value indicating empty string
         }
     }
 }

@@ -152,7 +152,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         {
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
-            FpsValue = (int)ConvertTimeDelayToFPS(TimeDelay);
+            FpsValue = (int)ConvertTimeDelayToFPS(TimeDelay); // Default value is 4
             Images = new ObservableCollection<ImageModel>();
             LoadImagesCommand = new RelayCommand(LoadImages);
             PlayCommand = new RelayCommand(OnPlay);
@@ -173,7 +173,14 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// <returns>The corresponding time delay in milliseconds.</returns>
         public int ConvertFPSToTimeDelay(int fps)
         {
-            return (int)(1000.0 / fps); // Convert FPS to time delay in milliseconds
+            if (fps < 4) 
+            { 
+                return (int)(1000.0 / fps); // Convert FPS to time delay in milliseconds
+            }
+            else
+            {
+                return 250;
+            }
         }
 
         /// <summary>
@@ -184,14 +191,15 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// <exception cref="ArgumentException">Thrown when the time delay is not a positive value greater than zero.</exception>
         public double ConvertTimeDelayToFPS(int timeDelay)
         {
-            if (timeDelay <= 0)
+            if (timeDelay <= 250)
             {
-                throw new ArgumentException("Time delay must be a positive value greater than zero.");
+                return 1000.0 / timeDelay;
             }
-
-            return 1000.0 / timeDelay;
+            else // FPS default value is 4
+            {
+                return 4;
+            }
         }
-
 
         /// <summary>
         /// Loads image files from a selected folder into the Images collection.
