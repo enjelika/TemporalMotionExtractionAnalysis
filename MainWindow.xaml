@@ -68,20 +68,108 @@
                 <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="600">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                        <StackPanel Orientation="Vertical" Margin="20,0">
+                        <StackPanel Orientation="Vertical" Margin="5,0">
                             <!-- TODO: Add your visual encoding options here -->
-                            <StackPanel Orientation="Horizontal">
-                                <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Pixel:</Label>
+                            <StackPanel Orientation="Vertical">
+                                <!-- Radio Buttons for Pixel and Marks -->
+                                <StackPanel Orientation="Horizontal">
+                                    <DockPanel VerticalAlignment="Center" Margin="5">
+                                        <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
+                                        <RadioButton x:Name="PixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" />
+                                        <RadioButton x:Name="MarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" />
+                                    </DockPanel>
+                                </StackPanel>
 
-                                </DockPanel>
+                                <!-- Submenu for Composition Modes, visible only when Pixel is selected -->
+                                <StackPanel Orientation="Vertical" Margin="5">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=PixelRadioButton, Path=IsChecked}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ElementName=PixelRadioButton, Path=IsChecked}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+
+                                    <Label FontWeight="Bold">Composition Modes:</Label>
+                                    <RadioButton Content="SourceOver" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="DestinationOver" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="SourceIn" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="DestinationIn" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="SourceOut" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="DestinationOut" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="SourceAtop" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="DestinationAtop" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="Clear" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton Content="XOR" GroupName="CompositionMode" Margin="5" />
+                                </StackPanel>
                             </StackPanel>
 
-                            <StackPanel Orientation="Horizontal">
-                                <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Marks:</Label>
+                            <!-- Submenu for Marks, visible only when Marks is selected -->
+                            <StackPanel Orientation="Vertical" Margin="5">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ElementName=MarksRadioButton, Path=IsChecked}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ElementName=MarksRadioButton, Path=IsChecked}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
 
-                                </DockPanel>
+                                <Label FontWeight="Bold">Glyphs:</Label>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Positive Difference: " />
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="△" />
+                                        </RadioButton>
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▲" />
+                                        </RadioButton>
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="◆" />
+                                        </RadioButton>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Positive Difference: " />
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▽" />
+                                        </RadioButton>
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▼" />
+                                        </RadioButton>
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="★" />
+                                        </RadioButton>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="No Difference: "/>
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="■" />
+                                        </RadioButton>
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="□" />
+                                        </RadioButton>
+                                        <RadioButton GroupName="GlyphOptions" Margin="5">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="●" />
+                                        </RadioButton>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label FontWeight="Bold">Area Size:</Label>
+                                        <TextBox Width="100" Margin="5" />
+                                    </StackPanel>
+                                </StackPanel>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
