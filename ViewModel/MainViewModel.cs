@@ -152,11 +152,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private void StartMotionExtraction()
         {
-            //Uri path1 = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00000.jpg");
-            //Mat prev_mask = Cv2.ImRead(path1.AbsolutePath, ImreadModes.Grayscale);
-            //Uri path2 = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\MoCA\\JPEGImages\\arabian_horn_viper\\00001.jpg");
-            //Mat curr_mask = Cv2.ImRead(path2.AbsolutePath, ImreadModes.Grayscale);
-            //MotionExtraction.calculate_ssim(prev_mask, curr_mask);
+            //Uri sourcePath = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\blue_triangle.jpg");
+            //Mat source = Cv2.ImRead(sourcePath.AbsolutePath, ImreadModes.Color);
+            //Uri destinationPath = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\red_triangle.jpg");
+            //Mat destination = Cv2.ImRead(destinationPath.AbsolutePath, ImreadModes.Color);
+            //MotionExtraction.XOR(source, destination);
         }
 
         private async void OnPlay()
