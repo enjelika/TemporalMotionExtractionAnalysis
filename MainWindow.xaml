@@ -85,7 +85,7 @@
                 </Border>
 
                 <!-- Visual Encoding Options Border with Label -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="490">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="460">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="5,0">
@@ -250,7 +250,7 @@
                 </Border>
 
                 <!-- TODO: Overview Timeline thumbnails -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="120">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="110">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
@@ -291,7 +291,7 @@
                 </Border>
 
                 <!-- TODO: Zoomed Timeline View -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="160">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="140">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
