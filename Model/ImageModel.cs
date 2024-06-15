@@ -10,7 +10,7 @@ namespace TemporalMotionExtractionAnalysis.Models
     {
         private string _imagePath;
         private int _frameNumber;
-        private string _modifiedPicturePath;
+        private bool _isCurrent;
 
         public string ImagePath
         {
@@ -32,13 +32,13 @@ namespace TemporalMotionExtractionAnalysis.Models
             }
         }
 
-        public string ModifiedPicturePath
+        public bool IsCurrent
         {
-            get => _modifiedPicturePath;
+            get => _isCurrent;
             set
             {
-                _modifiedPicturePath = value;
-                OnPropertyChanged();
+                _isCurrent = value;
+                OnPropertyChanged(nameof(IsCurrent));
             }
         }
 
