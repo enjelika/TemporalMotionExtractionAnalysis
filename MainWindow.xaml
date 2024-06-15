@@ -75,7 +75,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <DockPanel VerticalAlignment="Center" Margin="5">
                                         <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
-                                        <RadioButton x:Name="PixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" />
+                                        <RadioButton x:Name="PixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" IsChecked="True" />
                                         <RadioButton x:Name="MarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" />
                                     </DockPanel>
                                 </StackPanel>
@@ -173,21 +173,18 @@
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
-                                <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Blur:</Label>
-
-                                </DockPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label FontWeight="Bold">Blur:</Label>
+                                    <TextBox Width="100" Margin="5" />
+                                </StackPanel>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal">
-                                <DockPanel VerticalAlignment="Center" Margin="5">
-                                    <Label DockPanel.Dock="Left" FontWeight="Bold">Offset:</Label>
-
-                                </DockPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label FontWeight="Bold">Offset:</Label>
+                                    <TextBox Width="100" Margin="5" />
+                                </StackPanel>
                             </StackPanel>
-
-                            <!-- Button to kick off motion extraction -->
-                            <Button Content="Start Analysis" Command="{Binding StartMotionExtractionCommand}" Width="100" Margin="5,20,10,20"/>
                         </StackPanel>
                     </DockPanel>
                 </Border>
