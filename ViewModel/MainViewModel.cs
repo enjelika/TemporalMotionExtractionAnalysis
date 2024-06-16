@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using OpenCvSharp;
 using System.Diagnostics;
+using System.Windows;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -33,7 +34,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private int _selectedFps;
 
         private const int TotalCells = 57;
-        private const int CenterIndex = 18;
+        private const int CenterIndex = 26;
 
         private bool _isAnimating;
         private bool _isReversePlayback;
@@ -113,7 +114,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set
             {
                 _offsetFrame = value;
-                Console.WriteLine(OffsetFrame.ToString()); // Debugging
+                Console.WriteLine(OffsetFrame.ImagePath); // Debugging
                 OnPropertyChanged(nameof(OffsetValue));
             }
         }
@@ -258,8 +259,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Initialize the variables for the View Textboxes & Combobox
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
-            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" }; // Default value is 4
-            SelectedFps = 4;
+            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" }; 
+            SelectedFps = 4; // Default value is 4
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
 
@@ -281,7 +282,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Initialize zoomed timeline cells with default values
             for (int i = 0; i < 6; i++)
             {
-                TimelineCells.Add(new ImageModel
+                ZoommedTimelineCells.Add(new ImageModel
                 {
                     FrameNumber = -1, // Initialize with -1 indicating empty
                     IsCurrent = false
@@ -290,6 +291,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
             // Set initial current frame - Timeline Overview
             SetCurrentFrame(0);
+
+            OffsetFrame = new ImageModel();
+            OffsetFrame.IsOffsetSelection = false; 
 
             // Default false since no images have been loaded yet
             IsImagesLoaded = false;
@@ -328,6 +332,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 int frameIndex = (startIndex + i + totalFrames) % totalFrames;
                 TimelineCells[i].FrameNumber = frameIndex;
+                TimelineCells[i].ImagePath = Images[frameIndex].ImagePath;
                 TimelineCells[i].IsCurrent = (i == CenterIndex); // Set IsCurrent for center cell
 
                 if (TimelineCells[i].IsCurrent) 
@@ -370,7 +375,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 int frameIndex = (startIndex + i + totalFrames) % totalFrames;
                 ZoommedTimelineCells[i].FrameNumber = frameIndex;
                 ZoommedTimelineCells[i].ImagePath = Images[frameIndex].ImagePath;
-                ZoommedTimelineCells[i].IsCurrent = (i == CenterIndex); // Set IsCurrent for center cell
+                ZoommedTimelineCells[i].IsCurrent = (i == 2); // Center cell is always at index 2
 
                 if (ZoommedTimelineCells[i].IsCurrent)
                 {
@@ -383,10 +388,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 }
             }
 
-            // Notify property changed for TimelineCells to update the UI
+            // Notify property changed for ZoomedTimelineCells to update the UI
             OnPropertyChanged(nameof(ZoommedTimelineCells));
         }
-
 
         /// <summary>
         /// Converts frames per second (FPS) to a time delay in milliseconds.
@@ -460,6 +464,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     if (Images.Any())
                     {
                         SetCurrentFrame(0);
+                        SetZoomedCurrentFrame(0);
                         CurrentImage = Images.First();
                         CurrentIndex = 0;
                     }

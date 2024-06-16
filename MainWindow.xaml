@@ -11,6 +11,20 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
+        <DataTemplate x:Key="SecondItemTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding ImagePath}" Height="Auto" Width="350" Margin="30,2,0,0"
+                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="DefaultTemplate">
+            <StackPanel Orientation="Horizontal">
+                <!-- Empty template for non-second items -->
+            </StackPanel>
+        </DataTemplate>
+        <models:IndexBasedTemplateSelector x:Key="IndexBasedTemplateSelector"
+                                  SecondItemTemplate="{StaticResource SecondItemTemplate}"
+                                  DefaultTemplate="{StaticResource DefaultTemplate}"/>
         <models:IndexConverter x:Key="IndexConverter"/>
         <models:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <models:FrameIndexVisibilityConverter x:Key="FrameIndexVisibilityConverter"/>
@@ -245,6 +259,10 @@
                     <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="240">
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+
+                            <ItemsControl ItemsSource="{Binding SelectedFrames}" 
+                                          ItemTemplateSelector="{StaticResource IndexBasedTemplateSelector}"/>
+
                         </DockPanel>
                     </Border>
 
@@ -260,19 +278,20 @@
                 </StackPanel>
 
                 <!-- Composite View -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="400" HorizontalAlignment="Left">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="380" HorizontalAlignment="Left">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                     </DockPanel>
                 </Border>
 
                 <!-- Timeline Overview -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="90">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="110">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
                         <ListBox ItemsSource="{Binding TimelineCells}" HorizontalAlignment="Stretch" Height="Auto" Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                                 SelectionMode="Multiple" SelectionChanged="ListBox_SelectionChanged">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal"/>
@@ -281,9 +300,36 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical">
-                                        <Polygon Points="0,0 20,0 10,10" Fill="Black" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,2"
-                                            Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <!-- Empty triangle pointing down, visible if the cell is selected -->
+                                        <TextBlock Text="▽" FontFamily="Segoe UI" FontSize="12" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
 
+                                        <!-- Filled triangle pointing down, visible if the cell is the current frame -->
+                                        <TextBlock Text="▼" FontFamily="Segoe UI" FontSize="15" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-5,0,-2">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        
                                         <!-- Frame Number (if 0 or multiple of 6) -->
                                         <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"
                                             Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
@@ -292,8 +338,37 @@
                                         <TextBlock Text="|" HorizontalAlignment="Center" Margin="0"
                                             Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
 
-                                        <Polygon Points="10,0 20,10 0,10" Fill="Black" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,0"
-                                            Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                        <!-- Filled triangle pointing up, visible if the cell is the current frame -->
+                                        <TextBlock Text="▲" FontFamily="Segoe UI" FontSize="15" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <!-- Empty triangle pointing up, visible if the cell is selected -->
+                                        <TextBlock Text="△" FontFamily="Segoe UI" FontSize="12" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="False">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -321,14 +396,14 @@
 
                                         <!-- Frame Number (if 0 or multiple of 6) -->
                                         <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"
-                    Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
+                                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
 
                                         <!-- Additional TextBlock for tick marks in between multiples of 6 -->
                                         <TextBlock Text="|" HorizontalAlignment="Center" Margin="0"
-                    Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
+                                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
 
                                         <Polygon Points="10,0 20,10 0,10" Fill="Black" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,0"
-                    Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                            Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -338,15 +413,6 @@
                 </Border>
             </StackPanel>
         </StackPanel>
-
-        <Canvas Panel.ZIndex="2" Canvas.Left="50" Canvas.Top="50" Margin="443,693,207,199">
-            <!-- Previous Frames -->
-            <Image Source="{Binding PreviousImage}" Width="40" Height="Auto"  Canvas.Left="0" Canvas.Top="50" Panel.ZIndex="0" />
-            <!-- Future Frames -->
-            <Image Source="{Binding NextImage}" Width="40" Height="Auto" Canvas.Left="100" Canvas.Top="50" Panel.ZIndex="0" />
-            <!-- Current Frame - Displayed on top -->
-            <Image Source="{Binding CurrentImage}" Width="50" Height="Auto" Canvas.Left="50" Canvas.Top="50" Panel.ZIndex="1" />
-        </Canvas>
 
     </Grid>
 </Window>

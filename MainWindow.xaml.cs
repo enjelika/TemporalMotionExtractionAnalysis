@@ -23,5 +23,26 @@ namespace TemporalMotionExtractionAnalysis
             InitializeComponent();
             DataContext = new MainViewModel();
         }
+
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var listBox = sender as ListBox;
+
+            if (listBox != null)
+            {
+                var viewModel = DataContext as MainViewModel;
+
+                if (viewModel != null)
+                {
+                    viewModel.HandleSelectionChanged(listBox.SelectedItems);
+                }
+            }
+        }
+
+        private void Image_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            // Log or handle the image loading failure
+            Console.WriteLine($"Error loading image: {e.ErrorException.Message}");
+        }
     }
 }

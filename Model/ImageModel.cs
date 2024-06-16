@@ -8,6 +8,7 @@ namespace TemporalMotionExtractionAnalysis.Model
         private string _imagePath;
         private int _frameNumber;
         private bool _isCurrent;
+        private bool _isOffsetSelection;
 
         public string ImagePath
         {
@@ -39,6 +40,16 @@ namespace TemporalMotionExtractionAnalysis.Model
                     _isCurrent = value;
                     OnPropertyChanged(nameof(IsCurrent));
                 }
+            }
+        }
+
+        public bool IsOffsetSelection
+        {
+            get => _isOffsetSelection;
+            set
+            {
+                _isOffsetSelection = value;
+                OnPropertyChanged(nameof(IsOffsetSelection));
             }
         }
 
