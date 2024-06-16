@@ -210,7 +210,7 @@
 
                             <StackPanel Orientation="Horizontal">
                                 <Label FontWeight="Bold">Offset:</Label>
-                                <TextBox Width="100" Margin="5" Text="{Binding OffsetValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IndexConverter}}" />
+                                <TextBox Width="100" Margin="5" Text="{Binding OffsetValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" />
                             </StackPanel>
                         </StackPanel>
                     </DockPanel>
@@ -223,9 +223,15 @@
                         <!-- Animation of images in selected folder -->
                         <StackPanel Orientation="Vertical">
                             <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top"/>
+                            
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Label FontWeight="Bold" Content="Frame Index: "/>
-                                <Label Content="{Binding CurrentImage.FrameNumber, Converter={StaticResource StringToIntConverter}}"/>
+                                <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CurrentIndex, RelativeSource={RelativeSource AncestorType=Window}}" />
+                            </StackPanel>
+                            
+                            <StackPanel Orientation="Horizontal" Margin="5,0">
+                                <Label Content="Total Frames: "/>
+                                <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.ImageCount, RelativeSource={RelativeSource AncestorType=Window}}" />
                             </StackPanel>
                         </StackPanel>
                     </DockPanel>
@@ -261,7 +267,7 @@
                 </Border>
 
                 <!-- Timeline Overview -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="110">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="90">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
@@ -275,7 +281,8 @@
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical">
-                                        <Label Margin="0,5,0,0"/>
+                                        <Polygon Points="0,0 20,0 10,10" Fill="Black" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,2"
+                                            Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                                         <!-- Frame Number (if 0 or multiple of 6) -->
                                         <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"
@@ -295,15 +302,37 @@
                 </Border>
 
                 <!-- TODO: Zoomed Timeline View -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="140">
+                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="160">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                        <StackPanel Orientation="Vertical" Margin="5,0">
-                            <!-- Temporary TextBlock to display DataContext values for debugging -->
-                            <TextBlock Text="{Binding DataContext.CurrentIndex, RelativeSource={RelativeSource AncestorType=Window}}" />
-                            <TextBlock Text="{Binding DataContext.ImageCount, RelativeSource={RelativeSource AncestorType=Window}}" />
-                        </StackPanel>
+                        <ListBox ItemsSource="{Binding ZoomedTimelineCells}" HorizontalAlignment="Stretch" Height="Auto" 
+                                 Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Vertical">
+                                        <Label Margin="0,5,0,0"/>
+
+                                        <!-- Frame Number (if 0 or multiple of 6) -->
+                                        <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"
+                    Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
+
+                                        <!-- Additional TextBlock for tick marks in between multiples of 6 -->
+                                        <TextBlock Text="|" HorizontalAlignment="Center" Margin="0"
+                    Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
+
+                                        <Polygon Points="10,0 20,10 0,10" Fill="Black" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,0"
+                    Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
 
                     </DockPanel>
                 </Border>

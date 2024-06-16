@@ -17,10 +17,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         #region Private Variables
         private ObservableCollection<ImageModel> _images;
         private ObservableCollection<ImageModel> _timelineCells;
+        private ObservableCollection<ImageModel> _zoomedTimelineCells;
         private ObservableCollection<ImageModel> _selectedFrames;
         private ObservableCollection<string> _fpsValue;
 
+        private ImageModel _previousImage;
         private ImageModel _currentImage;
+        private ImageModel _nextImage;
         private ImageModel _offsetFrame;
 
         private int _imageCount;
@@ -30,7 +33,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private int _selectedFps;
 
         private const int TotalCells = 57;
-        private const int CenterIndex = 18; //28;
+        private const int CenterIndex = 18;
 
         private bool _isAnimating;
         private bool _isReversePlayback;
@@ -51,10 +54,23 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         }
         public ObservableCollection<ImageModel> TimelineCells
         {
-            get { return _timelineCells; }
-            set { _timelineCells = value; OnPropertyChanged(); }
+            get => _timelineCells;
+            set 
+            { 
+                _timelineCells = value;
+                OnPropertyChanged(nameof(TimelineCells)); 
+            }
         }
 
+        public ObservableCollection <ImageModel> ZoommedTimelineCells
+        {
+            get => _zoomedTimelineCells;
+            set
+            {
+                _zoomedTimelineCells = value;
+                OnPropertyChanged(nameof(ZoommedTimelineCells));
+            }
+        }
 
         public int CurrentIndex
         {
@@ -125,6 +141,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Console.WriteLine(SelectedFps.ToString()); // Debugging
                 OnPropertyChanged(nameof(SelectedFps));
                 TimeDelay = ConvertFPSToTimeDelay(_selectedFps);
+                OnPropertyChanged(nameof(TimeDelay));
             }
         }
 
@@ -141,6 +158,15 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public ImageModel PreviousImage
+        {
+            get => _previousImage;
+            set
+            {
+                _previousImage = value;
+                OnPropertyChanged(nameof(PreviousImage));
+            }
+        }
 
         public ImageModel CurrentImage
         {
@@ -149,6 +175,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 _currentImage = value;
                 OnPropertyChanged(nameof(CurrentImage));
+            }
+        }
+
+        public ImageModel NextImage
+        {
+            get => _nextImage;
+            set
+            {
+                _nextImage = value;
+                OnPropertyChanged(nameof(NextImage));
             }
         }
 
@@ -230,6 +266,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Initialize the ObservableCollection<ImageModel> for the Images
             Images = new ObservableCollection<ImageModel>();
             TimelineCells = new ObservableCollection<ImageModel>();
+            ZoommedTimelineCells = new ObservableCollection<ImageModel>();
 
             // Initialize timeline cells with default values
             for (int i = 0; i < TotalCells; i++)
@@ -241,7 +278,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 });
             }
 
-            // Set initial current frame
+            // Initialize zoomed timeline cells with default values
+            for (int i = 0; i < 6; i++)
+            {
+                TimelineCells.Add(new ImageModel
+                {
+                    FrameNumber = -1, // Initialize with -1 indicating empty
+                    IsCurrent = false
+                });
+            }
+
+            // Set initial current frame - Timeline Overview
             SetCurrentFrame(0);
 
             // Default false since no images have been loaded yet
@@ -257,8 +304,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
         }
 
+        /// <summary>
+        /// Sets the current frame in the timeline and updates the timeline cells accordingly.
+        /// </summary>
+        /// <param name="currentFrameIndex">The index of the current frame.</param>
         public void SetCurrentFrame(int currentFrameIndex)
         {
+            // Check if Images collection is valid and non-empty
             if (Images == null || !Images.Any())
                 return;
 
@@ -268,19 +320,72 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             int startIndex = currentFrameIndex - CenterIndex;
             if (startIndex < 0)
             {
-                startIndex += totalFrames;
+                startIndex += totalFrames; // Wrap around for negative indices
             }
 
+            // Update TimelineCells with frame numbers and current frame indicator
             for (int i = 0; i < TotalCells; i++)
             {
                 int frameIndex = (startIndex + i + totalFrames) % totalFrames;
                 TimelineCells[i].FrameNumber = frameIndex;
-                TimelineCells[i].IsCurrent = (i == CenterIndex);
+                TimelineCells[i].IsCurrent = (i == CenterIndex); // Set IsCurrent for center cell
+
+                if (TimelineCells[i].IsCurrent) 
+                {
+                    // Set the image for the previous frame and next frame in TimelineCells
+                    int prevFrameIndex = (frameIndex - 1 + totalFrames) % totalFrames;
+                    int nextFrameIndex = (frameIndex + 1) % totalFrames;
+
+                    PreviousImage = Images[prevFrameIndex];
+                    NextImage = Images[nextFrameIndex];
+                }
             }
 
+            // Notify property changed for TimelineCells to update the UI
             OnPropertyChanged(nameof(TimelineCells));
         }
 
+        /// <summary>
+        /// Sets the current frame in the zoomed timeline and updates the zoomed timeline cells accordingly.
+        /// </summary>
+        /// <param name="currentFrameIndex">The index of the current frame.</param>
+        public void SetZoomedCurrentFrame(int currentFrameIndex)
+        {
+            // Check if Images collection is valid and non-empty
+            if (Images == null || !Images.Any())
+                return;
+
+            int totalFrames = Images.Count;
+
+            // Calculate the start index based on the desired center index
+            int startIndex = currentFrameIndex - CenterIndex;
+            if (startIndex < 0)
+            {
+                startIndex += totalFrames; // Wrap around for negative indices
+            }
+
+            // Update ZoomedTimelineCells with frame numbers and current frame indicator
+            for (int i = 0; i < 5; i++)
+            {
+                int frameIndex = (startIndex + i + totalFrames) % totalFrames;
+                ZoommedTimelineCells[i].FrameNumber = frameIndex;
+                ZoommedTimelineCells[i].ImagePath = Images[frameIndex].ImagePath;
+                ZoommedTimelineCells[i].IsCurrent = (i == CenterIndex); // Set IsCurrent for center cell
+
+                if (ZoommedTimelineCells[i].IsCurrent)
+                {
+                    // Set the image for the previous frame and next frame in TimelineCells
+                    int prevFrameIndex = (frameIndex - 1 + totalFrames) % totalFrames;
+                    int nextFrameIndex = (frameIndex + 1) % totalFrames;
+
+                    PreviousImage = Images[prevFrameIndex];
+                    NextImage = Images[nextFrameIndex];
+                }
+            }
+
+            // Notify property changed for TimelineCells to update the UI
+            OnPropertyChanged(nameof(ZoommedTimelineCells));
+        }
 
 
         /// <summary>
