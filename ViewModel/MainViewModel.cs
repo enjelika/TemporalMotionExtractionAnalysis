@@ -280,7 +280,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
 
             // Initialize zoomed timeline cells with default values
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 5; i++)
             {
                 ZoommedTimelineCells.Add(new ImageModel
                 {
@@ -361,21 +361,22 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 return;
 
             int totalFrames = Images.Count;
+            int centerCellIndex = 2; // Center cell is always at index 2
 
             // Calculate the start index based on the desired center index
-            int startIndex = currentFrameIndex - CenterIndex;
+            int startIndex = currentFrameIndex - centerCellIndex;
             if (startIndex < 0)
             {
                 startIndex += totalFrames; // Wrap around for negative indices
             }
 
             // Update ZoomedTimelineCells with frame numbers and current frame indicator
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < ZoommedTimelineCells.Count; i++)
             {
                 int frameIndex = (startIndex + i + totalFrames) % totalFrames;
                 ZoommedTimelineCells[i].FrameNumber = frameIndex;
                 ZoommedTimelineCells[i].ImagePath = Images[frameIndex].ImagePath;
-                ZoommedTimelineCells[i].IsCurrent = (i == 2); // Center cell is always at index 2
+                ZoommedTimelineCells[i].IsCurrent = (i == centerCellIndex); // Center cell is always at index 2
 
                 if (ZoommedTimelineCells[i].IsCurrent)
                 {
@@ -391,6 +392,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Notify property changed for ZoomedTimelineCells to update the UI
             OnPropertyChanged(nameof(ZoommedTimelineCells));
         }
+
 
         /// <summary>
         /// Converts frames per second (FPS) to a time delay in milliseconds.
@@ -511,6 +513,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
                 CurrentImage = Images[CurrentIndex];
                 SetCurrentFrame(CurrentIndex); // Update the timeline cells
+                SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
             }
         }
 
@@ -535,6 +538,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CurrentIndex = (CurrentIndex - 1 + Images.Count) % Images.Count;
             CurrentImage = Images[CurrentIndex];
             SetCurrentFrame(CurrentIndex); // Update the timeline cells
+            SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
         }
 
         /// <summary>
@@ -550,6 +554,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CurrentIndex = (CurrentIndex + 1) % Images.Count;
             CurrentImage = Images[CurrentIndex];
             SetCurrentFrame(CurrentIndex); // Update the timeline cells
+            SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
         }
 
         /// <summary>

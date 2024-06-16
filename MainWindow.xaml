@@ -291,7 +291,7 @@
 
                         <ListBox ItemsSource="{Binding TimelineCells}" HorizontalAlignment="Stretch" Height="Auto" Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
-                                 SelectionMode="Multiple" SelectionChanged="ListBox_SelectionChanged">
+                                 SelectionMode="Multiple" SelectionChanged="ListBox_SelectionChanged" BorderBrush="Transparent">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal"/>
@@ -381,36 +381,45 @@
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                        <ListBox ItemsSource="{Binding ZoomedTimelineCells}" HorizontalAlignment="Stretch" Height="Auto" 
+                        <ListBox ItemsSource="{Binding ZoommedTimelineCells}" HorizontalAlignment="Stretch" Height="Auto" BorderBrush="Transparent"
                                  Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal"/>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical">
-                                        <Label Margin="0,5,0,0"/>
+                                        <!-- Image Display -->
+                                        <Image Source="{Binding ImagePath}" Width="150" Height="Auto" Margin="0" HorizontalAlignment="Center"
+                                               VerticalAlignment="Top"/>
 
-                                        <!-- Frame Number (if 0 or multiple of 6) -->
-                                        <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"
-                                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
+                                        <!-- Frame Number -->
+                                        <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"/>
 
-                                        <!-- Additional TextBlock for tick marks in between multiples of 6 -->
-                                        <TextBlock Text="|" HorizontalAlignment="Center" Margin="0"
-                                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
+                                        <!-- Filled triangle pointing up, visible if the cell is the current frame -->
+                                        <TextBlock Text="▲" FontFamily="Segoe UI" FontSize="15" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
 
-                                        <Polygon Points="10,0 20,10 0,10" Fill="Black" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,0"
-                                            Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
-
                     </DockPanel>
                 </Border>
+
             </StackPanel>
         </StackPanel>
 
