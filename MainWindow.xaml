@@ -291,7 +291,7 @@
 
                         <ListBox ItemsSource="{Binding TimelineCells}" HorizontalAlignment="Stretch" Height="Auto" Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
                                  ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
-                                 SelectionMode="Multiple" SelectionChanged="ListBox_SelectionChanged" BorderBrush="Transparent">
+                                 SelectionMode="Single" SelectionChanged="ListBox_SelectionChanged" BorderBrush="Transparent">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal"/>
@@ -376,7 +376,7 @@
                     </DockPanel>
                 </Border>
 
-                <!-- TODO: Zoomed Timeline View -->
+                <!-- Zoomed Timeline View -->
                 <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="160">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>

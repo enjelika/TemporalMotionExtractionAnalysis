@@ -592,6 +592,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 {
                     if (item is ImageModel imageModel)
                     {
+                        SelectedFrames.Add(Images[CurrentIndex]);
                         SelectedFrames.Add(imageModel);
                     }
                 }
