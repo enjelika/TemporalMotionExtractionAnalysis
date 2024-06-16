@@ -2,7 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:behaviors="clr-namespace:TemporalMotionExtractionAnalysis.Behaviors"
         xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
         Title="Temporal Motion Analysis App" 
@@ -242,10 +244,10 @@
                     <!-- Animation Frame -->
                     <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="240">
                         <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                            <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
                             <!-- Animation of images in selected folder -->
-                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="350" Margin="0"/>
+                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="350" Margin="0,-5,0,0"/>
                         </DockPanel>
                     </Border>
                 </StackPanel>
@@ -260,9 +262,12 @@
                 <!-- TODO: Overview Timeline thumbnails -->
                 <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="110">
                     <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                        <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
                         <ListBox x:Name="TimelineListBox" ItemsSource="{Binding Images}" Height="60" VerticalAlignment="Top" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
+                            <i:Interaction.Behaviors>
+                                <behaviors:ScrollSynchronizer CurrentIndex="{Binding CurrentIndex}" />
+                            </i:Interaction.Behaviors>
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <WrapPanel Orientation="Horizontal" />
@@ -272,6 +277,8 @@
                                 <DataTemplate>
                                     <Grid>
                                         <Grid.RowDefinitions>
+                                            <RowDefinition Height="20"/>
+                                            <RowDefinition Height="Auto"/>
                                             <RowDefinition Height="*"/>
                                         </Grid.RowDefinitions>
                                         <StackPanel Orientation="Vertical">
@@ -279,16 +286,16 @@
 
                                             <!-- Frame Number (if 0 or multiple of 6) -->
                                             <TextBlock Text="{Binding FrameNumber}" 
-                                                        HorizontalAlignment="Center" Margin="0"
-                                                        Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
+                                       HorizontalAlignment="Center" Margin="0"
+                                       Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
 
                                             <!-- Additional TextBlock for tick marks in between multiples of 6 -->
                                             <TextBlock Text="|" HorizontalAlignment="Center" Margin="0"
-                                                        Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
-                                            
+                                       Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
+
                                             <!-- Triangle shape for current frame indicator -->
                                             <Path Data="M0,10 L5,0 L10,10 Z" Fill="Black" Margin="0"
-                                                        Visibility="{Binding IsCurrent, Converter={StaticResource CurrentFrameIndicatorVisibilityConverter}}"/>
+                                  Visibility="{Binding IsCurrent, Converter={StaticResource CurrentFrameIndicatorVisibilityConverter}}"/>
                                         </StackPanel>
                                     </Grid>
                                 </DataTemplate>
