@@ -585,6 +585,19 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// </remarks>
         public void HandleSelectionChanged(System.Collections.IList selectedItems)
         {
+            // Reset all selections
+            foreach (var image in TimelineCells)
+            {
+                if (selectedItems.Contains(image))
+                {
+                    image.IsOffsetSelection = true;
+                }
+                else
+                {
+                    image.IsOffsetSelection = false;
+                }
+            }
+
             if (selectedItems.Count <= 2)
             {
                 SelectedFrames.Clear();
@@ -592,8 +605,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 {
                     if (item is ImageModel imageModel)
                     {
+                        // Current Frame
                         SelectedFrames.Add(Images[CurrentIndex]);
+                        SelectedFrames[0].IsOffsetSelection = true;
+                       
+                        // User Selected Offset Frame
                         SelectedFrames.Add(imageModel);
+                        SelectedFrames[1].IsOffsetSelection = true;
                     }
                 }
             }

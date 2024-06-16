@@ -31,7 +31,6 @@ namespace TemporalMotionExtractionAnalysis
             if (listBox != null)
             {
                 var viewModel = DataContext as MainViewModel;
-
                 if (viewModel != null)
                 {
                     viewModel.HandleSelectionChanged(listBox.SelectedItems);
