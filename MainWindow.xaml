@@ -30,6 +30,7 @@
         <models:FrameIndexVisibilityConverter x:Key="FrameIndexVisibilityConverter"/>
         <models:FrameIndexTickVisibilityConverter x:Key="FrameIndexTickVisibilityConverter"/>
         <models:StringToIntConverter x:Key="StringToIntConverter"/>
+        <models:RadioButtonConverter x:Key="RadioButtonConverter"/>
     </Window.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
@@ -130,10 +131,10 @@
                                     <StackPanel.Style>
                                         <Style TargetType="StackPanel">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=PixelRadioButton, Path=IsChecked}" Value="True">
+                                                <DataTrigger Binding="{Binding ElementName=PixelRadioButtonSelection, Path=IsChecked}" Value="True">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=PixelRadioButton, Path=IsChecked}" Value="False">
+                                                <DataTrigger Binding="{Binding ElementName=PixelRadioButtonSelection, Path=IsChecked}" Value="False">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -141,7 +142,7 @@
                                     </StackPanel.Style>
 
                                     <Label FontWeight="Bold">Composition Modes:</Label>
-                                    <RadioButton Content="SourceOver" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton x:Name="SourceOver" Content="SourceOver" GroupName="CompositionMode" Margin="5" IsChecked="{Binding Path=CompositionRadioButtonSelection, Converter={StaticResource RadioButtonConverter}, ConverterParameter={Models:CompositionRadioButton.SourceOver}}"  />
                                     <RadioButton Content="DestinationOver" GroupName="CompositionMode" Margin="5" />
                                     <RadioButton Content="SourceIn" GroupName="CompositionMode" Margin="5" />
                                     <RadioButton Content="DestinationIn" GroupName="CompositionMode" Margin="5" />

@@ -41,6 +41,20 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isImagesLoaded;
 
         private string _folderName;
+        private CompositionRadioButton _compositionRadioButtonSelection;
+        public enum CompositionRadioButton
+        {
+            SourceOver,
+            DestinationOver,
+            SourceIn,
+            DestinationIn,
+            SourceOut,
+            DestinationOut,
+            SourceAtop,
+            DestinationAtop,
+            Clear,
+            XOR
+        }
         #endregion
 
         #region Public Variables
@@ -70,6 +84,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 _zoomedTimelineCells = value;
                 OnPropertyChanged(nameof(ZoommedTimelineCells));
+            }
+        }
+
+        public CompositionRadioButton CompositionRadioButtonSelection
+        {
+            get => _compositionRadioButtonSelection;
+            set
+            {
+                _compositionRadioButtonSelection = value;
+                OnPropertyChanged(nameof(CompositionRadioButton));
             }
         }
 
@@ -306,6 +330,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             PreviousCommand = new RelayCommand(OnPrevious);
             NextCommand = new RelayCommand(OnNext);
             StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
+            CompositionRadioButtonSelection = CompositionRadioButton.SourceOver;
         }
 
         /// <summary>
