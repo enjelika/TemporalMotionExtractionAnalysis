@@ -14,20 +14,32 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+        #region Private Variables
         private ObservableCollection<ImageModel> _images;
-        private int _imageCount;
-        private ImageModel _currentImage;
-        private int _currentIndex;
-        private bool _isAnimating;
-        private bool _isReversePlayback;
-        private string _folderName;
-        private int _offsetValue;
-        private ImageModel _offsetFrame;
-        private int _timeDelay;
+        private ObservableCollection<ImageModel> _timelineCells;
         private ObservableCollection<ImageModel> _selectedFrames;
         private ObservableCollection<string> _fpsValue;
+
+        private ImageModel _currentImage;
+        private ImageModel _offsetFrame;
+
+        private int _imageCount;
+        private int _currentIndex;
+        private int _offsetValue;
+        private int _timeDelay;
         private int _selectedFps;
 
+        private const int TotalCells = 57;
+        private const int CenterIndex = 18; //28;
+
+        private bool _isAnimating;
+        private bool _isReversePlayback;
+        private bool _isImagesLoaded;
+
+        private string _folderName;
+        #endregion
+
+        #region Public Variables
         public ObservableCollection<ImageModel> Images
         {
             get => _images;
@@ -37,6 +49,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(Images));
             }
         }
+        public ObservableCollection<ImageModel> TimelineCells
+        {
+            get { return _timelineCells; }
+            set { _timelineCells = value; OnPropertyChanged(); }
+        }
+
 
         public int CurrentIndex
         {
@@ -174,6 +192,18 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public bool IsImagesLoaded
+        {
+            get => _isImagesLoaded;
+            set
+            {
+                _isImagesLoaded = value;
+                OnPropertyChanged(nameof(IsImagesLoaded));
+            }
+        }
+        #endregion
+
+        #region ICommands
         public ICommand LoadImagesCommand { get; }
         public ICommand PlayCommand { get; }
         public ICommand PauseCommand { get; }
@@ -181,6 +211,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         public ICommand PreviousCommand { get; }
         public ICommand NextCommand { get; }
         public ICommand StartMotionExtractionCommand { get; }
+        #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainViewModel"/> class.
@@ -188,13 +219,35 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// </summary>
         public MainViewModel()
         {
+            // Initialize the variables for the View Textboxes & Combobox
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
             FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" }; // Default value is 4
             SelectedFps = 4;
+            FolderName = "No Selected Folder";
+            SelectedFrames = new ObservableCollection<ImageModel>();
 
+            // Initialize the ObservableCollection<ImageModel> for the Images
             Images = new ObservableCollection<ImageModel>();
+            TimelineCells = new ObservableCollection<ImageModel>();
 
+            // Initialize timeline cells with default values
+            for (int i = 0; i < TotalCells; i++)
+            {
+                TimelineCells.Add(new ImageModel
+                {
+                    FrameNumber = -1, // Initialize with -1 indicating empty
+                    IsCurrent = false
+                });
+            }
+
+            // Set initial current frame
+            SetCurrentFrame(0);
+
+            // Default false since no images have been loaded yet
+            IsImagesLoaded = false;
+
+            // Initialize the Commands
             LoadImagesCommand = new RelayCommand(LoadImages);
             PlayCommand = new RelayCommand(OnPlay);
             PauseCommand = new RelayCommand(OnStop);
@@ -202,10 +255,33 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             PreviousCommand = new RelayCommand(OnPrevious);
             NextCommand = new RelayCommand(OnNext);
             StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
-
-            FolderName = "No Selected Folder";
-            SelectedFrames = new ObservableCollection<ImageModel>();
         }
+
+        public void SetCurrentFrame(int currentFrameIndex)
+        {
+            if (Images == null || !Images.Any())
+                return;
+
+            int totalFrames = Images.Count;
+
+            // Calculate the start index based on the desired center index
+            int startIndex = currentFrameIndex - CenterIndex;
+            if (startIndex < 0)
+            {
+                startIndex += totalFrames;
+            }
+
+            for (int i = 0; i < TotalCells; i++)
+            {
+                int frameIndex = (startIndex + i + totalFrames) % totalFrames;
+                TimelineCells[i].FrameNumber = frameIndex;
+                TimelineCells[i].IsCurrent = (i == CenterIndex);
+            }
+
+            OnPropertyChanged(nameof(TimelineCells));
+        }
+
+
 
         /// <summary>
         /// Converts frames per second (FPS) to a time delay in milliseconds.
@@ -263,16 +339,29 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     int frameNumber = 0;
                     foreach (var file in imageFiles)
                     {
-                        Images.Add(new ImageModel { ImagePath = file, FrameNumber = frameNumber++ });
+                        Images.Add(new ImageModel 
+                        { 
+                            ImagePath = file, 
+                            FrameNumber = frameNumber,
+                            IsCurrent = frameNumber == 0 // Assuming 0 is the initial current frame
+
+                        });
+                        
+
+                        frameNumber++;
                     }
 
+                    // Set initial current frame
                     if (Images.Any())
                     {
+                        SetCurrentFrame(0);
                         CurrentImage = Images.First();
                         CurrentIndex = 0;
                     }
 
                     FolderName = System.IO.Path.GetFileName(selectedPath);
+
+                    IsImagesLoaded = true;
                 }
             }
         }
@@ -311,6 +400,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 }
 
                 CurrentImage = Images[CurrentIndex];
+                SetCurrentFrame(CurrentIndex); // Update the timeline cells
             }
         }
 
@@ -334,6 +424,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             _isAnimating = false;
             CurrentIndex = (CurrentIndex - 1 + Images.Count) % Images.Count;
             CurrentImage = Images[CurrentIndex];
+            SetCurrentFrame(CurrentIndex); // Update the timeline cells
         }
 
         /// <summary>
@@ -348,6 +439,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             _isAnimating = false;
             CurrentIndex = (CurrentIndex + 1) % Images.Count;
             CurrentImage = Images[CurrentIndex];
+            SetCurrentFrame(CurrentIndex); // Update the timeline cells
         }
 
         /// <summary>

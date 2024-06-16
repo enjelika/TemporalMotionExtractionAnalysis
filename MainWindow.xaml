@@ -50,23 +50,28 @@
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,5">
                                 <!-- Previous Button -->
-                                <Button Command="{Binding PreviousCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                <Button Command="{Binding PreviousCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0"
+                                        IsEnabled="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="&#xE100;" />
                                 </Button>
                                 <!-- Play Button -->
-                                <Button Command="{Binding PlayCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                <Button Command="{Binding PlayCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0"
+                                        IsEnabled="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="&#xE102;" />
                                 </Button>
                                 <!-- Pause Button -->
-                                <Button Command="{Binding PauseCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                <Button Command="{Binding PauseCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0"
+                                        IsEnabled="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="&#xE103;" />
                                 </Button>
                                 <!-- Stop Button -->
-                                <Button Command="{Binding StopCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                <Button Command="{Binding StopCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0"
+                                        IsEnabled="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="&#xE15B;" />
                                 </Button>
                                 <!-- Next Button -->
-                                <Button Command="{Binding NextCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0">
+                                <Button Command="{Binding NextCommand}" FontFamily="Segoe MDL2 Assets" FontSize="24" Margin="5,0"
+                                        IsEnabled="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}">
                                     <TextBlock Text="&#xE101;" />
                                 </Button>
                             </StackPanel>
@@ -88,9 +93,9 @@
                                     </ComboBox>
                                 </StackPanel>
                             </StackPanel>
-                            
+
                         </StackPanel>
-                        
+
                     </DockPanel>
                 </Border>
 
@@ -240,7 +245,7 @@
                             <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         </DockPanel>
                     </Border>
-                    
+
                     <!-- Animation Frame -->
                     <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="240">
                         <DockPanel>
@@ -264,40 +269,29 @@
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
-                        <ListBox x:Name="TimelineListBox" ItemsSource="{Binding Images}" Height="60" VerticalAlignment="Top" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Hidden">
-                            <i:Interaction.Behaviors>
-                                <behaviors:ScrollSynchronizer CurrentIndex="{Binding CurrentIndex}" />
-                            </i:Interaction.Behaviors>
+                        <ListBox ItemsSource="{Binding TimelineCells}" HorizontalAlignment="Stretch" Height="Auto" Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <WrapPanel Orientation="Horizontal" />
+                                    <StackPanel Orientation="Horizontal"/>
                                 </ItemsPanelTemplate>
                             </ListBox.ItemsPanel>
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="20"/>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="*"/>
-                                        </Grid.RowDefinitions>
-                                        <StackPanel Orientation="Vertical">
-                                            <!-- TODO: Image Preview of current image -->
+                                    <StackPanel Orientation="Vertical">
+                                        <Label Margin="0,5,0,0"/>
+                                        
+                                        <!-- Frame Number (if 0 or multiple of 6) -->
+                                        <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"
+                                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
 
-                                            <!-- Frame Number (if 0 or multiple of 6) -->
-                                            <TextBlock Text="{Binding FrameNumber}" 
-                                       HorizontalAlignment="Center" Margin="0"
-                                       Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
+                                        <!-- Additional TextBlock for tick marks in between multiples of 6 -->
+                                        <TextBlock Text="|" HorizontalAlignment="Center" Margin="0"
+                                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
 
-                                            <!-- Additional TextBlock for tick marks in between multiples of 6 -->
-                                            <TextBlock Text="|" HorizontalAlignment="Center" Margin="0"
-                                       Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
-
-                                            <!-- Triangle shape for current frame indicator -->
-                                            <Path Data="M0,10 L5,0 L10,10 Z" Fill="Black" Margin="0"
-                                  Visibility="{Binding IsCurrent, Converter={StaticResource CurrentFrameIndicatorVisibilityConverter}}"/>
-                                        </StackPanel>
-                                    </Grid>
+                                        <Polygon Points="10,0 20,10 0,10" Fill="Black" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,0"
+                                            Visibility="{Binding IsCurrent, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -314,13 +308,12 @@
                             <TextBlock Text="{Binding DataContext.CurrentIndex, RelativeSource={RelativeSource AncestorType=Window}}" />
                             <TextBlock Text="{Binding DataContext.ImageCount, RelativeSource={RelativeSource AncestorType=Window}}" />
                         </StackPanel>
-                        
+
                     </DockPanel>
                 </Border>
             </StackPanel>
 
         </StackPanel>
 
-        
     </Grid>
 </Window>
