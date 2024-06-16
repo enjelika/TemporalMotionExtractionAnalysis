@@ -76,7 +76,13 @@
 
                                 <StackPanel Orientation="Horizontal">
                                     <Label FontWeight="Bold">FPS:</Label>
-                                    <TextBox Text="{Binding FpsValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource IndexConverter}}" Width="100" Margin="5" />
+                                    <ComboBox x:Name="fps" Width="100" Margin="5" ItemsSource="{Binding FpsValue}" SelectedValue="{Binding SelectedFps, Mode=TwoWay, Converter={StaticResource IndexConverter}}" >
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                             </StackPanel>
                             

@@ -22,9 +22,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isReversePlayback;
         private string _folderName;
         private int _offsetValue;
-        private int _fpsValue;
+        //private int _fpsValue;
         private int _timeDelay;
         private ObservableCollection<ImageModel> _selectedFrames;
+        private ObservableCollection<string> _fpsValue;
+        private int _selectedFps;
 
         public ObservableCollection<ImageModel> Images
         {
@@ -70,7 +72,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(OffsetValue));
             }
         }
-        public int FpsValue
+
+        public ObservableCollection<string> FpsValue
         {
             get => _fpsValue;
             set
@@ -80,8 +83,19 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     _fpsValue = value;
                     OnPropertyChanged(nameof(FpsValue)); // Notify property changed
                                                          // Update the time delay based on the new FPS value
-                    TimeDelay = ConvertFPSToTimeDelay(FpsValue);
                 }
+            }
+        }
+
+        public int SelectedFps
+        {
+            get => _selectedFps;
+            set
+            {
+                _selectedFps = value;
+                Console.WriteLine(SelectedFps.ToString()); // Debugging
+                OnPropertyChanged(nameof(SelectedFps));
+                TimeDelay = ConvertFPSToTimeDelay(_selectedFps);
             }
         }
 
@@ -165,7 +179,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         {
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
-            FpsValue = (int)ConvertTimeDelayToFPS(TimeDelay); // Default value is 4
+            //FpsValue = (int)ConvertTimeDelayToFPS(TimeDelay); // Default value is 4
+            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" };
             Images = new ObservableCollection<ImageModel>();
             LoadImagesCommand = new RelayCommand(LoadImages);
             PlayCommand = new RelayCommand(OnPlay);
@@ -177,6 +192,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
+            SelectedFps = 4;
         }
 
         /// <summary>
