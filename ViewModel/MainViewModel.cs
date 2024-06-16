@@ -22,7 +22,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isReversePlayback;
         private string _folderName;
         private int _offsetValue;
-        //private int _fpsValue;
         private int _timeDelay;
         private ObservableCollection<ImageModel> _selectedFrames;
         private ObservableCollection<string> _fpsValue;
@@ -179,9 +178,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         {
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
-            //FpsValue = (int)ConvertTimeDelayToFPS(TimeDelay); // Default value is 4
-            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" };
+            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" }; // Default value is 4
+            SelectedFps = 4;
+
             Images = new ObservableCollection<ImageModel>();
+
             LoadImagesCommand = new RelayCommand(LoadImages);
             PlayCommand = new RelayCommand(OnPlay);
             PauseCommand = new RelayCommand(OnStop);
@@ -192,7 +193,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
-            SelectedFps = 4;
         }
 
         /// <summary>
