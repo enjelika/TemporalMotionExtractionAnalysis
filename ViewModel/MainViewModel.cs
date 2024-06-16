@@ -22,6 +22,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isReversePlayback;
         private string _folderName;
         private int _offsetValue;
+        private ImageModel _offsetFrame;
         private int _timeDelay;
         private ObservableCollection<ImageModel> _selectedFrames;
         private ObservableCollection<string> _fpsValue;
@@ -68,6 +69,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 _offsetValue = value;
                 Console.WriteLine(OffsetValue.ToString()); // Debugging
+                OnPropertyChanged(nameof(OffsetValue));
+            }
+        }
+
+        public ImageModel OffsetFrame
+        {
+            get => _offsetFrame;
+            set
+            {
+                _offsetFrame = value;
+                Console.WriteLine(OffsetFrame.ToString()); // Debugging
                 OnPropertyChanged(nameof(OffsetValue));
             }
         }
