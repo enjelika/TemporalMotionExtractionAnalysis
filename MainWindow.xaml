@@ -2,9 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:behaviors="clr-namespace:TemporalMotionExtractionAnalysis.Behaviors"
         xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
         Title="Temporal Motion Analysis App" 
@@ -17,9 +15,7 @@
         <models:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <models:FrameIndexVisibilityConverter x:Key="FrameIndexVisibilityConverter"/>
         <models:FrameIndexTickVisibilityConverter x:Key="FrameIndexTickVisibilityConverter"/>
-        <models:CurrentFrameIndicatorVisibilityConverter x:Key="CurrentFrameIndicatorVisibilityConverter"/>
         <models:StringToIntConverter x:Key="StringToIntConverter"/>
-        <models:TriangleMarginConverter x:Key="TriangleMarginConverter"/>
     </Window.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
@@ -229,7 +225,7 @@
                             <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Label FontWeight="Bold" Content="Frame Index: "/>
-                                <Label Content="{Binding CurrentImage.FrameNumber, Converter={StaticResource IndexConverter}}"/>
+                                <Label Content="{Binding CurrentImage.FrameNumber, Converter={StaticResource StringToIntConverter}}"/>
                             </StackPanel>
                         </StackPanel>
                     </DockPanel>
@@ -264,7 +260,7 @@
                     </DockPanel>
                 </Border>
 
-                <!-- TODO: Overview Timeline thumbnails -->
+                <!-- Timeline Overview -->
                 <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="110">
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
@@ -280,7 +276,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical">
                                         <Label Margin="0,5,0,0"/>
-                                        
+
                                         <!-- Frame Number (if 0 or multiple of 6) -->
                                         <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"
                                             Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
@@ -312,8 +308,16 @@
                     </DockPanel>
                 </Border>
             </StackPanel>
-
         </StackPanel>
+
+        <Canvas Panel.ZIndex="2" Canvas.Left="50" Canvas.Top="50" Margin="443,693,207,199">
+            <!-- Previous Frames -->
+            <Image Source="{Binding PreviousImage}" Width="40" Height="Auto"  Canvas.Left="0" Canvas.Top="50" Panel.ZIndex="0" />
+            <!-- Future Frames -->
+            <Image Source="{Binding NextImage}" Width="40" Height="Auto" Canvas.Left="100" Canvas.Top="50" Panel.ZIndex="0" />
+            <!-- Current Frame - Displayed on top -->
+            <Image Source="{Binding CurrentImage}" Width="50" Height="Auto" Canvas.Left="50" Canvas.Top="50" Panel.ZIndex="1" />
+        </Canvas>
 
     </Grid>
 </Window>
