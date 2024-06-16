@@ -41,9 +41,22 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             get => _currentIndex;
             set
             {
-                _currentIndex = value;
-                OnPropertyChanged(nameof(CurrentIndex));
-                UpdateCurrentFrameStatus(); // Call method to update IsCurrent property
+                if (_currentIndex != value)
+                {
+                    if (_currentIndex >= 0 && _currentIndex < Images.Count)
+                    {
+                        Images[_currentIndex].IsCurrent = false;
+                    }
+
+                    _currentIndex = value;
+
+                    if (_currentIndex >= 0 && _currentIndex < Images.Count)
+                    {
+                        Images[_currentIndex].IsCurrent = true;
+                    }
+
+                    OnPropertyChanged(nameof(CurrentIndex));
+                }
             }
         }
 
@@ -243,19 +256,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             //Uri destinationPath = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\red_triangle.jpg");
             //Mat destination = Cv2.ImRead(destinationPath.AbsolutePath, ImreadModes.Color);
             //MotionExtraction.XOR(source, destination);
-        }
-
-        /// <summary>
-        /// Updates the IsCurrent property of each ImageModel in the Images collection.
-        /// Sets IsCurrent to true for the ImageModel whose FrameNumber matches the CurrentIndex.
-        /// Sets IsCurrent to false for all other ImageModels.
-        /// </summary>
-        private void UpdateCurrentFrameStatus()
-        {
-            foreach (var imageModel in Images)
-            {
-                imageModel.IsCurrent = imageModel.FrameNumber == CurrentIndex;
-            }
         }
 
         /// <summary>

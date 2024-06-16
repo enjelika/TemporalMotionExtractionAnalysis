@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Security.Policy;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -18,7 +15,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             set
             {
                 _imagePath = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(ImagePath));
             }
         }
 
@@ -28,7 +25,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             set
             {
                 _frameNumber = value;
-                OnPropertyChanged();
+                OnPropertyChanged(nameof(FrameNumber));
             }
         }
 
@@ -37,8 +34,11 @@ namespace TemporalMotionExtractionAnalysis.Model
             get => _isCurrent;
             set
             {
-                _isCurrent = value;
-                OnPropertyChanged(nameof(IsCurrent));
+                if (_isCurrent != value)
+                {
+                    _isCurrent = value;
+                    OnPropertyChanged(nameof(IsCurrent));
+                }
             }
         }
 
