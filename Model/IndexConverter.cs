@@ -9,7 +9,7 @@ namespace TemporalMotionExtractionAnalysis.Model
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var item = value as ListBoxItem;
+            var item = value as ComboBoxItem;
             var itemsControl = ItemsControl.ItemsControlFromItemContainer(item);
             if (itemsControl != null)
             {
