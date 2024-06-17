@@ -124,8 +124,8 @@
                                 <StackPanel Orientation="Horizontal">
                                     <DockPanel VerticalAlignment="Center" Margin="5">
                                         <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
-                                        <RadioButton x:Name="PixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" IsChecked="True" />
-                                        <RadioButton x:Name="MarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" />
+                                        <RadioButton x:Name="PixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" IsChecked="{Binding IsPixelModeSelected}" />
+                                        <RadioButton x:Name="MarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" IsChecked="{Binding IsMarksModeSelected}" />
                                     </DockPanel>
                                 </StackPanel>
 
@@ -134,10 +134,10 @@
                                     <StackPanel.Style>
                                         <Style TargetType="StackPanel">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding ElementName=PixelRadioButtonSelection, Path=IsChecked}" Value="True">
+                                                <DataTrigger Binding="{Binding IsPixelModeSelected}" Value="True">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding ElementName=PixelRadioButtonSelection, Path=IsChecked}" Value="False">
+                                                <DataTrigger Binding="{Binding IsPixelModeSelected}" Value="False">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -183,10 +183,10 @@
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=MarksRadioButton, Path=IsChecked}" Value="True">
+                                            <DataTrigger Binding="{Binding IsMarksModeSelected}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding ElementName=MarksRadioButton, Path=IsChecked}" Value="False">
+                                            <DataTrigger Binding="{Binding IsMarksModeSelected}" Value="False">
                                                 <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>

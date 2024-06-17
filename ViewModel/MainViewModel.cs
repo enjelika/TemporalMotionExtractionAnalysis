@@ -41,7 +41,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isAnimating;
         private bool _isReversePlayback;
         private bool _isImagesLoaded;
-
+        private bool isPixelModeSelected;
+        private bool isMarksModeSelected;
+        
         private string _folderName;
         private string _compositeImageLocation;
         private ObservableCollection<string> composedImagePaths = new ObservableCollection<string>();
@@ -249,6 +251,24 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 _isReversePlayback = value;
                 OnPropertyChanged(nameof(IsReversePlayback));
+            }
+        }
+
+        public bool IsPixelModeSelected
+        {
+            get => isPixelModeSelected; 
+            set 
+            { 
+                isPixelModeSelected = value; OnPropertyChanged(nameof(IsPixelModeSelected)); 
+            }
+        }
+
+        public bool IsMarksModeSelected
+        {
+            get => isMarksModeSelected; 
+            set 
+            {
+                isMarksModeSelected = value; OnPropertyChanged(nameof(IsMarksModeSelected)); 
             }
         }
 
