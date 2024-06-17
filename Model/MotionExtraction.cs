@@ -96,17 +96,13 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// <summary>
         /// Calculates the Mean Absolute Error (MAE) between two image masks.
         /// </summary>
-        /// <param name="prev_mask">The file path of the previous image mask.</param>
-        /// <param name="curr_mask">The file path of the current image mask.</param>
+        /// <param name="prev_mask">The Mat of the previous image mask.</param>
+        /// <param name="curr_mask">The Mat of the current image mask.</param>
         /// <returns>The Mean Absolute Error (MAE) between the two masks as a double value.</returns>
-        public double CalculateMAE(string prev_mask, string curr_mask)
+        public double CalculateMAE(Mat prev_mask, Mat curr_mask)
         {
-            // Convert images to arrays for easier computation
-            Mat prev_mask_mat = Cv2.ImRead(prev_mask);
-            Mat curr_mask_mat = Cv2.ImRead(curr_mask);
-
             // Compute the absolute difference between the two masks
-            Mat absolute_diff = Cv2.Abs(prev_mask_mat - curr_mask_mat);
+            Mat absolute_diff = Cv2.Abs(prev_mask - curr_mask);
 
             // Calculate the mean absolute error (MAE)
             double mae = (double)(Cv2.Mean(absolute_diff));

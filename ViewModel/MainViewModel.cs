@@ -11,6 +11,7 @@ using OpenCvSharp;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
+using System.Drawing;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -29,11 +30,20 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ImageModel _offsetFrame;
         private ImageModel _compositiedImage;
 
+        private System.Windows.Media.Color _selectedSourceColor;
+        private System.Windows.Media.Color _selectedDestinationColor;
+        private SolidColorBrush _selectedSourceBrush;
+        private SolidColorBrush _selectedDestinationBrush;
+
         private int _imageCount;
         private int _currentIndex;
         private int _offsetValue;
         private int _timeDelay;
         private int _selectedFps;
+
+        private double _calculatedEmeasure;
+        private double _calculatedMAE;
+        private double _calculatedSSIM;
 
         private const int TotalCells = 57;
         private const int CenterIndex = 26;
@@ -68,6 +78,38 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         #endregion
 
         #region Public Variables
+        public System.Windows.Media.Color SelectedSourceColor
+        {
+            get => _selectedSourceColor;
+            set
+            {
+                _selectedSourceColor = value;
+                OnPropertyChanged(nameof(SelectedSourceColor));
+                OnPropertyChanged(nameof(SelectedSourceBrush));
+            }
+        }
+
+        public System.Windows.Media.Color SelectedDestinationColor
+        {
+            get => _selectedDestinationColor;
+            set
+            {
+                _selectedDestinationColor = value;
+                OnPropertyChanged(nameof(SelectedDestinationColor));
+                OnPropertyChanged(nameof(SelectedDestinationBrush));
+            }
+        }
+
+        public SolidColorBrush SelectedSourceBrush
+        {
+            get { return new SolidColorBrush(SelectedSourceColor); }
+        }
+
+        public SolidColorBrush SelectedDestinationBrush
+        {
+            get { return new SolidColorBrush(SelectedDestinationColor); }
+        }
+
         public ObservableCollection<ImageModel> Images
         {
             get => _images;
@@ -125,6 +167,36 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
                 // Trigger composition whenever the mode changes
                 ComposeImages();
+            }
+        }
+
+        public double CalculatedEmeasure
+        {
+            get => _calculatedEmeasure;
+            set 
+            { 
+                _calculatedEmeasure = value;
+                OnPropertyChanged(nameof(CalculatedEmeasure));
+            }
+        }
+
+        public double CalculatedMAE
+        {
+            get => _calculatedMAE;
+            set
+            {
+                _calculatedMAE = value;
+                OnPropertyChanged(nameof(CalculatedMAE));
+            }
+        }
+
+        public double CalculatedSSIM
+        {
+            get => _calculatedSSIM;
+            set
+            {
+                _calculatedSSIM = value;
+                OnPropertyChanged(nameof(CalculatedSSIM));
             }
         }
 
@@ -329,6 +401,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// </summary>
         public MainViewModel()
         {
+            // Initialize the Color values
+            SelectedSourceColor = System.Windows.Media.Color.FromRgb(255,0,0); //Red
+            SelectedDestinationColor = System.Windows.Media.Color.FromRgb(0,0,255); //Blue
+
             // Initialize the variables for the View Textboxes & Combobox
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
@@ -471,7 +547,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             OnPropertyChanged(nameof(ZoommedTimelineCells));
         }
 
-
         /// <summary>
         /// Converts frames per second (FPS) to a time delay in milliseconds.
         /// </summary>
@@ -565,6 +640,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             //MotionExtraction.XOR(source, destination);
         }
 
+        #region Animation Controls
         /// <summary>
         /// Initiates the playback animation for the images in the Images collection.
         /// The playback can be forward or reverse based on the IsReversePlayback property.
@@ -649,6 +725,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 ComposeImages();
             }
         }
+        #endregion
 
         // Composition logic based on the selected mode
         private void ComposeImages()
@@ -657,7 +734,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             if (SelectedFrames != null && SelectedFrames.Count >= 2)
             {
                 // Get the image paths for source and destination images
-                string sourceImagePath = SelectedFrames[0].ImagePath;
+                string sourceImagePath = CurrentImage.ImagePath;
                 string destinationImagePath = SelectedFrames[1].ImagePath;
 
                 // Load the images from their paths
@@ -680,9 +757,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat blurSourceImage = motionExtraction.BlurImage(reducedAlphaSourceImage, kernelSize);
                 Mat blurDestinationImage = motionExtraction.BlurImage(reducedAlphaDestinationImage, kernelSize);
 
+                CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(blurSourceImage, blurDestinationImage), 4);
+                CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(blurSourceImage, blurDestinationImage), 4);
+                CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(blurSourceImage, blurDestinationImage), 4);
+
                 // Step 4: Tint the Source red, and the Destination blue (temporary until color selector controls are added)
-                Mat tintedSourceImage = ApplyColorTint(blurSourceImage, new SolidColorBrush(Color.FromArgb(255, 255, 0, 0))); // Red tint //SourceColorPickerViewModel.SelectedColorBrush);
-                Mat tintedDestinationImage = ApplyColorTint(blurDestinationImage, new SolidColorBrush(Color.FromArgb(255, 0, 0, 255))); // Blue tint //DestinationColorPickerViewModel.SelectedColorBrush);
+                Mat tintedSourceImage = ApplyColorTint(blurSourceImage, SelectedSourceBrush); 
+                Mat tintedDestinationImage = ApplyColorTint(blurDestinationImage, SelectedDestinationBrush);
                                 
                 // Call the SourceOver method from the model
                 switch (SelectedCompositionMode)
@@ -790,10 +871,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// object representing the tint color. It then applies the tint color to the input image
         /// by blending the input image with the tint color and sets the opacity to 60%.
         /// </remarks>
-        private Mat ApplyColorTint(Mat image, Brush tintColorBrush)
+        private Mat ApplyColorTint(Mat image, SolidColorBrush tintColorBrush)
         {
             // Extract color values from the brush
-            Color tintColor = ((SolidColorBrush)tintColorBrush).Color;
+            System.Windows.Media.Color tintColor = tintColorBrush.Color;
             Scalar tint = new Scalar(tintColor.B, tintColor.G, tintColor.R);
 
             // Separate the channels of the input image
@@ -888,9 +969,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 }
             }
 
-            if (selectedItems.Count <= 2)
+            if (selectedItems.Count == 1)
             {
                 SelectedFrames.Clear();
+
                 foreach (var item in selectedItems)
                 {
                     if (item is ImageModel imageModel)
@@ -902,6 +984,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         // User Selected Offset Frame
                         SelectedFrames.Add(imageModel);
                         SelectedFrames[1].IsOffsetSelection = true;
+
+                        // Calculate Frame Offset value
+                        OffsetValue = SelectedFrames[1].FrameNumber - SelectedFrames[0].FrameNumber;
                     }
                 }
             }
