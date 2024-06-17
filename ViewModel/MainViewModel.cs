@@ -766,7 +766,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private string SaveComposedImage(Mat composedImage)
         {
-            string tempFolderPath = "C:\\Users\\pharm\\AppData\\Local\\Temp"; // Example temporary folder
+            string tempFolderPath = System.IO.Path.GetTempPath(); // Example temporary folder
             string composedImagePath = System.IO.Path.Combine(tempFolderPath, $"ComposedImage_{DateTime.Now:yyyyMMddHHmmss}.png");
             Cv2.ImWrite(composedImagePath, composedImage);
             return composedImagePath;
