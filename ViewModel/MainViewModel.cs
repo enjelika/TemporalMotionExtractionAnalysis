@@ -826,7 +826,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat tintedSourceImage = ApplyColorTint(blurSourceImage, SelectedSourceBrush);
                 Mat tintedDestinationImage = ApplyColorTint(blurDestinationImage, SelectedDestinationBrush);
 
-                if(IsPixelModeSelected)
+                if (IsPixelModeSelected)
                 {
                     // Call the SourceOver method from the model
                     switch (SelectedCompositionMode)
@@ -905,21 +905,20 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         default:
                             break;
                     }
-                    if(isMarksModeSelected)
-                    {
-                        // Glyph Rendering
-                        glyphRendering.PositiveGlyph = PositiveGlyph;
-                        glyphRendering.NegativeGlyph = NegativeGlyph;
-                        glyphRendering.NoDifferenceGlyph = NoDifferenceGlyph;
-
-                        Mat compositedFrame = glyphRendering.RenderDifferences(blurSourceImage, blurDestinationImage);
-
-                        string composedImagePath = SaveComposedImage(compositedFrame);
-                        ComposedImagePaths.Add(composedImagePath); // Add to the collection
-                        UpdateDisplayedImage(composedImagePath); // Update the displayed image
-                    }
                 }
-                
+                if(isMarksModeSelected)
+                {
+                    // Glyph Rendering
+                    glyphRendering.PositiveGlyph = PositiveGlyph;
+                    glyphRendering.NegativeGlyph = NegativeGlyph;
+                    glyphRendering.NoDifferenceGlyph = NoDifferenceGlyph;
+
+                    Mat compositedFrame = glyphRendering.RenderDifferences(blurSourceImage, blurDestinationImage);
+
+                    string composedImagePath = SaveComposedImage(compositedFrame);
+                    ComposedImagePaths.Add(composedImagePath); // Add to the collection
+                    UpdateDisplayedImage(composedImagePath); // Update the displayed image
+                }  
             }
         }
 
