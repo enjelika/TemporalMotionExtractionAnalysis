@@ -93,7 +93,6 @@ namespace TemporalMotionExtractionAnalysis.Model
             return blurredImage;
         }
 
-        // Helper function: MAE evaluation of previous frame's motion vs current frame
         /// <summary>
         /// Calculates the Mean Absolute Error (MAE) between two image masks.
         /// </summary>
@@ -114,7 +113,6 @@ namespace TemporalMotionExtractionAnalysis.Model
             return mae;
         }
 
-        // Helper function: E_m evaluation of previous frame's motion vs current frame
         /// <summary>
         /// Calculates the mean E-measure pixelwise between two frames.
         /// </summary>
@@ -141,8 +139,6 @@ namespace TemporalMotionExtractionAnalysis.Model
             return e_measure;
         }
 
-
-        // Helper function: structural similarity index (SSIM) evaluation of previous frame's motion vs current frame
         /// <summary>
         /// Calculates the structural similarity index (SSIM) between two sequential frames.
         /// </summary>
@@ -161,10 +157,10 @@ namespace TemporalMotionExtractionAnalysis.Model
             return score;
         }
 
-        // Source image masks destination image in composition image.
-        // Source pixel is displayed if not black.
         /// <summary>
         /// Composes two images using the Source Over composition mode.
+        /// Source image masks destination image in composition image.
+        /// Source pixel is displayed if not black.
         /// </summary>
         /// <param name="source">The source image to be composited.</param>
         /// <param name="destination">The destination image where the source image is composited onto.</param>
@@ -202,8 +198,14 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // Destination image masks source destination image in composition image.
-        // Destination pixel is displayed if not black.
+        /// <summary>
+        /// Composes two images using the Destination Over composition mode.
+        /// Destination image masks source destination image in composition image.
+        /// Destination pixel is displayed if not black.
+        /// </summary>
+        /// <param name="source">The source image to be composited.</param>
+        /// <param name="destination">The destination image taht is composited onto the source image.</param>
+        /// <returns>The composited image using the Destination Over composition mode.</returns>
         public Mat DestinationOver(Mat source, Mat destination)
         {
             // Get pixel data
@@ -237,8 +239,13 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // The intersection of source and destination images 
-        // is displayed as the source color.
+        /// <summary>
+        /// Composes an intersection of two images using the Source In composition mode.
+        /// The intersection of source and destination images is displayed as the source color.
+        /// </summary>
+        /// <param name="source">The source image for the intersction composit.</param>
+        /// <param name="destination">The destination image for the intersction composit.</param>
+        /// <returns>The composited image using the Source In composition mode.</returns>
         public Mat SourceIn(Mat source, Mat destination)
         {
             // Get pixel data
@@ -275,8 +282,13 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // The intersection of source and destination images 
-        // is displayed as the destination color.
+        /// <summary>
+        /// Composes an intersection of two images using the Destination In composition mode.
+        /// The intersection of source and destination images is displayed as the destination color.
+        /// </summary>
+        /// <param name="source">The source image for the intersection composit.</param>
+        /// <param name="destination">The destination image for the intersection composit.</param>
+        /// <returns>The composited image using the Destination In composition mode.</returns>
         public Mat DestinationIn(Mat source, Mat destination)
         {
             // Get pixel data
@@ -313,8 +325,13 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // The intersection of source and destination images 
-        // is displayed as the source color.
+        /// <summary>
+        /// Composes an area of exclusion of two images using the Source Out composition mode.
+        /// The intersection of source and destination images is displayed as the source color.
+        /// </summary>
+        /// <param name="source">The source image for the composit.</param>
+        /// <param name="destination">The destination image for the composit.</param>
+        /// <returns>The composited image using the Source Out composition mode.</returns>
         public Mat SourceOut(Mat source, Mat destination)
         {
             // Get pixel data
@@ -351,8 +368,14 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // The area of the destination image not intersecting
-        // the source image is displayed as the destination color.
+        /// <summary>
+        /// Composes an area of exclusion of two images using the Destination Out composition mode.
+        /// The area of the destination image not intersecting the source image is displayed as 
+        /// the destination color.
+        /// </summary>
+        /// <param name="source">The source image for the composit.</param>
+        /// <param name="destination">The destination image for the composit.</param>
+        /// <returns>The composited image using the Destination Out composition mode.</returns>
         public Mat DestinationOut(Mat source, Mat destination)
         {
             // Get pixel data
@@ -389,9 +412,14 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // The intersection of source and destination images 
-        // is displayed as the source color and the remaining destination
-        // area is displayed also.
+        /// <summary>
+        /// Composes areas of both intersection and exclusion of two images using the SourceAtop composition mode.
+        /// The intersection of source and destination images is displayed as the source color and the remaining 
+        /// destination area is displayed also.
+        /// </summary>
+        /// <param name="source">The source image for the composit.</param>
+        /// <param name="destination">The destination image for the composit.</param>
+        /// <returns>The composited image using the SourceAtop composition mode.</returns>
         public Mat SourceAtop(Mat source, Mat destination)
         {
             // Get pixel data
@@ -433,9 +461,14 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // The intersection of source and destination images 
-        // is displayed as the destination color and the remaining source
-        // area is displayed also.
+        /// <summary>
+        /// Composes areas of both intersection and exclusion of two images using the DestinationAtop composition mode.
+        /// The intersection of source and destination images is displayed as the destination color and the remaining 
+        /// source area is displayed also.
+        /// </summary>
+        /// <param name="source">The source image for the composit.</param>
+        /// <param name="destination">The destination image for the composit.</param>
+        /// <returns>The composited image using the DestinationAtop composition mode.</returns>
         public Mat DestinationAtop(Mat source, Mat destination)
         {
             // Get pixel data
@@ -477,7 +510,13 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // The composition image is blank/clear
+        /// <summary>
+        /// Composes a blank/clear image using the Clear composition mode.
+        /// The composition image is blank/clear.
+        /// </summary>
+        /// <param name="source">The source image for the composit.</param>
+        /// <param name="destination">The destination image for the composit.</param>
+        /// <returns>The composited image using the Clear composition mode.</returns>
         public Mat Clear(Mat source, Mat destination)
         {
             // Get pixel data
@@ -504,8 +543,15 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
-        // The areas of source and destination images that
-        // are mutually exclusive are each displayed.
+
+        /// <summary>
+        /// Composes an image of mutual exclusion using the XOR composition mode.
+        /// The areas of source and destination images that
+        /// are mutually exclusive are each displayed.
+        /// </summary>
+        /// <param name="source">The source image for the composit.</param>
+        /// <param name="destination">The destination image for the composit.</param>
+        /// <returns>The composited image using the XOR composition mode.</returns>
         public Mat XOR(Mat source, Mat destination)
         {
             // Get pixel data
