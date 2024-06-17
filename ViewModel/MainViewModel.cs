@@ -733,7 +733,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.DestinationOut:
-                        Mat composedImage6 = motionExtraction.DestinationOut(blurSourceImage, blurDestinationImage);
+                        Mat composedImage6 = motionExtraction.DestinationOut(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath6 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -747,7 +747,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.SourceAtop:
-                        Mat composedImage7 = motionExtraction.SourceAtop(blurSourceImage, blurDestinationImage);
+                        Mat composedImage7 = motionExtraction.SourceAtop(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath7 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -761,7 +761,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.DestinationAtop:
-                        Mat composedImage8 = motionExtraction.DestinationAtop(blurSourceImage, blurDestinationImage);
+                        Mat composedImage8 = motionExtraction.DestinationAtop(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath8 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -775,7 +775,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.Clear:
-                        Mat composedImage9 = motionExtraction.Clear(blurSourceImage, blurDestinationImage);
+                        Mat composedImage9 = motionExtraction.Clear(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath9 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -789,7 +789,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.XOR:
-                        Mat composedImage10 = motionExtraction.XOR(blurSourceImage, blurDestinationImage);
+                        Mat composedImage10 = motionExtraction.XOR(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath10 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
