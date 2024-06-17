@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Controls;
 
-namespace TemporalMotionExtractionAnalysis.Model
+namespace TemporalMotionExtractionAnalysis.Converters
 {
     public class IndexConverter : IValueConverter
     {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows;
 
-namespace TemporalMotionExtractionAnalysis.Model
+namespace TemporalMotionExtractionAnalysis.Converters
 {
     public class FrameIndexVisibilityConverter : IValueConverter
     {
