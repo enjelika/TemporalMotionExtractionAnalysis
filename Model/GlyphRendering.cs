@@ -1,9 +1,7 @@
-﻿using OpenCvSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
+using System.Drawing.Text;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -21,49 +19,57 @@ namespace TemporalMotionExtractionAnalysis.Model
             NoDifferenceGlyph = noDifferenceGlyph;
         }
 
-        // Function to compare two Mats and render the results
         public Mat RenderDifferences(Mat mat1, Mat mat2)
         {
-            if (mat1.Size() != mat2.Size())
-                throw new System.ArgumentException("The input Mat objects must have the same size.");
+            // Ensure both Mats have the same size and type
+            if (mat1.Size() != mat2.Size() || mat1.Type() != mat2.Type())
+                throw new ArgumentException("Mats must have the same size and type.");
 
-            Mat result = new Mat(mat1.Size(), MatType.CV_8UC3, new Scalar(255, 255, 255)); // White background
+            // Create a result Mat of the same size and type
+            Mat result = new Mat(mat1.Size(), mat1.Type());
+            mat1.CopyTo(result);
 
-            for (int y = 0; y < mat1.Rows; y++)
+            Bitmap bitmap = BitmapConverter.ToBitmap(result);
+            using (Graphics g = Graphics.FromImage(bitmap))
             {
-                for (int x = 0; x < mat1.Cols; x++)
-                {
-                    Vec3b color1 = mat1.At<Vec3b>(y, x);
-                    Vec3b color2 = mat2.At<Vec3b>(y, x);
+                g.TextRenderingHint = TextRenderingHint.AntiAlias;
+                Font font = new Font("Segoe UI Symbol", 32);
+                Brush positiveBrush = Brushes.Green;
+                Brush negativeBrush = Brushes.Red;
+                Brush noDifferenceBrush = Brushes.Blue;
 
-                    string glyph = GetGlyph(color1, color2);
-                    RenderGlyph(result, glyph, x, y);
+                for (int y = 0; y < mat1.Rows; y++)
+                {
+                    for (int x = 0; x < mat1.Cols; x++)
+                    {
+                        var diff = mat1.At<byte>(y, x) - mat2.At<byte>(y, x);
+
+                        string glyph = null;
+                        Brush brush = null;
+
+                        if (diff > 0)
+                        {
+                            glyph = PositiveGlyph;
+                            brush = positiveBrush;
+                        }
+                        else if (diff < 0)
+                        {
+                            glyph = NegativeGlyph;
+                            brush = negativeBrush;
+                        }
+                        else
+                        {
+                            glyph = NoDifferenceGlyph;
+                            brush = noDifferenceBrush;
+                        }
+
+                        g.DrawString(glyph, font, brush, x * 10, y * 10);
+                    }
                 }
             }
 
-            return result;
-        }
-
-        private string GetGlyph(Vec3b color1, Vec3b color2)
-        {
-            int intensity1 = (color1.Item0 + color1.Item1 + color1.Item2) / 3;
-            int intensity2 = (color2.Item0 + color2.Item1 + color2.Item2) / 3;
-
-            if (intensity1 > intensity2)
-                return PositiveGlyph;
-            else if (intensity1 < intensity2)
-                return NegativeGlyph;
-            else
-                return NoDifferenceGlyph;
-        }
-
-        private void RenderGlyph(Mat image, string glyph, int x, int y)
-        {
-            int fontFace = (int)HersheyFonts.HersheySimplex;
-            double fontScale = 0.5;
-            int thickness = 1;
-
-            Cv2.PutText(image, glyph, new Point(x * 10, y * 10), (HersheyFonts)fontFace, fontScale, new Scalar(0, 0, 0), thickness); // Black text
+            // Convert the bitmap back to a Mat
+            return BitmapConverter.ToMat(bitmap);
         }
     }
 }

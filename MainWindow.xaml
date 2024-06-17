@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:converters="clr-namespace:YourNamespace.Converters"
+        xmlns:converters="clr-namespace:TemporalMotionExtractionAnalysis.Converters"
         xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis.ViewModel"
         xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
@@ -30,13 +30,14 @@
         <models:IndexBasedTemplateSelector x:Key="IndexBasedTemplateSelector"
                                   SecondItemTemplate="{StaticResource SecondItemTemplate}"
                                   DefaultTemplate="{StaticResource DefaultTemplate}"/>
-        <models:IndexConverter x:Key="IndexConverter"/>
+        <converters:IndexConverter x:Key="IndexConverter"/>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-        <models:FrameIndexVisibilityConverter x:Key="FrameIndexVisibilityConverter"/>
-        <models:FrameIndexTickVisibilityConverter x:Key="FrameIndexTickVisibilityConverter"/>
-        <models:SelectedFramesMultiValueConverter x:Key="SelectedFramesMultiValueConverter"/>
-        <models:StringToIntConverter x:Key="StringToIntConverter"/>
-        <models:RadioButtonConverter x:Key="RadioButtonConverter"/>
+        <converters:FrameIndexVisibilityConverter x:Key="FrameIndexVisibilityConverter"/>
+        <converters:FrameIndexTickVisibilityConverter x:Key="FrameIndexTickVisibilityConverter"/>
+        <converters:SelectedFramesMultiValueConverter x:Key="SelectedFramesMultiValueConverter"/>
+        <converters:StringToIntConverter x:Key="StringToIntConverter"/>
+        <converters:RadioButtonConverter x:Key="RadioButtonConverter"/>
+        <converters:GlyphConverter x:Key="GlyphConverter" />
     </Window.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
