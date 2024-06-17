@@ -50,16 +50,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         #region Enums
         public enum CompositionMode
         {
-            SourceOver,
-            DestinationOver,
-            SourceIn,
-            DestinationIn,
-            SourceOut,
-            DestinationOut,
-            SourceAtop,
-            DestinationAtop,
-            Clear,
-            XOR
+            SourceOver,     // 1
+            DestinationOver,// 2
+            SourceIn,       // 3
+            DestinationIn,  // 4
+            SourceOut,      // 5
+            DestinationOut, // 6
+            SourceAtop,     // 7
+            DestinationAtop,// 8
+            Clear,          // 9
+            XOR             // 10
         }
         #endregion
 
@@ -564,6 +564,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 CurrentImage = Images[CurrentIndex];
                 SetCurrentFrame(CurrentIndex); // Update the timeline cells
                 SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
+
+                if (SelectedFrames.Count == 2)
+                {
+                    ComposeImages();
+                }
             }
         }
 
@@ -589,6 +594,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CurrentImage = Images[CurrentIndex];
             SetCurrentFrame(CurrentIndex); // Update the timeline cells
             SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
+
+            if(SelectedFrames.Count == 2)
+            {
+                ComposeImages();
+            }
         }
 
         /// <summary>
@@ -605,6 +615,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CurrentImage = Images[CurrentIndex];
             SetCurrentFrame(CurrentIndex); // Update the timeline cells
             SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
+
+            if (SelectedFrames.Count == 2)
+            {
+                ComposeImages();
+            }
         }
 
         // Composition logic based on the selected mode
@@ -668,6 +683,48 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
                         // Update ViewModel properties or raise events as needed
                         CompositedImage = composedImageModel2;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
+                    case CompositionMode.SourceIn:
+                        Mat composedImage3 = motionExtraction.SourceIn(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath3 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath3, composedImage3);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel3 = new ImageModel { ImagePath = composedImagePath3 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel3;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
+                    case CompositionMode.DestinationIn:
+                        Mat composedImage4 = motionExtraction.DestinationIn(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath4 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath4, composedImage4);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel4 = new ImageModel { ImagePath = composedImagePath4 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel4;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
+                    case CompositionMode.SourceOut:
+                        Mat composedImage5 = motionExtraction.SourceOut(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath5 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath5, composedImage5);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel5 = new ImageModel { ImagePath = composedImagePath5 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel5;
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     // Add cases for other composition modes as needed
