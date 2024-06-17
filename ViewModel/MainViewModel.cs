@@ -727,6 +727,76 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         CompositedImage = composedImageModel5;
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
+                    case CompositionMode.DestinationOut:
+                        Mat composedImage6 = motionExtraction.DestinationOut(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath6 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath6, composedImage6);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel6 = new ImageModel { ImagePath = composedImagePath6 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel6;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
+                    case CompositionMode.SourceAtop:
+                        Mat composedImage7 = motionExtraction.SourceAtop(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath7 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath7, composedImage7);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel7 = new ImageModel { ImagePath = composedImagePath7 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel7;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
+                    case CompositionMode.DestinationAtop:
+                        Mat composedImage8 = motionExtraction.DestinationAtop(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath8 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath8, composedImage8);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel8 = new ImageModel { ImagePath = composedImagePath8 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel8;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
+                    case CompositionMode.Clear:
+                        Mat composedImage9 = motionExtraction.Clear(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath9 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath9, composedImage9);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel9 = new ImageModel { ImagePath = composedImagePath9 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel9;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
+                    case CompositionMode.XOR:
+                        Mat composedImage10 = motionExtraction.XOR(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath10 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath10, composedImage10);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel10 = new ImageModel { ImagePath = composedImagePath10 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel10;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
                     // Add cases for other composition modes as needed
                     default:
                         break;

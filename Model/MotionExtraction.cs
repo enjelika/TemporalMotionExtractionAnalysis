@@ -477,6 +477,33 @@ namespace TemporalMotionExtractionAnalysis.Model
             return composition;
         }
 
+        // The composition image is blank/clear
+        public Mat Clear(Mat source, Mat destination)
+        {
+            // Get pixel data
+            int width = source.Width;
+            int height = source.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create composition image from source and destination images                    
+                    Vec4b sourceColor = source.At<Vec4b>(i, j);
+                    sourceColor.Item0 = 0;
+                    sourceColor.Item1 = 0;
+                    sourceColor.Item2 = 0;
+                    sourceColor.Item3 = 255;
+                    composition.Set<Vec4b>(i, j, sourceColor);
+                }
+            }
+            return composition;
+        }
+
         // The areas of source and destination images that
         // are mutually exclusive are each displayed.
         public Mat XOR(Mat source, Mat destination)
