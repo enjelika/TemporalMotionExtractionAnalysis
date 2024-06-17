@@ -1,30 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.IO;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Windows.Forms.DataFormats;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media.Media3D;
-using System.Windows;
-using System.Windows.Media.Imaging;
+﻿using System.IO;
 using MOIE = Microsoft.Office.Interop.Excel;
-using System.Collections;
-using System.Drawing.Imaging;
-using System.Drawing;
 using OpenCvSharp;
-using System.Windows.Media.Effects;
-using System.Windows.Media;
-using static OpenCvSharp.LineIterator;
-using static System.Net.Mime.MediaTypeNames;
-using System.Windows.Shapes;
-using Microsoft.Office.Interop.Excel;
 using OpenCvSharp.Quality;
 
 namespace TemporalMotionExtractionAnalysis.Model
@@ -86,14 +62,13 @@ namespace TemporalMotionExtractionAnalysis.Model
             return modifiedImage;
         }
 
-
         /// <summary>
         /// Applies Gaussian blur to a given image Mat.
         /// </summary>
         /// <param name="sourceImage">The source image Mat to blur.</param>
         /// <param name="kernelSize">The size of the Gaussian kernel for blurring.</param>
         /// <returns>The blurred image as a Mat.</returns>
-        public Mat BlurImage(Mat sourceImage, OpenCvSharp.Size kernelSize)
+        public Mat BlurImage(Mat sourceImage, Size kernelSize)
         {
             if (sourceImage == null)
             {
@@ -114,7 +89,7 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// <param name="prev_mask">The file path of the previous image mask.</param>
         /// <param name="curr_mask">The file path of the current image mask.</param>
         /// <returns>The Mean Absolute Error (MAE) between the two masks as a double value.</returns>
-        public double calculate_mae(string prev_mask, string curr_mask)
+        public double CalculateMAE(string prev_mask, string curr_mask)
         {
             // Convert images to arrays for easier computation
             Mat prev_mask_mat = Cv2.ImRead(prev_mask);
@@ -128,7 +103,6 @@ namespace TemporalMotionExtractionAnalysis.Model
             return mae;
         }
 
-
         // Helper function: E_m evaluation of previous frame's motion vs current frame
         /// <summary>
         /// Calculates the mean E-measure pixelwise between two frames.
@@ -137,7 +111,7 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// <param name="curr_frame">The second frame (Mat object) in grayscale.</param>
         /// <param name="threshold">The threshold for gradient difference (default: 10).</param>
         /// <returns>The mean E-measure value.</returns>
-        public double calculate_e_measure_pixelwise(Mat prev_frame, Mat curr_frame, double threshold = 10)
+        public double CalculateEmeasurePixelwise(Mat prev_frame, Mat curr_frame, double threshold = 10)
         {
             // Compute the absolute pixel-wise difference between frames
             Mat prev_mask_f32 = new Mat();
@@ -164,7 +138,7 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// <param name="prev_frame">The first frame (Mat object) in grayscale.</param>
         /// <param name="curr_frame">The second frame (Mat object) in grayscale.</param>
         /// <returns>The SSIM score.</returns>
-        public double calculate_ssim(Mat prev_frame, Mat curr_frame)
+        public double CalculateSSIM(Mat prev_frame, Mat curr_frame)
         {
             // Calculate SSIM between two frames
             double score;
@@ -642,11 +616,11 @@ namespace TemporalMotionExtractionAnalysis.Model
         //        maes.append(mae)
 
         //# Calculate E-measure
-        //        em = calculate_e_measure_pixelwise(prev_mask_array, curr_mask_array)
+        //        em = CalculateEmeasurePixelwise(prev_mask_array, curr_mask_array)
         //        ems.append(em)
 
         //# Calculate SSIM
-        //        ssim = calculate_ssim(prev_mask_array, curr_mask_array)
+        //        ssim = CalculateSSIM(prev_mask_array, curr_mask_array)
         //        ssims.append(ssim)
 
         //# TODO: Overlay metrics on top of frame as a PCA scatter plot

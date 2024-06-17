@@ -307,7 +307,7 @@
                         <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
                         <!-- Composite Image from the SelectedFrames -->
-                        <Image Source="{Binding CompositeImage.ImagePath}" Height="Auto" Width="500" Margin="0,-5,0,0"/>
+                        <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="600" Margin="0,-15,0,0"/>
                     </DockPanel>
                 </Border>
 
