@@ -573,10 +573,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 SetCurrentFrame(CurrentIndex); // Update the timeline cells
                 SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
 
-                //if (SelectedFrames.Count == 2)
-                //{
-                //    ComposeImages();
-                //}
+                if (SelectedFrames.Count == 2)
+                {
+                    ComposeImages();
+                }
             }
         }
 
@@ -603,10 +603,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             SetCurrentFrame(CurrentIndex); // Update the timeline cells
             SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
 
-            //if(SelectedFrames.Count == 2)
-            //{
-            //    ComposeImages();
-            //}
+            if(SelectedFrames.Count == 2)
+            {
+                ComposeImages();
+            }
         }
 
         /// <summary>
@@ -624,10 +624,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             SetCurrentFrame(CurrentIndex); // Update the timeline cells
             SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
 
-            //if (SelectedFrames.Count == 2)
-            //{
-            //    ComposeImages();
-            //}
+            if (SelectedFrames.Count == 2)
+            {
+                ComposeImages();
+            }
         }
 
         // Composition logic based on the selected mode
