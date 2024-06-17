@@ -16,6 +16,17 @@ namespace TemporalMotionExtractionAnalysis.Model
 
         }
 
+        public Mat InvertColors(Mat inputImage)
+        {
+            // Create a new Mat to store the inverted image
+            Mat invertedImage = new Mat();
+
+            // Invert the colors of the input image
+            Cv2.BitwiseNot(inputImage, invertedImage);
+
+            return invertedImage;
+        }
+
         /// <summary>
         /// Reduces the alpha/opacity of an image, preparing it to be a mask for motion enhancement.
         /// </summary>

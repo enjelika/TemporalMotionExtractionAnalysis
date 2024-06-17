@@ -621,23 +621,18 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
                 // Load the images from their paths
                 Mat sourceImage = Cv2.ImRead(sourceImagePath);
-                //sourceImage.ConvertTo(sourceImage, MatType.CV_64F); // Convert to MatType.CV_64F
                 Mat destinationImage = Cv2.ImRead(destinationImagePath);
-                //destinationImage.ConvertTo(destinationImage, MatType.CV_64F); // Convert to MatType.CV_64F
 
                 // Motion Extraction of the sourceImage and destinationImage
                 MotionExtraction motionExtraction = new MotionExtraction();
 
                 // Step 1: Invert colors
-                //Mat invertSourceImage = new Mat(MatType.CV_64F);// Set to MatType.CV_32F 
-                //Cv2.Invert(sourceImage, invertSourceImage);
-
-                //Mat invertDestinationImage = new Mat(); // MatType.CV_32F);// Set to MatType.CV_32F 
-                //Cv2.Invert(destinationImage, invertDestinationImage);
+                Mat invertSourceImage = motionExtraction.InvertColors(sourceImage);
+                Mat invertDestinationImage = motionExtraction.InvertColors(destinationImage);
 
                 // Step 2: Reduce Alpha/Opacity
-                Mat reducedAlphaSourceImage = motionExtraction.ReduceAlpha(sourceImage); //invertSourceImage
-                Mat reducedAlphaDestinationImage = motionExtraction.ReduceAlpha(destinationImage); //invertDestinationImage
+                Mat reducedAlphaSourceImage = motionExtraction.ReduceAlpha(invertSourceImage);
+                Mat reducedAlphaDestinationImage = motionExtraction.ReduceAlpha(invertDestinationImage);
 
                 // Step 3: Add Blur
                 OpenCvSharp.Size kernelSize = new OpenCvSharp.Size(7,7); // Medium size: 7x7 kernel
