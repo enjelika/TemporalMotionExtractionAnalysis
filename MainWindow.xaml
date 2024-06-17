@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis.ViewModel"
         xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
         Title="Temporal Motion Analysis App" 
@@ -144,16 +145,36 @@
                                     </StackPanel.Style>
 
                                     <Label FontWeight="Bold">Composition Modes:</Label>
-                                    <RadioButton x:Name="SourceOver" Content="SourceOver" GroupName="CompositionMode" Margin="5" IsChecked="{Binding Path=CompositionRadioButtonSelection, Converter={StaticResource RadioButtonConverter}, ConverterParameter={Models:CompositionRadioButton.SourceOver}}"  />
-                                    <RadioButton Content="DestinationOver" GroupName="CompositionMode" Margin="5" />
-                                    <RadioButton Content="SourceIn" GroupName="CompositionMode" Margin="5" />
-                                    <RadioButton Content="DestinationIn" GroupName="CompositionMode" Margin="5" />
-                                    <RadioButton Content="SourceOut" GroupName="CompositionMode" Margin="5" />
-                                    <RadioButton Content="DestinationOut" GroupName="CompositionMode" Margin="5" />
-                                    <RadioButton Content="SourceAtop" GroupName="CompositionMode" Margin="5" />
-                                    <RadioButton Content="DestinationAtop" GroupName="CompositionMode" Margin="5" />
-                                    <RadioButton Content="Clear" GroupName="CompositionMode" Margin="5" />
-                                    <RadioButton Content="XOR" GroupName="CompositionMode" Margin="5" />
+                                    <RadioButton x:Name="SourceOver" Content="SourceOver" GroupName="CompositionMode" Margin="5" 
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.SourceOver}}"/>
+                                    <RadioButton x:Name="DestinationOver" Content="DestinationOver" GroupName="CompositionMode" Margin="5"
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.DestinationOver}}"/>
+                                    <RadioButton x:Name="SourceIn" Content="SourceIn" GroupName="CompositionMode" Margin="5" 
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.SourceIn}}"/>
+                                    <RadioButton x:Name="DestinationIn" Content="DestinationIn" GroupName="CompositionMode" Margin="5"
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.DestinationIn}}"/>
+                                    <RadioButton x:Name="SourceOut" Content="SourceOut" GroupName="CompositionMode" Margin="5"
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.SourceOut}}"/>
+                                    <RadioButton x:Name="DestinationOut" Content="DestinationOut" GroupName="CompositionMode" Margin="5"
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.DestinationOut}}"/>
+                                    <RadioButton x:Name="SourceAtop" Content="SourceAtop" GroupName="CompositionMode" Margin="5"
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.SourceAtop}}"/>
+                                    <RadioButton x:Name="DestinationAtop" Content="DestinationAtop" GroupName="CompositionMode" Margin="5"
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.DestinationAtop}}"/>
+                                    <RadioButton x:Name="Clear" Content="Clear" GroupName="CompositionMode" Margin="5"
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.Clear}}"/>
+                                    <RadioButton x:Name="XOR" Content="XOR" GroupName="CompositionMode" Margin="5" 
+                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
+                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.XOR}}"/>
                                 </StackPanel>
                             </StackPanel>
 

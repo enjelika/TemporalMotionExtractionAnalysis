@@ -41,8 +41,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isImagesLoaded;
 
         private string _folderName;
-        private CompositionRadioButton _compositionRadioButtonSelection;
-        public enum CompositionRadioButton
+        private string _compositeImageLocation;
+
+        private CompositionMode _selectedCompositionMode;
+        #endregion
+
+        #region Enums
+        public enum CompositionMode
         {
             SourceOver,
             DestinationOver,
@@ -87,13 +92,14 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public CompositionRadioButton CompositionRadioButtonSelection
+        public CompositionMode SelectedCompositionMode
         {
-            get => _compositionRadioButtonSelection;
+            get => _selectedCompositionMode;
             set
             {
-                _compositionRadioButtonSelection = value;
-                OnPropertyChanged(nameof(CompositionRadioButton));
+                _selectedCompositionMode = value;
+                Console.WriteLine("Selected Composition Mode: " + _selectedCompositionMode.ToString());
+                OnPropertyChanged(nameof(CompositionMode));
             }
         }
 
@@ -330,7 +336,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             PreviousCommand = new RelayCommand(OnPrevious);
             NextCommand = new RelayCommand(OnNext);
             StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
-            CompositionRadioButtonSelection = CompositionRadioButton.SourceOver;
+            SelectedCompositionMode = CompositionMode.SourceOver;
         }
 
         /// <summary>
