@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace TemporalMotionExtractionAnalysis.Model
+namespace TemporalMotionExtractionAnalysis.Converters
 {
     public class StringToIntConverter : IValueConverter
     {

@@ -7,8 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows;
+using TemporalMotionExtractionAnalysis.Model;
 
-namespace TemporalMotionExtractionAnalysis.Model
+namespace TemporalMotionExtractionAnalysis.Converters
 {
     public class SelectedFramesMultiValueConverter : IMultiValueConverter
     {
