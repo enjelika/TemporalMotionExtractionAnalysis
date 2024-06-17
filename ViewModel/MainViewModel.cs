@@ -44,6 +44,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private string _folderName;
         private string _compositeImageLocation;
+        private ObservableCollection<string> composedImagePaths = new ObservableCollection<string>();
 
         private CompositionMode _selectedCompositionMode;
         #endregion
@@ -83,6 +84,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 _compositiedImage = value;
                 OnPropertyChanged(nameof(CompositedImage));
             }
+        }
+
+        public ObservableCollection<string> ComposedImagePaths
+        {
+            get { return composedImagePaths; }
+            set { composedImagePaths = value; OnPropertyChanged(nameof(ComposedImagePaths)); }
         }
 
         public ObservableCollection<ImageModel> TimelineCells
@@ -626,8 +633,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         // Composition logic based on the selected mode
         private void ComposeImages()
         {
-            string tempFolderPath = System.IO.Path.GetTempPath();
-
             // Call the SourceOver method from the model
             if (SelectedFrames != null && SelectedFrames.Count >= 2)
             {
@@ -658,149 +663,79 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 // Step 4: Tint the Source red, and the Destination blue (temporary until color selector controls are added)
                 Mat tintedSourceImage = ApplyColorTint(blurSourceImage, new SolidColorBrush(Color.FromArgb(255, 255, 0, 0))); // Red tint //SourceColorPickerViewModel.SelectedColorBrush);
                 Mat tintedDestinationImage = ApplyColorTint(blurDestinationImage, new SolidColorBrush(Color.FromArgb(255, 0, 0, 255))); // Blue tint //DestinationColorPickerViewModel.SelectedColorBrush);
-
+                                
                 // Call the SourceOver method from the model
                 switch (SelectedCompositionMode)
                 {
                     case CompositionMode.SourceOver:
                         Mat composedImage = motionExtraction.SourceOver(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath, composedImage);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel = new ImageModel { ImagePath = composedImagePath };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath = SaveComposedImage(composedImage); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath); // Update the displayed image
                         break;
                     case CompositionMode.DestinationOver:
                         Mat composedImage2 = motionExtraction.DestinationOver(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath2 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath2, composedImage2);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel2 = new ImageModel { ImagePath = composedImagePath2 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel2;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath2 = SaveComposedImage(composedImage2); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath2); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath2); // Update the displayed image
                         break;
                     case CompositionMode.SourceIn:
                         Mat composedImage3 = motionExtraction.SourceIn(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath3 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath3, composedImage3);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel3 = new ImageModel { ImagePath = composedImagePath3 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel3;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath3 = SaveComposedImage(composedImage3); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath3); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath3); // Update the displayed image
                         break;
                     case CompositionMode.DestinationIn:
                         Mat composedImage4 = motionExtraction.DestinationIn(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath4 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath4, composedImage4);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel4 = new ImageModel { ImagePath = composedImagePath4 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel4;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath4 = SaveComposedImage(composedImage4); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath4); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath4); // Update the displayed image
                         break;
                     case CompositionMode.SourceOut:
                         Mat composedImage5 = motionExtraction.SourceOut(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath5 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath5, composedImage5);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel5 = new ImageModel { ImagePath = composedImagePath5 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel5;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath5 = SaveComposedImage(composedImage5); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath5); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath5); // Update the displayed image
                         break;
                     case CompositionMode.DestinationOut:
                         Mat composedImage6 = motionExtraction.DestinationOut(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath6 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath6, composedImage6);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel6 = new ImageModel { ImagePath = composedImagePath6 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel6;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath6 = SaveComposedImage(composedImage6); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath6); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath6); // Update the displayed image
                         break;
                     case CompositionMode.SourceAtop:
                         Mat composedImage7 = motionExtraction.SourceAtop(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath7 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath7, composedImage7);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel7 = new ImageModel { ImagePath = composedImagePath7 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel7;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath7 = SaveComposedImage(composedImage7); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath7); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath7); // Update the displayed image
                         break;
                     case CompositionMode.DestinationAtop:
                         Mat composedImage8 = motionExtraction.DestinationAtop(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath8 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath8, composedImage8);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel8 = new ImageModel { ImagePath = composedImagePath8 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel8;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath8 = SaveComposedImage(composedImage8); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath8); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath8); // Update the displayed image
                         break;
                     case CompositionMode.Clear:
                         Mat composedImage9 = motionExtraction.Clear(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath9 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath9, composedImage9);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel9 = new ImageModel { ImagePath = composedImagePath9 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel9;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath9 = SaveComposedImage(composedImage9); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath9); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath9); // Update the displayed image
                         break;
                     case CompositionMode.XOR:
                         Mat composedImage10 = motionExtraction.XOR(tintedSourceImage, tintedDestinationImage);
 
-                        // Save the composed image as a PNG in a temporary folder
-                        string composedImagePath10 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
-                        Cv2.ImWrite(composedImagePath10, composedImage10);
-
-                        // Create a new ImageModel object with the composed image path
-                        ImageModel composedImageModel10 = new ImageModel { ImagePath = composedImagePath10 };
-
-                        // Update ViewModel properties or raise events as needed
-                        CompositedImage = composedImageModel10;
-                        OnPropertyChanged(nameof(CompositedImage));
+                        string composedImagePath10 = SaveComposedImage(composedImage10); // Save and get the file path
+                        ComposedImagePaths.Add(composedImagePath10); // Add to the collection
+                        UpdateDisplayedImage(composedImagePath10); // Update the displayed image
                         break;
                     // Add cases for other composition modes as needed
                     default:
@@ -808,6 +743,21 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 }
             }
         }
+
+        private string SaveComposedImage(Mat composedImage)
+        {
+            string tempFolderPath = "C:\\Users\\pharm\\AppData\\Local\\Temp"; // Example temporary folder
+            string composedImagePath = System.IO.Path.Combine(tempFolderPath, $"ComposedImage_{DateTime.Now:yyyyMMddHHmmss}.png");
+            Cv2.ImWrite(composedImagePath, composedImage);
+            return composedImagePath;
+        }
+
+        private void UpdateDisplayedImage(string imagePath)
+        {
+            CompositedImage = new ImageModel { ImagePath = imagePath };
+            OnPropertyChanged(nameof(CompositedImage));
+        }
+
 
         /// <summary>
         /// Applies a color tint to the given image using the specified brush color, ensuring 60% opacity.
@@ -855,6 +805,27 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             return tintedRGB;
         }
 
+        #region EventHandlers
+        /// <summary>
+        /// Occurs when a property value changes.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Notifies listeners that a property value has changed.
+        /// This method is called by the Set accessor of each property.
+        /// </summary>
+        /// <param name="name">The name of the property that changed, which is optional and provided automatically by the CallerMemberName attribute.</param>
+        protected void OnPropertyChanged([CallerMemberName] string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+            if (name == nameof(SelectedCompositionMode))
+            {
+                OnCompositionModeChanged(this, new PropertyChangedEventArgs(nameof(SelectedCompositionMode)));
+            }
+        }
+
         // Event handler for composition mode changes
         private void OnCompositionModeChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -870,20 +841,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        /// <summary>
-        /// Occurs when a property value changes.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        /// Notifies listeners that a property value has changed.
-        /// This method is called by the Set accessor of each property.
-        /// </summary>
-        /// <param name="name">The name of the property that changed, which is optional and provided automatically by the CallerMemberName attribute.</param>
-        protected void OnPropertyChanged([CallerMemberName] string name = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
 
         /// <summary>
         /// Handles the selection change event for a collection of selected items.
@@ -935,5 +892,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Debug.WriteLine("Error: More than two items were selected.");
             }
         }
+        #endregion
     }
 }
