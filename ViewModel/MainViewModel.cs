@@ -657,7 +657,18 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.DestinationOver:
-                        //Mat composedImage = MotionExtraction.DestinationOver(sourceImage, destinationImage);
+                        Mat composedImage2 = motionExtraction.DestinationOver(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath2 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath2, composedImage2);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel2 = new ImageModel { ImagePath = composedImagePath2 };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel2;
+                        OnPropertyChanged(nameof(CompositedImage));
                         break;
                     // Add cases for other composition modes as needed
                     default:
