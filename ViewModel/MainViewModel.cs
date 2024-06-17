@@ -278,7 +278,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Console.WriteLine(SelectedFps.ToString()); // Debugging
                 OnPropertyChanged(nameof(SelectedFps));
                 TimeDelay = ConvertFPSToTimeDelay(_selectedFps);
-                OnPropertyChanged(nameof(TimeDelay));
             }
         }
 
@@ -606,7 +605,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// <returns>The corresponding time delay in milliseconds.</returns>
         public int ConvertFPSToTimeDelay(int fps)
         {
-            if (fps < 4) 
+            if (fps > 4) 
             { 
                 return (int)(1000.0 / fps); // Convert FPS to time delay in milliseconds
             }
