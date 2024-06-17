@@ -35,65 +35,85 @@ namespace TemporalMotionExtractionAnalysis.Model
         const string moca_folder = "MoCA";
         const string jpeg_images_folder = moca_folder + "\\JPEGImages";
 
-
-        //""" Helper function: Shows an image via the matplotlib plt.show() ability """ 
-        //def show_image(image):
-        //    plt.imshow(image)
-        //    plt.axis('off')  # Turn off axis labels
-        //    plt.show()
-
-        //def show_image_with_index(image, index) :
-        //    plt.imshow(image)
-        //    plt.axis('off')  # Turn off axis labels
-        //    plt.title(f'Index: {index}')
-        //    plt.show()  
-
-        public Mat reduce_alpha(Uri path)
+        public MotionExtraction()
         {
-            Mat modifiedImage; 
 
-            // Helper function: Adjusts the alpha/opacity of the image even more - preparing it to be a mask for motion enhancement
-            using (Mat image = Cv2.ImRead(path.AbsolutePath))
+        }
+
+        /// <summary>
+        /// Reduces the alpha/opacity of an image, preparing it to be a mask for motion enhancement.
+        /// </summary>
+        /// <param name="image">The input image as a Mat object.</param>
+        /// <returns>A modified image with reduced alpha/opacity.</returns>
+        /// <remarks>
+        /// This method converts the input image to grayscale, converts it to RGBA mode if necessary,
+        /// and then reduces the opacity based on pixel intensity.
+        /// </remarks>
+        public Mat ReduceAlpha(Mat image)
+        {
+            Mat modifiedImage;
+
+            // Convert to grayscale
+            Mat grayscale = Mat.Zeros(image.Width, image.Height);
+            Cv2.CvtColor(image, grayscale, ColorConversionCodes.BGR2GRAY);
+
+            // Convert the image to RGBA mode (if it's not already in RGBA mode)
+            Cv2.CvtColor(grayscale, image, ColorConversionCodes.GRAY2RGBA);
+
+            // Get pixel data
+            int width = image.Width;
+            int height = image.Height;
+
+            // Create a new image to store the modified pixels
+            modifiedImage = image.Clone(); // Clone to avoid modifying the input image directly
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
             {
-                // Convert to grayscale
-                Mat grayscale = Mat.Zeros(image.Width, image.Height);
-                Cv2.CvtColor(image, grayscale, ColorConversionCodes.BGR2GRAY);
-                //Cv2.ImWrite("C:\\grayscale.jpg", grayscale);
-                // Convert the image to RGBA mode (if it's not already in RGBA mode)
-                Cv2.CvtColor(grayscale, image, ColorConversionCodes.GRAY2RGBA);
-                //Cv2.ImWrite("C:\\rgba.jpg", image);
-
-                // Get pixel data
-                int width = image.Width;
-                int height = image.Height;
-
-                // Create a new image to store the modified pixels
-                modifiedImage = image;
-
-                // Iterate through each pixel and adjust opacity
-                for(int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
                 {
-                    for (int j = 0; j < width; j++)
+                    // Reduce opacity based on the pixel intensity
+                    if (modifiedImage.Channels() == 4)
                     {
-                        // Reduce opacity based on the pixel intensity
-                        if (modifiedImage.Channels() == 4)
-                        {
-                            Vec4b color = modifiedImage.At<Vec4b>(i, j);
-                            double colorValue = (double)color.Item3;
-                            color.Item3 = BitConverter.GetBytes((int)(colorValue * 0.5))[0];
-                            modifiedImage.Set<Vec4b>(i, j, color);
-                        }
+                        Vec4b color = modifiedImage.At<Vec4b>(i, j);
+                        double colorValue = (double)color.Item3;
+                        color.Item3 = BitConverter.GetBytes((int)(colorValue * 0.5))[0];
+                        modifiedImage.Set<Vec4b>(i, j, color);
                     }
                 }
-                //Cv2.ImWrite("C:\\modifiedImage.jpg", modifiedImage);
-
-                // Show the modified image
-                // show_image(modified_img)
             }
+
             return modifiedImage;
         }
 
+
+        /// <summary>
+        /// Applies Gaussian blur to a given image Mat.
+        /// </summary>
+        /// <param name="sourceImage">The source image Mat to blur.</param>
+        /// <param name="kernelSize">The size of the Gaussian kernel for blurring.</param>
+        /// <returns>The blurred image as a Mat.</returns>
+        public Mat BlurImage(Mat sourceImage, OpenCvSharp.Size kernelSize)
+        {
+            if (sourceImage == null)
+            {
+                throw new ArgumentNullException(nameof(sourceImage), "Source image cannot be null.");
+            }
+
+            // Apply Gaussian blur
+            Mat blurredImage = new Mat();
+            Cv2.GaussianBlur(sourceImage, blurredImage, kernelSize, sigmaX: 0, sigmaY: 0);
+
+            return blurredImage;
+        }
+
         // Helper function: MAE evaluation of previous frame's motion vs current frame
+        /// <summary>
+        /// Calculates the Mean Absolute Error (MAE) between two image masks.
+        /// </summary>
+        /// <param name="prev_mask">The file path of the previous image mask.</param>
+        /// <param name="curr_mask">The file path of the current image mask.</param>
+        /// <returns>The Mean Absolute Error (MAE) between the two masks as a double value.</returns>
         public double calculate_mae(string prev_mask, string curr_mask)
         {
             // Convert images to arrays for easier computation
@@ -110,18 +130,15 @@ namespace TemporalMotionExtractionAnalysis.Model
 
 
         // Helper function: E_m evaluation of previous frame's motion vs current frame
+        /// <summary>
+        /// Calculates the mean E-measure pixelwise between two frames.
+        /// </summary>
+        /// <param name="prev_frame">The first frame (Mat object) in grayscale.</param>
+        /// <param name="curr_frame">The second frame (Mat object) in grayscale.</param>
+        /// <param name="threshold">The threshold for gradient difference (default: 10).</param>
+        /// <returns>The mean E-measure value.</returns>
         public double calculate_e_measure_pixelwise(Mat prev_frame, Mat curr_frame, double threshold = 10)
         {
-            // Calculate the mean E-measure pixelwise between two frames.
-
-            // Parameters:
-            // - prev_mask_img: First frame (numpy array) in grayscale
-            // - curr_mask_img: Second frame (numpy array) in grayscale
-            // - threshold: Threshold for gradient difference (default: 25)
-
-            // Returns:
-            // - mean_e_measure: Mean E-measure value
-
             // Compute the absolute pixel-wise difference between frames
             Mat prev_mask_f32 = new Mat();
             prev_frame.ConvertTo(prev_mask_f32, MatType.CV_32F);
@@ -141,16 +158,14 @@ namespace TemporalMotionExtractionAnalysis.Model
 
 
         // Helper function: structural similarity index (SSIM) evaluation of previous frame's motion vs current frame
+        /// <summary>
+        /// Calculates the structural similarity index (SSIM) between two sequential frames.
+        /// </summary>
+        /// <param name="prev_frame">The first frame (Mat object) in grayscale.</param>
+        /// <param name="curr_frame">The second frame (Mat object) in grayscale.</param>
+        /// <returns>The SSIM score.</returns>
         public double calculate_ssim(Mat prev_frame, Mat curr_frame)
         {
-            //    Calculate the structural similarity index (SSIM) between two sequential frames.
-
-            //    Parameters:
-            //    - prev_mask_img: First frame (numpy array) in grayscale
-            //    - curr_mask_img: Second frame (numpy array)) in grayscale
-
-            //    Returns:
-            //    - mean_e_measure: Mean E-measure value
             // Calculate SSIM between two frames
             double score;
             using (var ssim = QualitySSIM.Create(prev_frame))
@@ -163,6 +178,12 @@ namespace TemporalMotionExtractionAnalysis.Model
 
         // Source image masks destination image in composition image.
         // Source pixel is displayed if not black.
+        /// <summary>
+        /// Composes two images using the Source Over composition mode.
+        /// </summary>
+        /// <param name="source">The source image to be composited.</param>
+        /// <param name="destination">The destination image where the source image is composited onto.</param>
+        /// <returns>The composited image using the Source Over composition mode.</returns>
         public Mat SourceOver (Mat source, Mat destination)
         {
             // Get pixel data
@@ -556,7 +577,7 @@ namespace TemporalMotionExtractionAnalysis.Model
 
         //        # Step 2 - Reduce opacity (aka alpha)
         //        blended.putalpha(alpha)
-        //        semifinal = reduce_alpha(blended)
+        //        semifinal = ReduceAlpha(blended)
         //        semifinal.putalpha(alpha)
         //        # TODO: Save first frame's output
         //        if index == 60:

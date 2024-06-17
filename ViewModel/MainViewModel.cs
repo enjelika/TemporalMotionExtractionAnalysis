@@ -26,6 +26,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ImageModel _currentImage;
         private ImageModel _nextImage;
         private ImageModel _offsetFrame;
+        private ImageModel _compositiedImage;
 
         private int _imageCount;
         private int _currentIndex;
@@ -72,6 +73,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(Images));
             }
         }
+
+        public ImageModel CompositedImage
+        {
+            get => _compositiedImage;
+            set
+            {
+                _compositiedImage = value;
+                OnPropertyChanged(nameof(CompositedImage));
+            }
+        }
+
         public ObservableCollection<ImageModel> TimelineCells
         {
             get => _timelineCells;
@@ -100,6 +112,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 _selectedCompositionMode = value;
                 Console.WriteLine("Selected Composition Mode: " + _selectedCompositionMode.ToString());
                 OnPropertyChanged(nameof(CompositionMode));
+
+                // Trigger composition whenever the mode changes
+                ComposeImages();
             }
         }
 
@@ -337,6 +352,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             NextCommand = new RelayCommand(OnNext);
             StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
             SelectedCompositionMode = CompositionMode.SourceOver;
+
+            // Initialize commands or event handlers for composition mode changes
+            // For simplicity, assume there's a PropertyChanged event handler wired up to trigger composition
+            PropertyChanged += OnCompositionModeChanged;
         }
 
         /// <summary>
@@ -586,6 +605,79 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CurrentImage = Images[CurrentIndex];
             SetCurrentFrame(CurrentIndex); // Update the timeline cells
             SetZoomedCurrentFrame(CurrentIndex); // Update the zoomed timeline cells
+        }
+
+        // Composition logic based on the selected mode
+        private void ComposeImages()
+        {
+            string tempFolderPath = System.IO.Path.GetTempPath();
+
+            // Call the SourceOver method from the model
+            if (SelectedFrames != null && SelectedFrames.Count >= 2)
+            {
+                // Get the image paths for source and destination images
+                string sourceImagePath = SelectedFrames[0].ImagePath;
+                string destinationImagePath = SelectedFrames[1].ImagePath;
+
+                // Load the images from their paths
+                Mat sourceImage = Cv2.ImRead(sourceImagePath);
+                //sourceImage.ConvertTo(sourceImage, MatType.CV_64F); // Convert to MatType.CV_64F
+                Mat destinationImage = Cv2.ImRead(destinationImagePath);
+                //destinationImage.ConvertTo(destinationImage, MatType.CV_64F); // Convert to MatType.CV_64F
+
+                // Motion Extraction of the sourceImage and destinationImage
+                MotionExtraction motionExtraction = new MotionExtraction();
+
+                // Step 1: Invert colors
+                //Mat invertSourceImage = new Mat(MatType.CV_64F);// Set to MatType.CV_32F 
+                //Cv2.Invert(sourceImage, invertSourceImage);
+
+                //Mat invertDestinationImage = new Mat(); // MatType.CV_32F);// Set to MatType.CV_32F 
+                //Cv2.Invert(destinationImage, invertDestinationImage);
+
+                // Step 2: Reduce Alpha/Opacity
+                Mat reducedAlphaSourceImage = motionExtraction.ReduceAlpha(sourceImage); //invertSourceImage
+                Mat reducedAlphaDestinationImage = motionExtraction.ReduceAlpha(destinationImage); //invertDestinationImage
+
+                // Step 3: Add Blur
+                OpenCvSharp.Size kernelSize = new OpenCvSharp.Size(7,7); // Medium size: 7x7 kernel
+                Mat blurSourceImage = motionExtraction.BlurImage(reducedAlphaSourceImage, kernelSize);
+                Mat blurDestinationImage = motionExtraction.BlurImage(reducedAlphaDestinationImage, kernelSize);
+
+                // Call the SourceOver method from the model
+                switch (SelectedCompositionMode)
+                {
+                    case CompositionMode.SourceOver:
+                        Mat composedImage = motionExtraction.SourceOver(blurSourceImage, blurDestinationImage);
+
+                        // Save the composed image as a PNG in a temporary folder
+                        string composedImagePath = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
+                        Cv2.ImWrite(composedImagePath, composedImage);
+
+                        // Create a new ImageModel object with the composed image path
+                        ImageModel composedImageModel = new ImageModel { ImagePath = composedImagePath };
+
+                        // Update ViewModel properties or raise events as needed
+                        CompositedImage = composedImageModel;
+                        OnPropertyChanged(nameof(CompositedImage));
+                        break;
+                    case CompositionMode.DestinationOver:
+                        //Mat composedImage = MotionExtraction.DestinationOver(sourceImage, destinationImage);
+                        break;
+                    // Add cases for other composition modes as needed
+                    default:
+                        break;
+                }
+            }
+        }
+
+        // Event handler for composition mode changes
+        private void OnCompositionModeChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(SelectedCompositionMode))
+            {
+                ComposeImages();
+            }
         }
 
         /// <summary>
