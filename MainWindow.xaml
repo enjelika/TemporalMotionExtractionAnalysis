@@ -118,7 +118,7 @@
                     <DockPanel>
                         <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="5,0">
-                            <!-- TODO: Add your visual encoding options here -->
+                            
                             <StackPanel Orientation="Vertical">
                                 <!-- Radio Buttons for Pixel and Marks -->
                                 <StackPanel Orientation="Horizontal">

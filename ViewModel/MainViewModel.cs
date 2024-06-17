@@ -10,6 +10,7 @@ using System.Windows.Shapes;
 using OpenCvSharp;
 using System.Diagnostics;
 using System.Windows;
+using System.Windows.Media;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -654,11 +655,15 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat blurSourceImage = motionExtraction.BlurImage(reducedAlphaSourceImage, kernelSize);
                 Mat blurDestinationImage = motionExtraction.BlurImage(reducedAlphaDestinationImage, kernelSize);
 
+                // Step 4: Tint the Source red, and the Destination blue (temporary until color selector controls are added)
+                Mat tintedSourceImage = ApplyColorTint(blurSourceImage, new SolidColorBrush(Color.FromArgb(255, 255, 0, 0))); // Red tint //SourceColorPickerViewModel.SelectedColorBrush);
+                Mat tintedDestinationImage = ApplyColorTint(blurDestinationImage, new SolidColorBrush(Color.FromArgb(255, 0, 0, 255))); // Blue tint //DestinationColorPickerViewModel.SelectedColorBrush);
+
                 // Call the SourceOver method from the model
                 switch (SelectedCompositionMode)
                 {
                     case CompositionMode.SourceOver:
-                        Mat composedImage = motionExtraction.SourceOver(blurSourceImage, blurDestinationImage);
+                        Mat composedImage = motionExtraction.SourceOver(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -672,7 +677,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.DestinationOver:
-                        Mat composedImage2 = motionExtraction.DestinationOver(blurSourceImage, blurDestinationImage);
+                        Mat composedImage2 = motionExtraction.DestinationOver(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath2 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -686,7 +691,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.SourceIn:
-                        Mat composedImage3 = motionExtraction.SourceIn(blurSourceImage, blurDestinationImage);
+                        Mat composedImage3 = motionExtraction.SourceIn(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath3 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -700,7 +705,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.DestinationIn:
-                        Mat composedImage4 = motionExtraction.DestinationIn(blurSourceImage, blurDestinationImage);
+                        Mat composedImage4 = motionExtraction.DestinationIn(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath4 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -714,7 +719,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         OnPropertyChanged(nameof(CompositedImage));
                         break;
                     case CompositionMode.SourceOut:
-                        Mat composedImage5 = motionExtraction.SourceOut(blurSourceImage, blurDestinationImage);
+                        Mat composedImage5 = motionExtraction.SourceOut(tintedSourceImage, tintedDestinationImage);
 
                         // Save the composed image as a PNG in a temporary folder
                         string composedImagePath5 = System.IO.Path.Combine(tempFolderPath, "ComposedImage.png");
@@ -734,11 +739,63 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        /// <summary>
+        /// Applies a color tint to the given image using the specified brush color, ensuring 60% opacity.
+        /// </summary>
+        /// <param name="image">The input image to which the tint will be applied.</param>
+        /// <param name="tintColorBrush">The brush containing the tint color.</param>
+        /// <returns>A new image with the tint color applied and 60% opacity.</returns>
+        /// <remarks>
+        /// This method extracts the color values from the given brush and creates a Scalar
+        /// object representing the tint color. It then applies the tint color to the input image
+        /// by blending the input image with the tint color and sets the opacity to 60%.
+        /// </remarks>
+        private Mat ApplyColorTint(Mat image, Brush tintColorBrush)
+        {
+            // Extract color values from the brush
+            Color tintColor = ((SolidColorBrush)tintColorBrush).Color;
+            Scalar tint = new Scalar(tintColor.B, tintColor.G, tintColor.R);
+
+            // Separate the channels of the input image
+            Mat[] channels = Cv2.Split(image);
+            Mat alphaChannel = channels.Length == 4 ? channels[3] : Mat.Ones(image.Size(), MatType.CV_8UC1) * 255;
+
+            // Create a new Mat for the tinted image
+            Mat tintedRGB = new Mat();
+            Cv2.Multiply(image, new Scalar(0.5, 0.5, 0.5, 1.0), tintedRGB); // Reduce the original image brightness by 50%
+            Mat tintMat = new Mat(image.Size(), image.Type(), tint);
+            Cv2.AddWeighted(tintedRGB, 1.0, tintMat, 0.5, 0, tintedRGB); // Apply the tint color
+
+            // Create a new alpha channel with 60% opacity
+            Mat alpha60 = new Mat(image.Size(), MatType.CV_8UC1, new Scalar(153)); // 60% of 255 is 153
+
+            // Merge the tinted RGB channels with the new alpha channel
+            if (channels.Length == 4)
+            {
+                Mat[] tintedChannels = Cv2.Split(tintedRGB);
+                tintedChannels[3] = alpha60; // Set the new alpha channel
+                Cv2.Merge(tintedChannels, tintedRGB);
+            }
+            else
+            {
+                // If the original image did not have an alpha channel, add the alpha channel
+                Cv2.Merge(new Mat[] { tintedRGB, alpha60 }, tintedRGB);
+            }
+
+            return tintedRGB;
+        }
+
         // Event handler for composition mode changes
         private void OnCompositionModeChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(SelectedCompositionMode))
             {
+                if (CompositedImage != null)
+                {
+                    CompositedImage.Clear(); // Clear CompositiedImage so the new Composite Image can be saved
+                    OnPropertyChanged(nameof(CompositedImage));
+                }
+
                 ComposeImages();
             }
         }

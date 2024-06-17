@@ -59,5 +59,14 @@ namespace TemporalMotionExtractionAnalysis.Model
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
+        // Clear method to reset the ImageModel properties to default values
+        public void Clear()
+        {
+            ImagePath = string.Empty;
+            FrameNumber = 0;
+            IsCurrent = false;
+            IsOffsetSelection = false;
+        }
     }
 }
