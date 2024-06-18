@@ -37,6 +37,7 @@
         <converters:SelectedFramesMultiValueConverter x:Key="SelectedFramesMultiValueConverter"/>
         <converters:StringToIntConverter x:Key="StringToIntConverter"/>
         <converters:RadioButtonConverter x:Key="RadioButtonConverter"/>
+        <converters:StringToColorConverter x:Key="StringToColorConverter"/>
         <converters:GlyphConverter x:Key="GlyphConverter" />
     </Window.Resources>
     <Grid>
@@ -180,12 +181,24 @@
 
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="Source Color:" FontWeight="Bold"/>
-                                        
+                                        <ComboBox x:Name="SourceColor" Width="100" Margin="5" ItemsSource="{Binding Colors}" SelectedValue="{Binding SelectedSourceColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToColorConverter}}" >
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="Destination Color:" FontWeight="Bold"/>
-                                        
+                                        <ComboBox x:Name="DestinationColor" Width="100" Margin="5" ItemsSource="{Binding Colors}" SelectedValue="{Binding SelectedDestinationColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToColorConverter}}" >
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
