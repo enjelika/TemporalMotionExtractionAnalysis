@@ -26,6 +26,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ObservableCollection<ImageModel> _selectedFrames;
         private ObservableCollection<string> _fpsValue;
         private ObservableCollection<string> _blurValue;
+        private ObservableCollection<string> _colors;
 
         private ImageModel _previousImage;
         private ImageModel _currentImage;
@@ -287,6 +288,19 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public ObservableCollection<string> Colors
+        {
+            get => _colors;
+            set
+            {
+                if (_colors != value)
+                {
+                    _colors = value;
+                    OnPropertyChanged(nameof(Colors)); // Notify property changed
+                }
+            }
+        }
+
         public int SelectedFps
         {
             get => _selectedFps;
@@ -502,6 +516,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             SelectedFrames = new ObservableCollection<ImageModel>();
             SelectedBlurSize = 7; // Default value is 7
            
+            Colors = new ObservableCollection<string>() { "Red", "Green", "Blue" };
+
             // Initialize the ObservableCollection<ImageModel> for the Images
             Images = new ObservableCollection<ImageModel>();
             TimelineCells = new ObservableCollection<ImageModel>();
