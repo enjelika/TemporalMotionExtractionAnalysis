@@ -44,6 +44,7 @@
             <!-- Parent Control Pane : Left -->
             <StackPanel Orientation="Vertical">
 
+                <!-- Folder Loader Controls -->
                 <StackPanel Orientation="Horizontal"  HorizontalAlignment="Left" VerticalAlignment="Center">
                     <Border BorderBrush="Black" BorderThickness="1" Margin="5,5,0,5" Width="250" Height="60">
                         <DockPanel>
@@ -264,7 +265,13 @@
 
                             <StackPanel Orientation="Horizontal">
                                 <Label FontWeight="Bold">Blur:</Label>
-                                <TextBox Width="100" Margin="5" />
+                                <ComboBox Width="100" Margin="5" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Visibility="Hidden">
@@ -281,7 +288,7 @@
                         <TextBlock DockPanel.Dock="Top" Text="Indication Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <!-- Animation of images in selected folder -->
                         <StackPanel Orientation="Vertical">
-                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top"/>
+                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top" Margin="0,5,0,0"/>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Label FontWeight="Bold" Content="Frame Index: "/>
@@ -329,9 +336,9 @@
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <!-- Composite Image from the SelectedFrames -->
-                            <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="600" Margin="0,-15,0,0" HorizontalAlignment="Left"/>
+                            <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="600" Margin="0,-10,0,0" HorizontalAlignment="Left"/>
 
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="15,0,0,0">
+                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="15,0,0,0" Width="150">
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
                                     <Label Content="Frame Offset:" FontWeight="Bold"/>
                                     <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.OffsetValue, RelativeSource={RelativeSource AncestorType=Window}}"/>

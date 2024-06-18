@@ -25,6 +25,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ObservableCollection<ImageModel> _zoomedTimelineCells;
         private ObservableCollection<ImageModel> _selectedFrames;
         private ObservableCollection<string> _fpsValue;
+        private ObservableCollection<string> _blurValue;
 
         private ImageModel _previousImage;
         private ImageModel _currentImage;
@@ -68,6 +69,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private string _negativeGlyph = "▼";
         private string _noDifferenceGlyph = "■";
         private int _areaSize;
+        private int _blurSize;
+
+        private OpenCvSharp.Size kernelSize;
         #endregion
 
         #region Enums
@@ -269,6 +273,20 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public ObservableCollection<string> BlurValue
+        {
+            get => _blurValue;
+            set
+            {
+                if (_blurValue != value)
+                {
+                    _blurValue = value;
+                    OnPropertyChanged(nameof(BlurValue)); // Notify property changed
+                                                          // Update the time delay based on the new Blur value
+                }
+            }
+        }
+
         public int SelectedFps
         {
             get => _selectedFps;
@@ -431,6 +449,27 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(AreaSize));
             }
         }
+
+        public int SelectedBlurSize
+        {
+            get => _blurSize;
+            set
+            {
+                _blurSize = value;
+                OnPropertyChanged(nameof(SelectedBlurSize)); // Notify property changed
+                UpdateKernelSize();
+            }
+        }
+                
+        public OpenCvSharp.Size KernelSize
+        {
+            get => kernelSize;
+            private set
+            {
+                kernelSize = value;
+                OnPropertyChanged(nameof(KernelSize));
+            }
+        }
         #endregion
 
         #region ICommands
@@ -456,11 +495,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Initialize the variables for the View Textboxes & Combobox
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
-            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" }; 
+            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" };
+            BlurValue = new ObservableCollection<string>() { "5", "7", "9" };
             SelectedFps = 4; // Default value is 4
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
-
+            SelectedBlurSize = 7; // Default value is 7
+           
             // Initialize the ObservableCollection<ImageModel> for the Images
             Images = new ObservableCollection<ImageModel>();
             TimelineCells = new ObservableCollection<ImageModel>();
@@ -786,6 +827,15 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             glyphRendering.NoDifferenceGlyph = noDifference;
         }
 
+        private void UpdateKernelSize()
+        {
+            // Update the OpenCv.Kernel.Size based on the selected blur size
+            // Small size:  5x5 kernel
+            // Medium size: 7x7 kernel
+            // Medium size: 9x9 kernel
+            KernelSize = new OpenCvSharp.Size(SelectedBlurSize, SelectedBlurSize);
+        }
+
         // Composition logic based on the selected mode
         private void ComposeImages()
         {
@@ -813,8 +863,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat reducedAlphaDestinationImage = motionExtraction.ReduceAlpha(invertDestinationImage);
 
                 // Step 3: Add Blur
-                OpenCvSharp.Size kernelSize = new OpenCvSharp.Size(7,7); // Medium size: 7x7 kernel
-                Mat blurSourceImage = motionExtraction.BlurImage(reducedAlphaSourceImage, kernelSize);
+                Mat blurSourceImage = motionExtraction.BlurImage(reducedAlphaSourceImage, KernelSize);
                 Mat blurDestinationImage = motionExtraction.BlurImage(reducedAlphaDestinationImage, kernelSize);
 
                 CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(blurSourceImage, blurDestinationImage), 4);
