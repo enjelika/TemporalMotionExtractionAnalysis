@@ -515,7 +515,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
             SelectedBlurSize = 7; // Default value is 7
-           
+            AreaSize = 40; // Default value
             Colors = new ObservableCollection<string>() { "Red", "Green", "Blue" };
 
             // Initialize the ObservableCollection<ImageModel> for the Images
