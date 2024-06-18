@@ -411,6 +411,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        #region Boolean Flags
         public bool IsReversePlayback
         {
             get => _isReversePlayback;
@@ -456,6 +457,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 _isBackMarksModeSelected = value; OnPropertyChanged(nameof(IsBackMarksModeSelected));
             }
         }
+
+        public bool IsCurrentXORSelected
+        {
+            get => _isCurrentXORSelected;
+            set
+            {
+                _isCurrentXORSelected = value;
+                OnPropertyChanged(nameof(IsCurrentXORSelected));
+            }
+        }
+        #endregion
 
         public int ImageCount
         {
@@ -961,7 +973,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             Mat invertCurrentImage = new Mat(currentImage);
 
             // Step 1: Invert colors (if selected)
-            if (_isCurrentXORSelected)
+            if (IsCurrentXORSelected)
             {
                 invertCurrentImage = motionExtraction.InvertColors(currentImage);
             }

@@ -32,6 +32,7 @@
                                   SecondItemTemplate="{StaticResource SecondItemTemplate}"
                                   DefaultTemplate="{StaticResource DefaultTemplate}"/>
         <converters:IndexConverter x:Key="IndexConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:FrameIndexVisibilityConverter x:Key="FrameIndexVisibilityConverter"/>
         <converters:FrameIndexTickVisibilityConverter x:Key="FrameIndexTickVisibilityConverter"/>
@@ -585,11 +586,11 @@
                             <DockPanel Background="White">
                                 <TextBlock DockPanel.Dock="Top" Text="Offset Frame Transforms" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
-                                <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Vertical" Margin="5,0,0,0">
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="XOR:" FontWeight="Bold"/>
-                                        <CheckBox Content="On" IsChecked="True" VerticalAlignment="Center"/>
-                                        <CheckBox Content="Off" VerticalAlignment="Center"/>
+                                        <RadioButton Content="On" IsChecked="{Binding IsCurrentXORSelected, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XORGroup"/>
+                                        <RadioButton Content="Off" IsChecked="{Binding IsCurrentXORSelected, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XORGroup"/>
                                     </StackPanel>
 
                                     <!-- TODO: Transparency/Opacity/Alpha Slider -->
@@ -606,7 +607,7 @@
                                             </ComboBox>
                                         </StackPanel>
 
-                                        <!-- TODO: ViewModel - updated to have CurrentFrameBlurValue && OffsetFrameBlurValue -->
+                                        <!-- Current Blur Kernel Size Selection -->
                                         <StackPanel Orientation="Horizontal">
                                             <Label FontWeight="Bold">Blur:</Label>
                                             <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedOffsetBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
