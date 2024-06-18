@@ -26,7 +26,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ObservableCollection<ImageModel> _selectedFrames;
         private ObservableCollection<string> _fpsValue;
         private ObservableCollection<string> _blurValue;
-        private ObservableCollection<string> _colors;
+        private ObservableCollection<string> _sourceColors;
+        private ObservableCollection<string> _destinationColors;
 
         private ImageModel _previousImage;
         private ImageModel _currentImage;
@@ -288,15 +289,28 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public ObservableCollection<string> Colors
+        public ObservableCollection<string> SourceColors
         {
-            get => _colors;
+            get => _sourceColors;
             set
             {
-                if (_colors != value)
+                if (_sourceColors != value)
                 {
-                    _colors = value;
-                    OnPropertyChanged(nameof(Colors)); // Notify property changed
+                    _sourceColors = value;
+                    OnPropertyChanged(nameof(SourceColors)); // Notify property changed
+                }
+            }
+        }
+
+        public ObservableCollection<string> DestinationColors
+        {
+            get => _destinationColors;
+            set
+            {
+                if (_destinationColors != value)
+                {
+                    _destinationColors = value;
+                    OnPropertyChanged(nameof(DestinationColors)); // Notify property changed
                 }
             }
         }
@@ -515,8 +529,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
             SelectedBlurSize = 7; // Default value is 7
-            AreaSize = 30; // Default value is 30
-            Colors = new ObservableCollection<string>() { "Red", "Green", "Blue" };
+            AreaSize = 40; // Default value
+            SourceColors = new ObservableCollection<string>() { "Red", "Yellow", "Blue" };
+            DestinationColors = new ObservableCollection<string>() { "Orange", "Green", "Purple" };
 
             // Initialize the ObservableCollection<ImageModel> for the Images
             Images = new ObservableCollection<ImageModel>();
