@@ -50,8 +50,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private double _calculatedMAE;
         private double _calculatedSSIM;
 
-        private const int TotalCells = 57;
-        private const int CenterIndex = 26;
+        private const int TotalCells = 120; //57
+        private const int CenterIndex = 2; //26
 
         private bool _isAnimating;
         private bool _isReversePlayback;

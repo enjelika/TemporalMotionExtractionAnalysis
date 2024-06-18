@@ -39,7 +39,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             mat1.CopyTo(result);
 
             Bitmap bitmap = BitmapConverter.ToBitmap(result);
-            List<(string glyph, Brush brush, PointF position, Rectangle rect)> glyphsToDraw = new List<(string, Brush, PointF, Rectangle)>();
+            List<(string glyph, Brush brush, PointF position)> glyphsToDraw = new List<(string, Brush, PointF)>();
 
 
             for (int y = 0; y <= diffMat.Rows-1; y += areaSize / 2)
@@ -83,8 +83,8 @@ namespace TemporalMotionExtractionAnalysis.Model
                     }
 
                     // Define the rectangle for the window
-                    Rectangle rect = new Rectangle(x, y, windowWidth, windowHeight);
-                    glyphsToDraw.Add((glyph, brush, new PointF(centerX, centerY), rect));
+                    //Rectangle rect = new Rectangle(x, y, windowWidth, windowHeight);
+                    glyphsToDraw.Add((glyph, brush, new PointF(centerX, centerY)));
                 }
             }
 
@@ -96,7 +96,7 @@ namespace TemporalMotionExtractionAnalysis.Model
                 foreach (var glyph in glyphsToDraw)
                 {
                     // Draw the rectangle around the window
-                    g.DrawRectangle(Pens.Black, glyph.rect);
+                    //g.DrawRectangle(Pens.Black, glyph.rect);
                     // Draw the glyph in the center of the window
                     g.DrawString(glyph.glyph, font, glyph.brush, glyph.position);
                 }
