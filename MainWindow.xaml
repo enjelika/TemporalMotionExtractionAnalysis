@@ -218,9 +218,8 @@
                                         </Style.Triggers>
                                     </Style>
                                 </StackPanel.Style>
-                                
+
                                 <StackPanel Orientation="Vertical">
-                                    <Label FontWeight="Bold">Glyphs:</Label>
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="Positive Difference: " />
                                         <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
