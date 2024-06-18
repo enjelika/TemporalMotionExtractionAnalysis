@@ -63,7 +63,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isBackMarksModeSelected;
 
         private bool _isCurrentXORSelected;
-        
+        private bool _isOffsetXORSelected;
+
         private string _folderName;
         private string _compositeImageLocation;
         private string _transformedCurrentImageLocation;
@@ -465,6 +466,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 _isCurrentXORSelected = value;
                 OnPropertyChanged(nameof(IsCurrentXORSelected));
+            }
+        }
+
+        public bool IsOffsetXORSelected
+        {
+            get => _isOffsetXORSelected;
+            set
+            {
+                _isOffsetXORSelected = value;
+                OnPropertyChanged(nameof(IsOffsetXORSelected));
             }
         }
         #endregion
