@@ -39,13 +39,12 @@ namespace TemporalMotionExtractionAnalysis.Model
             mat1.CopyTo(result);
 
             Bitmap bitmap = BitmapConverter.ToBitmap(result);
-            //List<(string glyph, Brush brush, PointF position)> glyphsToDraw = new List<(string, Brush, PointF)>();
             List<(string glyph, Brush brush, PointF position, Rectangle rect)> glyphsToDraw = new List<(string, Brush, PointF, Rectangle)>();
 
 
-            for (int y = 0; y < diffMat.Rows; y += areaSize / 2)
+            for (int y = 0; y <= diffMat.Rows-1; y += areaSize / 2)
             {
-                for (int x = 0; x < diffMat.Cols; x += areaSize / 2)
+                for (int x = 0; x <= diffMat.Cols-1; x += areaSize / 2)
                 {
                     // Define the window boundaries
                     int windowWidth = Math.Min(areaSize, diffMat.Cols - x);
@@ -60,8 +59,8 @@ namespace TemporalMotionExtractionAnalysis.Model
                     double avgValue = avgScalar.Val0;
 
                     // Determine the center of the window and apply the offset
-                    float centerX = x + windowWidth / 2 - AreaSize / 2;
-                    float centerY = y + windowHeight / 2 - AreaSize / 2;
+                    float centerX = x + windowWidth / 2.0f - AreaSize / 2;
+                    float centerY = y + windowHeight / 2.0f - AreaSize / 2;
 
                     // Determine the appropriate glyph and brush based on the average value
                     string glyph;
@@ -83,7 +82,6 @@ namespace TemporalMotionExtractionAnalysis.Model
                         brush = Brushes.Blue;
                     }
 
-                    //glyphsToDraw.Add((glyph, brush, new PointF(centerX, centerY)));
                     // Define the rectangle for the window
                     Rectangle rect = new Rectangle(x, y, windowWidth, windowHeight);
                     glyphsToDraw.Add((glyph, brush, new PointF(centerX, centerY), rect));
