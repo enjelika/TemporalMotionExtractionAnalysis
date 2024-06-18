@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Drawing.Text;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
@@ -12,59 +14,93 @@ namespace TemporalMotionExtractionAnalysis.Model
         public string NegativeGlyph { get; set; }
         public string NoDifferenceGlyph { get; set; }
 
-        public GlyphRendering(string positiveGlyph, string negativeGlyph, string noDifferenceGlyph)
+        // Size for the sliding window (AreaSize x AreaSize)
+        public int AreaSize { get; set; }
+
+        public GlyphRendering(string positiveGlyph, string negativeGlyph, string noDifferenceGlyph, int areaSize)
         {
             PositiveGlyph = positiveGlyph;
             NegativeGlyph = negativeGlyph;
             NoDifferenceGlyph = noDifferenceGlyph;
+            AreaSize = areaSize;
         }
 
-        public Mat RenderDifferences(Mat mat1, Mat mat2)
+        public Mat RenderDifferences(Mat mat1, Mat mat2, int areaSize)
         {
             // Ensure both Mats have the same size and type
             if (mat1.Size() != mat2.Size() || mat1.Type() != mat2.Type())
                 throw new ArgumentException("Mats must have the same size and type.");
+
+            // Calculate the difference between the two images
+            Mat diffMat = mat2 - mat1;
 
             // Create a result Mat of the same size and type
             Mat result = new Mat(mat1.Size(), mat1.Type());
             mat1.CopyTo(result);
 
             Bitmap bitmap = BitmapConverter.ToBitmap(result);
+            //List<(string glyph, Brush brush, PointF position)> glyphsToDraw = new List<(string, Brush, PointF)>();
+            List<(string glyph, Brush brush, PointF position, Rectangle rect)> glyphsToDraw = new List<(string, Brush, PointF, Rectangle)>();
+
+
+            for (int y = 0; y < diffMat.Rows; y += areaSize / 2)
+            {
+                for (int x = 0; x < diffMat.Cols; x += areaSize / 2)
+                {
+                    // Define the window boundaries
+                    int windowWidth = Math.Min(areaSize, diffMat.Cols - x);
+                    int windowHeight = Math.Min(areaSize, diffMat.Rows - y);
+
+                    // Extract the window from diffMat
+                    Rect window = new Rect(x, y, windowWidth, windowHeight);
+                    Mat windowMat = new Mat(diffMat, window);
+
+                    // Calculate the average of the area within the window
+                    Scalar avgScalar = Cv2.Mean(windowMat);
+                    double avgValue = avgScalar.Val0;
+
+                    // Determine the center of the window and apply the offset
+                    float centerX = x + windowWidth / 2 - AreaSize / 2;
+                    float centerY = y + windowHeight / 2 - AreaSize / 2;
+
+                    // Determine the appropriate glyph and brush based on the average value
+                    string glyph;
+                    Brush brush;
+
+                    if (avgValue > 0)
+                    {
+                        glyph = PositiveGlyph;
+                        brush = Brushes.Green;
+                    }
+                    else if (avgValue < 0)
+                    {
+                        glyph = NegativeGlyph;
+                        brush = Brushes.Red;
+                    }
+                    else
+                    {
+                        glyph = NoDifferenceGlyph;
+                        brush = Brushes.Blue;
+                    }
+
+                    //glyphsToDraw.Add((glyph, brush, new PointF(centerX, centerY)));
+                    // Define the rectangle for the window
+                    Rectangle rect = new Rectangle(x, y, windowWidth, windowHeight);
+                    glyphsToDraw.Add((glyph, brush, new PointF(centerX, centerY), rect));
+                }
+            }
+
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
-                Font font = new Font("Segoe UI Symbol", 32);
-                Brush positiveBrush = Brushes.Green;
-                Brush negativeBrush = Brushes.Red;
-                Brush noDifferenceBrush = Brushes.Blue;
+                Font font = new Font("Segoe UI Symbol", 12); // Reduced font size for efficiency
 
-                for (int y = 0; y < mat1.Rows; y++)
+                foreach (var glyph in glyphsToDraw)
                 {
-                    for (int x = 0; x < mat1.Cols; x++)
-                    {
-                        var diff = mat1.At<byte>(y, x) - mat2.At<byte>(y, x);
-
-                        string glyph = null;
-                        Brush brush = null;
-
-                        if (diff > 0)
-                        {
-                            glyph = PositiveGlyph;
-                            brush = positiveBrush;
-                        }
-                        else if (diff < 0)
-                        {
-                            glyph = NegativeGlyph;
-                            brush = negativeBrush;
-                        }
-                        else
-                        {
-                            glyph = NoDifferenceGlyph;
-                            brush = noDifferenceBrush;
-                        }
-
-                        g.DrawString(glyph, font, brush, x * 10, y * 10);
-                    }
+                    // Draw the rectangle around the window
+                    g.DrawRectangle(Pens.Black, glyph.rect);
+                    // Draw the glyph in the center of the window
+                    g.DrawString(glyph.glyph, font, glyph.brush, glyph.position);
                 }
             }
 

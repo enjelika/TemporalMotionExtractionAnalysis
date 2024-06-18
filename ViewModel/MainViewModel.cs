@@ -515,7 +515,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
             SelectedBlurSize = 7; // Default value is 7
-            AreaSize = 40; // Default value
+            AreaSize = 30; // Default value is 30
             Colors = new ObservableCollection<string>() { "Red", "Green", "Blue" };
 
             // Initialize the ObservableCollection<ImageModel> for the Images
@@ -563,7 +563,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             SelectedCompositionMode = CompositionMode.SourceOver;
 
             // Initialize the GlyphRendering class with default glyphs
-            glyphRendering = new GlyphRendering("▲", "▼", "■");
+            glyphRendering = new GlyphRendering("▲", "▼", "■", AreaSize);
 
             // Initialize commands or event handlers for composition mode changes
             // For simplicity, assume there's a PropertyChanged event handler wired up to trigger composition
@@ -977,7 +977,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     glyphRendering.NegativeGlyph = NegativeGlyph;
                     glyphRendering.NoDifferenceGlyph = NoDifferenceGlyph;
 
-                    Mat compositedFrame = glyphRendering.RenderDifferences(blurSourceImage, blurDestinationImage);
+                    Mat compositedFrame = glyphRendering.RenderDifferences(blurSourceImage, blurDestinationImage, AreaSize);
 
                     string composedImagePath = SaveComposedImage(compositedFrame);
                     ComposedImagePaths.Add(composedImagePath); // Add to the collection
