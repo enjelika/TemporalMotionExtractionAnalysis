@@ -150,8 +150,8 @@
                                 <StackPanel Orientation="Horizontal">
                                     <DockPanel VerticalAlignment="Center" Margin="5">
                                         <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
-                                        <RadioButton x:Name="ForePixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" IsChecked="{Binding IsPixelModeSelected}" />
-                                        <RadioButton x:Name="ForeMarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" IsChecked="{Binding IsMarksModeSelected}" />
+                                        <RadioButton x:Name="ForePixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" IsChecked="{Binding IsForePixelModeSelected}" />
+                                        <RadioButton x:Name="ForeMarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" IsChecked="{Binding IsForeMarksModeSelected}" />
                                     </DockPanel>
                                 </StackPanel>
 
@@ -160,10 +160,10 @@
                                     <StackPanel.Style>
                                         <Style TargetType="StackPanel">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPixelModeSelected}" Value="True">
+                                                <DataTrigger Binding="{Binding IsForePixelModeSelected}" Value="True">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsPixelModeSelected}" Value="False">
+                                                <DataTrigger Binding="{Binding IsForePixelModeSelected}" Value="False">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -213,10 +213,10 @@
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsMarksModeSelected}" Value="True">
+                                            <DataTrigger Binding="{Binding IsForeMarksModeSelected}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsMarksModeSelected}" Value="False">
+                                            <DataTrigger Binding="{Binding IsForeMarksModeSelected}" Value="False">
                                                 <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -294,8 +294,8 @@
                                 <StackPanel Orientation="Horizontal">
                                     <DockPanel VerticalAlignment="Center" Margin="5">
                                         <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
-                                        <RadioButton x:Name="BackPixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" IsChecked="{Binding IsPixelModeSelected}" />
-                                        <RadioButton x:Name="BackMarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" IsChecked="{Binding IsMarksModeSelected}" />
+                                        <RadioButton x:Name="BackPixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" IsChecked="{Binding IsBackPixelModeSelected}" />
+                                        <RadioButton x:Name="BackMarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" IsChecked="{Binding IsBackMarksModeSelected}" />
                                     </DockPanel>
                                 </StackPanel>
 
@@ -304,10 +304,10 @@
                                     <StackPanel.Style>
                                         <Style TargetType="StackPanel">
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPixelModeSelected}" Value="True">
+                                                <DataTrigger Binding="{Binding IsBackPixelModeSelected}" Value="True">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                 </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsPixelModeSelected}" Value="False">
+                                                <DataTrigger Binding="{Binding IsBackPixelModeSelected}" Value="False">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -325,10 +325,10 @@
                                 <StackPanel.Style>
                                     <Style TargetType="StackPanel">
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsMarksModeSelected}" Value="True">
+                                            <DataTrigger Binding="{Binding IsBackMarksModeSelected}" Value="True">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsMarksModeSelected}" Value="False">
+                                            <DataTrigger Binding="{Binding IsBackMarksModeSelected}" Value="False">
                                                 <Setter Property="Visibility" Value="Collapsed" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -530,7 +530,7 @@
 
                                     <StackPanel Orientation="Horizontal">
                                         <Label FontWeight="Bold">Blur:</Label>
-                                        <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
+                                        <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedCurrentBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding}" />
@@ -609,7 +609,7 @@
                                         <!-- TODO: ViewModel - updated to have CurrentFrameBlurValue && OffsetFrameBlurValue -->
                                         <StackPanel Orientation="Horizontal">
                                             <Label FontWeight="Bold">Blur:</Label>
-                                            <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
+                                            <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedOffsetBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
                                                         <TextBlock Text="{Binding}" />
