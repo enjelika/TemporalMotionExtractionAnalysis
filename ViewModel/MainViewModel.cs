@@ -671,6 +671,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         }
 
         /// <summary>
+        /// Resets the IsOffsetSelection property of all TimelineCells to false.
+        /// </summary>
+        public void ResetOffsetSelection()
+        {
+            foreach (var cell in TimelineCells)
+            {
+                cell.IsOffsetSelection = false;
+            }
+        }
+
+        /// <summary>
         /// Converts frames per second (FPS) to a time delay in milliseconds.
         /// </summary>
         /// <param name="fps">The frames per second value to convert.</param>
@@ -684,24 +695,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             else
             {
                 return 250;
-            }
-        }
-
-        /// <summary>
-        /// Converts a time delay in milliseconds to frames per second (FPS).
-        /// </summary>
-        /// <param name="timeDelay">The time delay in milliseconds.</param>
-        /// <returns>The FPS value calculated from the time delay.</returns>
-        /// <exception cref="ArgumentException">Thrown when the time delay is not a positive value greater than zero.</exception>
-        public double ConvertTimeDelayToFPS(int timeDelay)
-        {
-            if (timeDelay <= 250)
-            {
-                return 1000.0 / timeDelay;
-            }
-            else // FPS default value is 4
-            {
-                return 4;
             }
         }
 
@@ -721,6 +714,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                                                           f.EndsWith(".png", StringComparison.OrdinalIgnoreCase));
 
                     ImageCount = imageFiles.Count(); // Update image count
+
+                    if(SelectedFrames.Count >= 2) 
+                    {
+                        ResetOffsetSelection();
+                        CompositedImage.ImagePath = "";
+                        SelectedFrames.Clear();
+                    }
 
                     Images.Clear();
                     int frameNumber = 0;
