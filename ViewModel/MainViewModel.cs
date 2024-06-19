@@ -28,6 +28,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ObservableCollection<string> _blurValue;
         private ObservableCollection<string> _sourceColors;
         private ObservableCollection<string> _destinationColors;
+        private ObservableCollection<string> _compositionModes;
+        private ObservableCollection<string> _backgroundMarksTextures;
 
         private ImageModel _previousImage;
         private ImageModel _currentImage;
@@ -74,7 +76,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ObservableCollection<string> transformedCurrentImagePaths = new ObservableCollection<string>();
         private ObservableCollection<string> transformedOffsetImagePaths = new ObservableCollection<string>();
 
-        private CompositionMode _selectedCompositionMode;
+        private string _selectedForegroundCompositionMode;
+        private string _selectedBackgroundCompositionMode;
+        private string _selectedBackgroundMarksTextures;
 
         private GlyphRendering glyphRendering;
 
@@ -87,22 +91,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private OpenCvSharp.Size _currentKernelSize;
         private OpenCvSharp.Size _offsetKernelSize;
-        #endregion
-
-        #region Enums
-        public enum CompositionMode
-        {
-            SourceOver,     // 1
-            DestinationOver,// 2
-            SourceIn,       // 3
-            DestinationIn,  // 4
-            SourceOut,      // 5
-            DestinationOut, // 6
-            SourceAtop,     // 7
-            DestinationAtop,// 8
-            Clear,          // 9
-            XOR             // 10
-        }
         #endregion
 
         #region Public Variables
@@ -254,6 +242,32 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public ObservableCollection<string> CompositionModes
+        {
+            get => _compositionModes;
+            set
+            {
+                if (_compositionModes != value)
+                {
+                    _compositionModes = value;
+                    OnPropertyChanged(nameof(CompositionModes)); // Notify property changed
+                }
+            }
+        }
+
+        public ObservableCollection<string> BackgroundMarksTextures
+        {
+            get => _backgroundMarksTextures;
+            set
+            {
+                if (_backgroundMarksTextures != value)
+                {
+                    _backgroundMarksTextures = value;
+                    OnPropertyChanged(nameof(BackgroundMarksTextures)); // Notify property changed
+                }
+            }
+        }
+
         public ObservableCollection<ImageModel> SelectedFrames
         {
             get => _selectedFrames;
@@ -265,14 +279,42 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         }
         #endregion
 
-        public CompositionMode SelectedCompositionMode
+        public string SelectedForegroundCompositionMode
         {
-            get => _selectedCompositionMode;
+            get => _selectedForegroundCompositionMode;
             set
             {
-                _selectedCompositionMode = value;
-                Console.WriteLine("Selected Composition Mode: " + _selectedCompositionMode.ToString());
-                OnPropertyChanged(nameof(CompositionMode));
+                _selectedForegroundCompositionMode = value;
+                Console.WriteLine("Selected Foreground Composition Mode: " + _selectedForegroundCompositionMode.ToString());
+                OnPropertyChanged(nameof(SelectedForegroundCompositionMode));
+
+                // Trigger composition whenever the mode changes
+                ComposeImages();
+            }
+        }
+
+        public string SelectedBackgroundCompositionMode
+        {
+            get => _selectedBackgroundCompositionMode;
+            set
+            {
+                _selectedBackgroundCompositionMode = value;
+                Console.WriteLine("Selected Background Composition Mode: " + _selectedBackgroundCompositionMode.ToString());
+                OnPropertyChanged(nameof(SelectedBackgroundCompositionMode));
+
+                // Trigger composition whenever the mode changes
+                ComposeImages();
+            }
+        }
+
+        public string SelectedBackgroundMarksTextures
+        {
+            get => _selectedBackgroundMarksTextures;
+            set
+            {
+                _selectedBackgroundMarksTextures = value;
+                Console.WriteLine("Selected Background Marks Textures: " + _selectedBackgroundMarksTextures.ToString());
+                OnPropertyChanged(nameof(SelectedBackgroundMarksTextures));
 
                 // Trigger composition whenever the mode changes
                 ComposeImages();
@@ -626,6 +668,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             AreaSize = 40; // Default value
             SourceColors = new ObservableCollection<string>() { "Red", "Yellow", "Blue" };
             DestinationColors = new ObservableCollection<string>() { "Orange", "Green", "Purple" };
+            CompositionModes =  new ObservableCollection<string>() { "SourceOver", "DestinationOver", "SourceIn", 
+                "DestinationIn", "SourceOut", "DestinationOut", "SourceAtop", "DestinationAtop", "Clear", "XOR" };
+            BackgroundMarksTextures = new ObservableCollection<string>() { "Texture1", "Texture2", "Texture3" };
 
             // Initialize the ObservableCollection<ImageModel> for the Images
             Images = new ObservableCollection<ImageModel>();
@@ -669,7 +714,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             PreviousCommand = new RelayCommand(OnPrevious);
             NextCommand = new RelayCommand(OnNext);
             StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
-            SelectedCompositionMode = CompositionMode.SourceOver;
+            SelectedForegroundCompositionMode = "SourceOver";
 
             // Initialize the GlyphRendering class with default glyphs
             glyphRendering = new GlyphRendering("▲", "▼", "■", AreaSize);
@@ -1254,16 +1299,20 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-            if (name == nameof(SelectedCompositionMode))
+            if (name == nameof(SelectedForegroundCompositionMode))
             {
-                OnCompositionModeChanged(this, new PropertyChangedEventArgs(nameof(SelectedCompositionMode)));
+                OnCompositionModeChanged(this, new PropertyChangedEventArgs(nameof(SelectedForegroundCompositionMode)));
+            }
+            if(name == nameof(SelectedBackgroundCompositionMode))
+            {
+                OnCompositionModeChanged(this, new PropertyChangedEventArgs(nameof(SelectedBackgroundCompositionMode)));
             }
         }
 
         // Event handler for composition mode changes
         private void OnCompositionModeChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(SelectedCompositionMode))
+            if (e.PropertyName == nameof(SelectedForegroundCompositionMode) || e.PropertyName == nameof(SelectedBackgroundCompositionMode))
             {
                 if (CompositedImage != null)
                 {
