@@ -348,7 +348,7 @@
             <!-- Parent Control Pane : Center/Right -->
             <StackPanel Orientation="Vertical" Margin="0,5,0,0">
                 <!-- Timeline Overview -->
-                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="1100" Height="100">
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="1100" Height="70">
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
@@ -364,7 +364,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical">
                                         <!-- Empty triangle pointing down, visible if the cell is selected -->
-                                        <TextBlock Text="▽" FontFamily="Segoe UI" FontSize="12" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0">
+                                        <TextBlock Text="▽" FontFamily="Segoe UI" FontSize="10" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -378,7 +378,7 @@
                                         </TextBlock>
 
                                         <!-- Filled triangle pointing down, visible if the cell is the current frame -->
-                                        <TextBlock Text="▼" FontFamily="Segoe UI" FontSize="15" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-5,0,-2">
+                                        <TextBlock Text="▼" FontFamily="Segoe UI" FontSize="10" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-5,0,-2">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -400,7 +400,7 @@
                             Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
 
                                         <!-- Filled triangle pointing up, visible if the cell is the current frame -->
-                                        <TextBlock Text="▲" FontFamily="Segoe UI" FontSize="15" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
+                                        <TextBlock Text="▲" FontFamily="Segoe UI" FontSize="10" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -414,7 +414,7 @@
                                         </TextBlock>
 
                                         <!-- Empty triangle pointing up, visible if the cell is selected -->
-                                        <TextBlock Text="△" FontFamily="Segoe UI" FontSize="12" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0">
+                                        <TextBlock Text="△" FontFamily="Segoe UI" FontSize="10" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -435,7 +435,7 @@
                 </Border>
 
                 <!-- Zoomed Timeline View -->
-                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="1100" Height="100">
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="1100" Height="130">
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
@@ -451,7 +451,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical">
                                         <!-- Image Display -->
-                                        <Image Source="{Binding ImagePath}" Width="150" Height="Auto" Margin="0" HorizontalAlignment="Center"
+                                        <Image Source="{Binding ImagePath}" Width="100" Height="Auto" Margin="0" HorizontalAlignment="Center"
                                VerticalAlignment="Top"/>
 
                                         <!-- Frame Number -->

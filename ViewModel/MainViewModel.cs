@@ -510,33 +510,33 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public string PositiveGlyph
+        public string PositiveMark
         {
             get => _positiveGlyph;
             set
             {
                 _positiveGlyph = value;
-                OnPropertyChanged(nameof(PositiveGlyph));
+                OnPropertyChanged(nameof(PositiveMark));
             }
         }
 
-        public string NegativeGlyph
+        public string NegativeMark
         {
             get => _negativeGlyph; 
             set
             {
                 _negativeGlyph = value;
-                OnPropertyChanged(nameof(NegativeGlyph));
+                OnPropertyChanged(nameof(NegativeMark));
             }
         }
 
-        public string NoDifferenceGlyph
+        public string NoDifferenceMark
         {
             get => _noDifferenceGlyph; 
             set
             {
                 _noDifferenceGlyph = value;
-                OnPropertyChanged(nameof(NoDifferenceGlyph));
+                OnPropertyChanged(nameof(NoDifferenceMark));
             }
         }
 
@@ -643,7 +643,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
 
             // Initialize zoomed timeline cells with default values
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 11; i++)
             {
                 ZoommedTimelineCells.Add(new ImageModel
                 {
@@ -732,7 +732,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 return;
 
             int totalFrames = Images.Count;
-            int centerCellIndex = 2; // Center cell is always at index 2
+            int centerCellIndex = 4; // Center cell is always at index 2
 
             // Calculate the start index based on the desired center index
             int startIndex = currentFrameIndex - centerCellIndex;
@@ -970,35 +970,87 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             OffsetKernelSize = new OpenCvSharp.Size(SelectedOffsetBlurSize, SelectedOffsetBlurSize);
         }
 
-        private void ProcessCurrentTransforms()
+        /// <summary>
+        /// Processes frame transformations on an image, including optional XOR rendering, color inversion, alpha reduction, and blurring.
+        /// </summary>
+        /// <param name="frameImagePath">The file path of the image to be processed.</param>
+        /// <param name="isXORselected">A boolean indicating whether XOR rendering should be applied.</param>
+        /// <returns>The file path of the transformed image.</returns>
+        /// <exception cref="FileNotFoundException">Thrown if the specified image file does not exist.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the image fails to load from the specified path.</exception>
+        private string ProcessFraneTransforms(string frameImagePath, bool isXORselected)
         {
-            // Get the image paths for source
-            string currentImagePath = CurrentImage.ImagePath;
+            // Check if the file exists before attempting to load
+            if (!File.Exists(frameImagePath))
+            {
+                throw new FileNotFoundException("The specified image file does not exist.", frameImagePath);
+            }
 
-            // Load the images from their paths
-            Mat currentImage = Cv2.ImRead(currentImagePath);
+            // Load the image from its path
+            Mat originalImage = Cv2.ImRead(frameImagePath);
+            if (originalImage.Empty())
+            {
+                throw new InvalidOperationException("Failed to load the image from the specified path.");
+            }
 
             // Motion Extraction of the current image
             MotionExtraction motionExtraction = new MotionExtraction();
 
-            Mat invertCurrentImage = new Mat(currentImage);
+            // Step 1: Invert
+            Mat invertedImage = motionExtraction.InvertColors(originalImage);
 
-            // Step 1: Invert colors (if selected)
-            if (IsCurrentXORSelected)
+            // Step 1: Apply XOR rendering (if selected)
+            Mat transformedImage;
+            if (isXORselected)
             {
-                invertCurrentImage = motionExtraction.InvertColors(currentImage);
+                transformedImage = ReduceNoise(invertedImage);
             }
             else
             {
-                invertCurrentImage = currentImage;
+                transformedImage = invertedImage.Clone();
             }
 
             // Step 2: Reduce Alpha/Opacity
-            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(invertCurrentImage);
+            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage);
 
             // Step 3: Add Blur
             Mat blurCurrentImage = motionExtraction.BlurImage(reducedAlphaCurrentImage, CurrentKernelSize);
+            string transformedCurrentImagePath = SaveComposedImage(blurCurrentImage); // Save and get the file path
 
+            return transformedCurrentImagePath;
+        }
+
+        /// <summary>
+        /// Reduces background noise from an image using a series of image processing techniques.
+        /// </summary>
+        /// <param name="image">The input image from which to reduce noise.</param>
+        /// <returns>A Mat object containing the processed image with reduced background noise.</returns>
+        public Mat ReduceNoise(Mat image)
+        {
+            Mat result = new Mat();
+
+            // Step 1: Convert the image to grayscale
+            Mat grayImage = new Mat();
+            Cv2.CvtColor(image, grayImage, ColorConversionCodes.BGR2GRAY);
+
+            // Step 2: Apply Gaussian Blur to reduce noise
+            Mat blurredImage = new Mat();
+            Cv2.GaussianBlur(grayImage, blurredImage, new OpenCvSharp.Size(5, 5), 0);
+
+            // Step 3: Apply adaptive thresholding to create a binary image
+            Mat binaryImage = new Mat();
+            Cv2.AdaptiveThreshold(blurredImage, binaryImage, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.BinaryInv, 11, 2);
+
+            // Step 4: Apply morphological operations to remove small noise
+            Mat morphImage = new Mat();
+            Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(3, 3));
+            Cv2.MorphologyEx(binaryImage, morphImage, MorphTypes.Open, kernel);
+
+            // Step 5: Bitwise AND with the original image to retain the actual colors in the foreground
+            Mat colorForeground = new Mat();
+            Cv2.BitwiseAnd(image, image, colorForeground, morphImage);
+
+            return colorForeground;
         }
 
         // Composition logic based on the selected mode
@@ -1007,131 +1059,123 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Call the Composition Mode method from the model
             if (SelectedFrames != null && SelectedFrames.Count >= 2)
             {
-            //    // Get the image paths for source and destination images
-            //    string sourceImagePath = CurrentImage.ImagePath;
-            //    string destinationImagePath = SelectedFrames[1].ImagePath;
+                // Get the image paths for source and destination images
+                string sourceImagePath = CurrentImage.ImagePath;
+                string destinationImagePath = SelectedFrames[1].ImagePath;
 
-            //    // Load the images from their paths
-            //    Mat sourceImage = Cv2.ImRead(sourceImagePath);
-            //    Mat destinationImage = Cv2.ImRead(destinationImagePath);
+                // Do any image pre-processing from user selections
+                string processedSourceImage = ProcessFraneTransforms(sourceImagePath, IsCurrentXORSelected);
+                string processedDestinationImage = ProcessFraneTransforms(destinationImagePath, IsOffsetXORSelected);
 
-            //    // Motion Extraction of the sourceImage and destinationImage
-            //    MotionExtraction motionExtraction = new MotionExtraction();
-            //    CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
+                // Load the images from their paths
+                Mat sourceImage = Cv2.ImRead(processedSourceImage);
+                Mat destinationImage = Cv2.ImRead(processedDestinationImage);
 
-            //    // Step 1: Invert colors
-            //    Mat invertSourceImage = motionExtraction.InvertColors(sourceImage);
-            //    Mat invertDestinationImage = motionExtraction.InvertColors(destinationImage);
+                // Motion Extraction of the sourceImage and destinationImage
+                MotionExtraction motionExtraction = new MotionExtraction();
+                CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
 
-            //    // Step 2: Reduce Alpha/Opacity
-            //    Mat reducedAlphaSourceImage = motionExtraction.ReduceAlpha(invertSourceImage);
-            //    Mat reducedAlphaDestinationImage = motionExtraction.ReduceAlpha(invertDestinationImage);
+                CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(sourceImage, destinationImage), 4);
+                CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(sourceImage, destinationImage), 4);
+                CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(sourceImage, destinationImage), 4);
 
-            //    // Step 3: Add Blur
-                
-            //    Mat blurDestinationImage = motionExtraction.BlurImage(reducedAlphaDestinationImage, kernelSize);
+                // Step 4: Tint the Source red, and the Destination blue (temporary until color selector controls are added)
+                //Mat tintedSourceImage = ApplyColorTint(sourceImage, SelectedSourceBrush);
+                //Mat tintedDestinationImage = ApplyColorTint(destinationImage, SelectedDestinationBrush);
 
-            //    CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(blurSourceImage, blurDestinationImage), 4);
-            //    CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(blurSourceImage, blurDestinationImage), 4);
-            //    CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(blurSourceImage, blurDestinationImage), 4);
+                if (IsForePixelModeSelected)
+                {
+                    // Call the SourceOver method from the model
+                    switch (SelectedCompositionMode)
+                    {
+                        case CompositionMode.SourceOver:
+                            Mat composedImage = compositeModeRendering.SourceOver(sourceImage, destinationImage);
 
-            //    // Step 4: Tint the Source red, and the Destination blue (temporary until color selector controls are added)
-            //    Mat tintedSourceImage = ApplyColorTint(blurSourceImage, SelectedSourceBrush);
-            //    Mat tintedDestinationImage = ApplyColorTint(blurDestinationImage, SelectedDestinationBrush);
+                            string composedImagePath = SaveComposedImage(composedImage); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath); // Update the displayed image
+                            break;
+                        case CompositionMode.DestinationOver:
+                            Mat composedImage2 = compositeModeRendering.DestinationOver(sourceImage, destinationImage);
 
-            //    if (IsForePixelModeSelected)
-            //    {
-            //        // Call the SourceOver method from the model
-            //        switch (SelectedCompositionMode)
-            //        {
-            //            case CompositionMode.SourceOver:
-            //                Mat composedImage = compositeModeRendering.SourceOver(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath2 = SaveComposedImage(composedImage2); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath2); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath2); // Update the displayed image
+                            break;
+                        case CompositionMode.SourceIn:
+                            Mat composedImage3 = compositeModeRendering.SourceIn(sourceImage, destinationImage);
 
-            //                string composedImagePath = SaveComposedImage(composedImage); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath); // Update the displayed image
-            //                break;
-            //            case CompositionMode.DestinationOver:
-            //                Mat composedImage2 = compositeModeRendering.DestinationOver(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath3 = SaveComposedImage(composedImage3); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath3); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath3); // Update the displayed image
+                            break;
+                        case CompositionMode.DestinationIn:
+                            Mat composedImage4 = compositeModeRendering.DestinationIn(sourceImage, destinationImage);
 
-            //                string composedImagePath2 = SaveComposedImage(composedImage2); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath2); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath2); // Update the displayed image
-            //                break;
-            //            case CompositionMode.SourceIn:
-            //                Mat composedImage3 = compositeModeRendering.SourceIn(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath4 = SaveComposedImage(composedImage4); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath4); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath4); // Update the displayed image
+                            break;
+                        case CompositionMode.SourceOut:
+                            Mat composedImage5 = compositeModeRendering.SourceOut(sourceImage, destinationImage);
 
-            //                string composedImagePath3 = SaveComposedImage(composedImage3); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath3); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath3); // Update the displayed image
-            //                break;
-            //            case CompositionMode.DestinationIn:
-            //                Mat composedImage4 = compositeModeRendering.DestinationIn(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath5 = SaveComposedImage(composedImage5); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath5); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath5); // Update the displayed image
+                            break;
+                        case CompositionMode.DestinationOut:
+                            Mat composedImage6 = compositeModeRendering.DestinationOut(sourceImage, destinationImage);
 
-            //                string composedImagePath4 = SaveComposedImage(composedImage4); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath4); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath4); // Update the displayed image
-            //                break;
-            //            case CompositionMode.SourceOut:
-            //                Mat composedImage5 = compositeModeRendering.SourceOut(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath6 = SaveComposedImage(composedImage6); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath6); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath6); // Update the displayed image
+                            break;
+                        case CompositionMode.SourceAtop:
+                            Mat composedImage7 = compositeModeRendering.SourceAtop(sourceImage, destinationImage);
 
-            //                string composedImagePath5 = SaveComposedImage(composedImage5); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath5); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath5); // Update the displayed image
-            //                break;
-            //            case CompositionMode.DestinationOut:
-            //                Mat composedImage6 = compositeModeRendering.DestinationOut(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath7 = SaveComposedImage(composedImage7); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath7); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath7); // Update the displayed image
+                            break;
+                        case CompositionMode.DestinationAtop:
+                            Mat composedImage8 = compositeModeRendering.DestinationAtop(sourceImage, destinationImage);
 
-            //                string composedImagePath6 = SaveComposedImage(composedImage6); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath6); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath6); // Update the displayed image
-            //                break;
-            //            case CompositionMode.SourceAtop:
-            //                Mat composedImage7 = compositeModeRendering.SourceAtop(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath8 = SaveComposedImage(composedImage8); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath8); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath8); // Update the displayed image
+                            break;
+                        case CompositionMode.Clear:
+                            Mat composedImage9 = compositeModeRendering.Clear(sourceImage, destinationImage);
 
-            //                string composedImagePath7 = SaveComposedImage(composedImage7); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath7); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath7); // Update the displayed image
-            //                break;
-            //            case CompositionMode.DestinationAtop:
-            //                Mat composedImage8 = compositeModeRendering.DestinationAtop(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath9 = SaveComposedImage(composedImage9); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath9); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath9); // Update the displayed image
+                            break;
+                        case CompositionMode.XOR:
+                            Mat composedImage10 = compositeModeRendering.XOR(sourceImage, destinationImage);
 
-            //                string composedImagePath8 = SaveComposedImage(composedImage8); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath8); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath8); // Update the displayed image
-            //                break;
-            //            case CompositionMode.Clear:
-            //                Mat composedImage9 = compositeModeRendering.Clear(tintedSourceImage, tintedDestinationImage);
+                            string composedImagePath10 = SaveComposedImage(composedImage10); // Save and get the file path
+                            ComposedImagePaths.Add(composedImagePath10); // Add to the collection
+                            UpdateDisplayedImage(composedImagePath10); // Update the displayed image
+                            break;
+                        // Add cases for other composition modes as needed
+                        default:
+                            break;
+                    }
+                }
+                if (_isForeMarksModeSelected)
+                {
+                    // Glyph Rendering
+                   // glyphRendering.PositiveMark = PositiveMark;
+                   // glyphRendering.NegativeMark = NegativeMark;
+                   // glyphRendering.NoDifferenceMark = NoDifferenceMark;
 
-            //                string composedImagePath9 = SaveComposedImage(composedImage9); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath9); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath9); // Update the displayed image
-            //                break;
-            //            case CompositionMode.XOR:
-            //                Mat composedImage10 = compositeModeRendering.XOR(tintedSourceImage, tintedDestinationImage);
+                    Mat compositedFrame = glyphRendering.RenderDifferences(sourceImage, destinationImage, AreaSize);
 
-            //                string composedImagePath10 = SaveComposedImage(composedImage10); // Save and get the file path
-            //                ComposedImagePaths.Add(composedImagePath10); // Add to the collection
-            //                UpdateDisplayedImage(composedImagePath10); // Update the displayed image
-            //                break;
-            //            // Add cases for other composition modes as needed
-            //            default:
-            //                break;
-            //        }
-            //    }
-            //    if(_isForeMarksModeSelected)
-            //    {
-            //        // Glyph Rendering
-            //        glyphRendering.PositiveGlyph = PositiveGlyph;
-            //        glyphRendering.NegativeGlyph = NegativeGlyph;
-            //        glyphRendering.NoDifferenceGlyph = NoDifferenceGlyph;
-
-            //        Mat compositedFrame = glyphRendering.RenderDifferences(blurSourceImage, blurDestinationImage, AreaSize);
-
-            //        string composedImagePath = SaveComposedImage(compositedFrame);
-            //        ComposedImagePaths.Add(composedImagePath); // Add to the collection
-            //        UpdateDisplayedImage(composedImagePath); // Update the displayed image
-            //    }  
+                    string composedImagePath = SaveComposedImage(compositedFrame);
+                    ComposedImagePaths.Add(composedImagePath); // Add to the collection
+                    UpdateDisplayedImage(composedImagePath); // Update the displayed image
+                }
             }
         }
 
@@ -1148,7 +1192,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CompositedImage = new ImageModel { ImagePath = imagePath };
             OnPropertyChanged(nameof(CompositedImage));
         }
-
 
         /// <summary>
         /// Applies a color tint to the given image using the specified brush color, ensuring 60% opacity.
