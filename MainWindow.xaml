@@ -532,7 +532,9 @@
 
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="Tint Color:" FontWeight="Bold"/>
-                                        <ComboBox x:Name="CurrentFrameSourceColor" Width="100" Margin="5" ItemsSource="{Binding SourceColors}" SelectedValue="{Binding SelectedSourceColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToColorConverter}}" >
+                                        <ComboBox x:Name="CurrentFrameSourceColor" Width="100" Margin="5" 
+                                                  ItemsSource="{Binding SourceColors}" 
+                                                  SelectedValue="{Binding SelectedSourceColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToColorConverter}}" >
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding}" />
@@ -543,7 +545,9 @@
 
                                     <StackPanel Orientation="Horizontal">
                                         <Label FontWeight="Bold">Blur:</Label>
-                                        <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedCurrentBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
+                                        <ComboBox Width="100" Margin="5,0,0,0" 
+                                                  ItemsSource="{Binding BlurValue}" 
+                                                  SelectedValue="{Binding SelectedCurrentBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding}" />
@@ -551,6 +555,8 @@
                                             </ComboBox.ItemTemplate>
                                         </ComboBox>
                                     </StackPanel>
+                                    
+                                    <!-- TODO: Preview of Image Transforms -->
                                 </StackPanel>
 
                             </DockPanel>
@@ -589,7 +595,9 @@
                                     <StackPanel Orientation="Vertical">
                                         <StackPanel Orientation="Horizontal">
                                             <Label Content="Tint Color:" FontWeight="Bold"/>
-                                            <ComboBox x:Name="OffsetFrameDestinationColor" Width="100" Margin="5" ItemsSource="{Binding DestinationColors}" SelectedValue="{Binding SelectedDestinationColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToColorConverter}}" >
+                                            <ComboBox x:Name="OffsetFrameDestinationColor" Width="100" Margin="5" 
+                                                      ItemsSource="{Binding DestinationColors}" 
+                                                      SelectedValue="{Binding SelectedDestinationColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToColorConverter}}" >
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
                                                         <TextBlock Text="{Binding}" />
@@ -610,6 +618,7 @@
                                             </ComboBox>
                                         </StackPanel>
 
+                                        <!-- TODO: Preview of Image Transforms -->
                                     </StackPanel>
                                 </StackPanel>
                             </DockPanel>

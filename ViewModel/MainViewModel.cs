@@ -14,6 +14,10 @@ using System.Windows.Media;
 using System.Drawing;
 using System;
 using System.Diagnostics.Eventing.Reader;
+using System.Linq;
+using TemporalMotionExtractionAnalysis.Converters;
+using static System.Resources.ResXFileRef;
+using System.Globalization;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -653,10 +657,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// </summary>
         public MainViewModel()
         {
-            // Initialize the Color values
-            SelectedSourceColor = System.Windows.Media.Color.FromArgb(0,255,0,0); //Red - Transparent
-            SelectedDestinationColor = System.Windows.Media.Color.FromArgb(0,0,0,255); //Blue - Transparent
-
             // Initialize the variables for the View Textboxes & Combobox
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
@@ -676,6 +676,22 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CompositionModes =  new ObservableCollection<string>() { "SourceOver", "DestinationOver", "SourceIn", 
                 "DestinationIn", "SourceOut", "DestinationOut", "SourceAtop", "DestinationAtop", "Clear", "XOR" };
             BackgroundMarksTextures = new ObservableCollection<string>() { "Texture1", "Texture2", "Texture3" };
+
+            // Create an instance of the StringToColorConverter
+            var converter = new StringToColorConverter();
+
+            // Initialize the Color values
+            // Set the default selected value to the first item in the collection
+            if (SourceColors.Any())
+            {
+                SelectedSourceColor = (System.Windows.Media.Color)converter.ConvertBack(SourceColors.First(), typeof(System.Windows.Media.Color), null, CultureInfo.InvariantCulture);
+            }
+
+            // Set the default selected value to the first item in the collection
+            if (DestinationColors.Any())
+            {
+                SelectedDestinationColor = (System.Windows.Media.Color)converter.ConvertBack(DestinationColors.First(), typeof(System.Windows.Media.Color), null, CultureInfo.InvariantCulture);
+            }
 
             // Initialize the ObservableCollection<ImageModel> for the Images
             Images = new ObservableCollection<ImageModel>();
@@ -1245,7 +1261,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// This method extracts the color values from the given brush and creates a Scalar
         /// object representing the tint color. It then applies the tint color to the input image
         /// by blending the input image with the tint color and sets the opacity to 60%.
-        /// </remarks>
         private Mat ApplyColorTint(Mat image, SolidColorBrush tintColorBrush)
         {
             // Extract color values from the brush
@@ -1257,33 +1272,30 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             Mat alphaChannel = channels.Length == 4 ? channels[3] : Mat.Ones(image.Size(), MatType.CV_8UC1) * 255;
 
             // Create a new Mat for the tinted image
-            Mat tintedRGB = new Mat();
-            Cv2.Multiply(image, new Scalar(0.5, 0.5, 0.5, 1.0), tintedRGB); // Reduce the original image brightness by 50%
+            Mat tintedImage = new Mat();
+            Cv2.Multiply(image, new Scalar(0.5, 0.5, 0.5, 1.0), tintedImage); // Reduce the original image brightness by 50%
             Mat tintMat = new Mat(image.Size(), image.Type(), tint);
-            Cv2.AddWeighted(tintedRGB, 1.0, tintMat, 0.5, 0, tintedRGB); // Apply the tint color
+            Cv2.AddWeighted(tintedImage, 0.5, tintMat, 0.5, 0, tintedImage); // Apply the tint color
 
             // Create a new alpha channel with 60% opacity
-            Mat alpha60 = new Mat(image.Size(), MatType.CV_8UC1, new Scalar(153)); // 60% of 255 is 153
+            Mat alpha60 = alphaChannel * 0.6; // 60% of the original alpha values
 
-            // Merge the tinted RGB channels with the new alpha channel
             if (channels.Length == 4)
             {
-                Mat[] tintedChannels = new Mat[4];
-                Cv2.Split(tintedRGB, out tintedChannels);
-                tintedChannels[3] = alpha60; // Set the new alpha channel
-                Cv2.Merge(tintedChannels, tintedRGB);
+                // If the original image had an alpha channel, update the alpha channel
+                channels[3] = alpha60;
+                Cv2.Merge(channels, tintedImage);
             }
             else
             {
                 // If the original image did not have an alpha channel, add the alpha channel
-                Mat[] tintedChannels = Cv2.Split(tintedRGB);
+                Mat[] tintedChannels = Cv2.Split(tintedImage);
                 Mat[] mergedChannels = new Mat[] { tintedChannels[0], tintedChannels[1], tintedChannels[2], alpha60 };
-                Cv2.Merge(mergedChannels, tintedRGB);
+                Cv2.Merge(mergedChannels, tintedImage);
             }
 
-            return tintedRGB;
+            return tintedImage;
         }
-
         #endregion
 
         #region EventHandlers

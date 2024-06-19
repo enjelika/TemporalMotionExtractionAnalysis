@@ -15,7 +15,10 @@ namespace TemporalMotionExtractionAnalysis.Converters
         {
             if (value is System.Windows.Media.Color)
             {
-                return ((Color)value).ToString();
+                if (value.Equals(System.Windows.Media.Colors.DarkGray))
+                    return "none";
+                else
+                    return ((Color)value).ToString();
             }
             return "0"; // Default value in case of an error
         }
