@@ -124,12 +124,12 @@
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Indication Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         
-                        <StackPanel Orientation="Vertical">
-                            <Image Source="{Binding IndicationImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top" Margin="0,5,0,0"/>
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                            <Image Source="{Binding IndicationImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Center" Margin="0,5,0,0"/>
 
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <Label Content="Frame Number:" FontWeight="Bold" />
-                                <TextBlock Text="{Binding IndicationImage.FrameNumber}" HorizontalAlignment="Center" Margin="0"/>
+                                <TextBlock Text="{Binding IndicationImage.FrameNumber}" VerticalAlignment="Center" Margin="0"/>
                             </StackPanel>
                         </StackPanel>
                     </DockPanel>
@@ -417,6 +417,11 @@
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <EventSetter Event="MouseEnter" Handler="ListBoxItem_MouseEnter" />
+                                </Style>
+                            </ListBox.ItemContainerStyle>
                         </ListBox>
                     </DockPanel>
                 </Border>
