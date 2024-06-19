@@ -562,8 +562,8 @@
                                     <!-- Transparency Slider -->
                                     <StackPanel>
                                         <TextBlock Text = "Transparency" Margin = "5,0,0,0" FontWeight="Bold" />
-                                        <Slider x:Name = "CurrentFrameTransparency" Minimum = "0" Maximum = "100" TickFrequency = "2" 
-                                            TickPlacement = "BottomRight" ValueChanged = "currentFrameTransparency_ValueChanged" Margin = "5">
+                                        <Slider x:Name = "CurrentFrameTransparency" Minimum = "0" Maximum = "100" TickFrequency = "2"
+                                                Margin = "5" Value="{Binding CurrentFrameTransparency, Mode=TwoWay}">
                                             <Slider.Background>
                                                 <LinearGradientBrush EndPoint = "0.5,1" StartPoint = "0.5,0">
                                                     <GradientStop Color = "DarkGray" Offset = "0" />
@@ -571,7 +571,7 @@
                                                 </LinearGradientBrush>
                                             </Slider.Background>
                                         </Slider>
-                                        <TextBlock x:Name = "textBlock1" Margin = "10" Text = "Level: 0" />
+                                        <TextBlock x:Name = "textBlock1" Margin = "10" Text ="{Binding Path=CurrentFrameTransparency, Mode=TwoWay, Converter={StaticResource StringToIntConverter}}"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
@@ -636,8 +636,8 @@
                                     <!-- Transparency/Opacity/Alpha Slider -->
                                     <StackPanel>
                                         <TextBlock Text = "Transparency" Margin = "5,0,0,0" FontWeight="Bold" />
-                                        <Slider x:Name = "OffsetFrameTransparency" Minimum = "0" Maximum = "100" TickFrequency = "2" 
-                                        TickPlacement = "BottomRight" ValueChanged = "offsetFrameTransparency_ValueChanged" Margin = "5">
+                                        <Slider x:Name = "OffsetFrameTransparency" Minimum = "0" Maximum = "100" TickFrequency = "2"
+                                            Margin = "5" Value="{Binding OffsetFrameTransparency, Mode=TwoWay}">
                                             <Slider.Background>
                                                 <LinearGradientBrush EndPoint = "0.5,1" StartPoint = "0.5,0">
                                                     <GradientStop Color = "DarkGray" Offset = "0" />
@@ -645,7 +645,7 @@
                                                 </LinearGradientBrush>
                                             </Slider.Background>
                                         </Slider>
-                                        <TextBlock x:Name = "textBlock2" Margin = "10" Text = "Level: 0" />
+                                        <TextBlock x:Name = "textBlock2" Margin = "10" Text ="{Binding Path=OffsetFrameTransparency, Mode=TwoWay, Converter={StaticResource StringToIntConverter}}"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Vertical">

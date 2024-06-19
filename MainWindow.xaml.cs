@@ -45,29 +45,5 @@ namespace TemporalMotionExtractionAnalysis
                 }
             }
         }
-
-        private void currentFrameTransparency_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            int value = Convert.ToInt32(e.NewValue);
-            string msg = String.Format("Level: {0}", value);
-            this.textBlock1.Text = msg;
-            var viewModel = DataContext as MainViewModel;
-            if (viewModel != null)
-            {
-                viewModel.CurrentFrameTransparency = value;
-            }
-        }
-
-        private void offsetFrameTransparency_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            int value = Convert.ToInt32(e.NewValue);
-            string msg = String.Format("Level: {0}", value);
-            this.textBlock2.Text = msg;
-            //var viewModel = DataContext as MainViewModel;
-            //if (viewModel != null)
-            //{
-            //    viewModel.OffsetFrameTransparency = value;
-            //}
-        }
     }
 }

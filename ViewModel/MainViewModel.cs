@@ -734,8 +734,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             ZoommedTimelineCells = new ObservableCollection<ImageModel>();
 
             // Default values for sliders
-            CurrentFrameTransparency = 0;
-            OffsetFrameTransparency = 0;
+            CurrentFrameTransparency = 50;
+            OffsetFrameTransparency = 50;
 
             // Radio button defaults
             IsForePixelModeSelected = true;
