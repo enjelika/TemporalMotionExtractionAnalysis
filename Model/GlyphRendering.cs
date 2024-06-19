@@ -8,9 +8,9 @@ namespace TemporalMotionExtractionAnalysis.Model
     internal class GlyphRendering
     {
         // Glyphs for positive, negative, and no difference areas
-        public string PositiveGlyph { get; set; }
-        public string NegativeGlyph { get; set; }
-        public string NoDifferenceGlyph { get; set; }
+        public string PositiveMark { get; set; }
+        public string NegativeMark { get; set; }
+        public string NoDifferenceMark { get; set; }
 
         public string BackgroundMark { get; set; }
 
@@ -24,7 +24,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             BackgroundMark = "\xE10A"; // Unicode escape sequence for '&#xE10A;'
         }
 
-        public Mat RenderDifferences(Mat mat1, Mat mat2)
+        public Mat XorImages(Mat currentImage, Mat offsetImage)
         {
             // Perform XOR operation between the current image and the offset image
             Mat xorImage = new Mat();
@@ -127,7 +127,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             return BitmapConverter.ToMat(bitmap);
         }
 
-
+        /*
         public Mat RenderDifferences2(Mat currentImage, Mat offsetImage, int areaSize)
         {
             // Ensure both Mats have the same size and type
@@ -158,17 +158,17 @@ namespace TemporalMotionExtractionAnalysis.Model
 
                         if (diff > 0)
                         {
-                            glyph = PositiveGlyph;
+                            glyph = PositiveMark;
                             brush = positiveBrush;
                         }
                         else if (diff < 0)
                         {
-                            glyph = NegativeGlyph;
+                            glyph = NegativeMark;
                             brush = negativeBrush;
                         }
                         else
                         {
-                            glyph = NoDifferenceGlyph;
+                            glyph = NoDifferenceMark;
                             brush = noDifferenceBrush;
                         }
 
@@ -180,5 +180,6 @@ namespace TemporalMotionExtractionAnalysis.Model
             // Convert the bitmap back to a Mat
             return BitmapConverter.ToMat(bitmap);
         }
+        */
     }
 }

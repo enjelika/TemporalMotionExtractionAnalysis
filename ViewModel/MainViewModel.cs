@@ -1010,9 +1010,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 if(isMarksModeSelected)
                 {
                     // Glyph Rendering
-                    glyphRendering.PositiveGlyph = PositiveGlyph;
-                    glyphRendering.NegativeGlyph = NegativeGlyph;
-                    glyphRendering.NoDifferenceGlyph = NoDifferenceGlyph;
+                    glyphRendering.PositiveMark = PositiveGlyph;
+                    glyphRendering.NegativeMark = NegativeGlyph;
+                    glyphRendering.NoDifferenceMark = NoDifferenceGlyph;
 
                     Mat compositedFrame = glyphRendering.RenderDifferences(blurSourceImage, blurDestinationImage);
 
