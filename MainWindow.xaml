@@ -141,7 +141,7 @@
                 </Border>
 
                 <!-- Foreground Visual Encoding Options Border with Label -->
-                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="342">
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="280">
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Foreground Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="5,0">
@@ -261,7 +261,7 @@
                 </Border>
 
                 <!-- Background Visual Encoding Options Border with Label -->
-                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="100">
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="160">
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Background Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="5,0">
@@ -471,10 +471,11 @@
                     <!-- Animation Frame -->
                     <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="240">
                         <DockPanel Background="White">
-                            <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
-
+                            <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                            
                             <!-- Animation of images in selected folder -->
-                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="350" Margin="0,-5,0,0"/>
+                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="400" Margin="0,2,0,15"/>
+
                         </DockPanel>
                     </Border>
                     
@@ -483,9 +484,32 @@
                         <DockPanel Background="White">
                             <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                            <ItemsControl ItemsSource="{Binding SelectedFrames}" 
-                                          ItemTemplateSelector="{StaticResource IndexBasedTemplateSelector}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <ItemsControl ItemsSource="{Binding SelectedFrames}" 
+                                        ItemTemplateSelector="{StaticResource IndexBasedTemplateSelector}" Height="Auto" Width="400" Margin="0,0,0,0"/>
 
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="10,0,0,0" Width="120">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                        <Label Content="Frame Offset:" FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.OffsetValue, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="E-measure:" FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedEmeasure, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="MAE:" FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedMAE, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="SSIM:" FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedSSIM, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
                         </DockPanel>
                     </Border>
                 </StackPanel>
@@ -497,10 +521,10 @@
                             <DockPanel Background="White">
                                 <TextBlock DockPanel.Dock="Top" Text="Current Frame Transforms" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
-                                <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Vertical" Margin="5,5,0,0">
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="XOR:" FontWeight="Bold"/>
-                                        <RadioButton Content="On" IsChecked="{Binding IsCurrentXORSelected, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XORCurrentGroup"/>
+                                        <Label Content="Reduce Noise:" FontWeight="Bold"/>
+                                        <RadioButton Content="On" IsChecked="{Binding IsCurrentXORSelected, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XORCurrentGroup" Margin="0,0,8,0"/>
                                         <RadioButton Content="Off" IsChecked="{Binding IsCurrentXORSelected, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XORCurrentGroup"/>
                                     </StackPanel>
 
@@ -540,29 +564,8 @@
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <!-- Composite Image from the SelectedFrames -->
-                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="600" Margin="0,-10,0,0" HorizontalAlignment="Left"/>
+                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="650" Margin="0,-10,0,0" HorizontalAlignment="Left"/>
 
-                                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="15,0,0,0" Width="150">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                                        <Label Content="Frame Offset:" FontWeight="Bold"/>
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.OffsetValue, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="E-measure:" FontWeight="Bold"/>
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedEmeasure, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="MAE:" FontWeight="Bold"/>
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedMAE, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="SSIM:" FontWeight="Bold"/>
-                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedSSIM, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                    </StackPanel>
-                                </StackPanel>
                             </StackPanel>
 
                         </DockPanel>
@@ -574,10 +577,10 @@
                             <DockPanel Background="White">
                                 <TextBlock DockPanel.Dock="Top" Text="Offset Frame Transforms" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
-                                <StackPanel Orientation="Vertical" Margin="5,0,0,0">
+                                <StackPanel Orientation="Vertical" Margin="5,5,0,0">
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="XOR:" FontWeight="Bold"/>
-                                        <RadioButton Content="On" IsChecked="{Binding IsOffsetXORSelected, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XOROffsetGroup"/>
+                                        <Label Content="Reduce Noise:" FontWeight="Bold"/>
+                                        <RadioButton Content="On" IsChecked="{Binding IsOffsetXORSelected, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XOROffsetGroup" Margin="0,0,8,0"/>
                                         <RadioButton Content="Off" IsChecked="{Binding IsOffsetXORSelected, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XOROffsetGroup"/>
                                     </StackPanel>
 
