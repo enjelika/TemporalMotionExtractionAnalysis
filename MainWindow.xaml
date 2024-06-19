@@ -332,9 +332,10 @@
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
-                        <ListBox ItemsSource="{Binding TimelineCells}" HorizontalAlignment="Stretch" Height="Auto" Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
-                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
-                 SelectionMode="Single" SelectionChanged="ListBox_SelectionChanged" BorderBrush="Transparent">
+                        <ListBox ItemsSource="{Binding TimelineCells}" HorizontalAlignment="Stretch" Height="Auto" 
+                                 Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                                 SelectionMode="Single" SelectionChanged="ListBox_SelectionChanged" BorderBrush="Transparent">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal"/>
@@ -358,7 +359,8 @@
                                         </TextBlock>
 
                                         <!-- Filled triangle pointing down, visible if the cell is the current frame -->
-                                        <TextBlock Text="▼" FontFamily="Segoe UI" FontSize="10" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-5,0,-2">
+                                        <TextBlock Text="▼" FontFamily="Segoe UI" FontSize="10" FontWeight="ExtraBold" Foreground="Black" 
+                                                   HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-5,0,-2">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -380,7 +382,8 @@
                             Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
 
                                         <!-- Filled triangle pointing up, visible if the cell is the current frame -->
-                                        <TextBlock Text="▲" FontFamily="Segoe UI" FontSize="10" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
+                                        <TextBlock Text="▲" FontFamily="Segoe UI" FontSize="10" FontWeight="ExtraBold" Foreground="Black" 
+                                                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -420,8 +423,9 @@
                         <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
                         <ListBox ItemsSource="{Binding ZoommedTimelineCells}" HorizontalAlignment="Stretch" Height="Auto" BorderBrush="Transparent"
-                 Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
-                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                                 Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                                 SelectionMode="Single" SelectionChanged="ListBox_SelectionChanged">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>

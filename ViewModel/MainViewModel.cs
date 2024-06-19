@@ -175,7 +175,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set 
             { 
                 _timelineCells = value;
-                OnPropertyChanged(nameof(TimelineCells)); 
+                OnPropertyChanged(nameof(TimelineCells));
             }
         }
 
@@ -1382,29 +1382,31 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// </remarks>
         public void HandleSelectionChanged(System.Collections.IList selectedItems)
         {
-            // Reset all selections
+            // Update the IsOffsetSelection property for TimelineCells
             foreach (var image in TimelineCells)
             {
-                if (selectedItems.Contains(image))
+                image.IsOffsetSelection = false; // Reset all selections
+                foreach (var selectedItem in selectedItems)
                 {
-                    image.IsOffsetSelection = true;
-                }
-                else
-                {
-                    image.IsOffsetSelection = false;
+                    if (selectedItem is ImageModel selectedImage && image.FrameNumber == selectedImage.FrameNumber)
+                    {
+                        image.IsOffsetSelection = true;
+                        break;
+                    }
                 }
             }
 
-            // Reset all selections
+            // Update the IsOffsetSelection property for ZoomedTimelineCells
             foreach (var image in ZoommedTimelineCells)
             {
-                if (selectedItems.Contains(image))
+                image.IsOffsetSelection = false; // Reset all selections
+                foreach (var selectedItem in selectedItems)
                 {
-                    image.IsOffsetSelection = true;
-                }
-                else
-                {
-                    image.IsOffsetSelection = false;
+                    if (selectedItem is ImageModel selectedImage && image.FrameNumber == selectedImage.FrameNumber)
+                    {
+                        image.IsOffsetSelection = true;
+                        break;
+                    }
                 }
             }
 
@@ -1417,15 +1419,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     if (item is ImageModel imageModel)
                     {
                         // Current Frame
-                        SelectedFrames.Add(Images[CurrentIndex]);
-                        SelectedFrames[0].IsOffsetSelection = true;
-                       
+                        var currentFrame = Images[CurrentIndex];
+                        currentFrame.IsOffsetSelection = true;
+                        SelectedFrames.Add(currentFrame);
+
                         // User Selected Offset Frame
+                        imageModel.IsOffsetSelection = true;
                         SelectedFrames.Add(imageModel);
-                        SelectedFrames[1].IsOffsetSelection = true;
 
                         // Calculate Frame Offset value
-                        OffsetValue = SelectedFrames[1].FrameNumber - SelectedFrames[0].FrameNumber;
+                        OffsetValue = imageModel.FrameNumber - currentFrame.FrameNumber;
                     }
                 }
             }
@@ -1435,7 +1438,14 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 // Log an error
                 Debug.WriteLine("Error: More than two items were selected.");
             }
+
+            // Notify property changed for any UI updates
+            OnPropertyChanged(nameof(TimelineCells));
+            OnPropertyChanged(nameof(ZoommedTimelineCells));
+            OnPropertyChanged(nameof(SelectedFrames));
         }
+
+
         #endregion
     }
 }
