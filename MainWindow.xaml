@@ -26,7 +26,7 @@
                 <!-- Empty template for non-second items -->
             </StackPanel>
         </DataTemplate>
-        
+
         <!-- Converter Resources -->
         <models:IndexBasedTemplateSelector x:Key="IndexBasedTemplateSelector"
                                   SecondItemTemplate="{StaticResource SecondItemTemplate}"
@@ -470,7 +470,7 @@
                         </ListBox>
                     </DockPanel>
                 </Border>
-                
+
                 <StackPanel Orientation="Horizontal">
                     <!-- Animation Frame -->
                     <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="240">
@@ -497,7 +497,7 @@
 
                         </DockPanel>
                     </Border>
-                    
+
                     <!-- Offset Frame -->
                     <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="240">
                         <DockPanel Background="White">
@@ -587,7 +587,7 @@
                                             </ComboBox.ItemTemplate>
                                         </ComboBox>
                                     </StackPanel>
-                                    
+
                                     <!-- TODO: Preview of Image Transforms -->
                                 </StackPanel>
 
@@ -671,8 +671,41 @@
                     </StackPanel>
 
                 </StackPanel>
-                
+
             </StackPanel>
         </StackPanel>
+
+        <!-- Arrows -->
+        <TextBlock FontFamily="Segoe UI Symbol"
+                   FontSize="40"
+                   FontWeight="Bold"
+                   Text="&#x2193;"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Foreground="Black" Margin="626,448,0,0"/>
+
+        <TextBlock FontFamily="Segoe UI Symbol"
+                   FontSize="40"
+                   FontWeight="Bold"
+                   Text="&#x2193;"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Foreground="Black" Margin="1005,448,0,0"/>
+
+        <TextBlock FontFamily="Segoe UI Symbol"
+                   FontSize="40"
+                   FontWeight="Bold"
+                   Text="&#x2192;"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Foreground="Black" Margin="454,676,0,0"/>
+        
+        <TextBlock FontFamily="Segoe UI Symbol"
+                   FontSize="40"
+                   FontWeight="Bold"
+                   Text="&#x2190;"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Foreground="Black" Margin="1148,676,0,0"/>
     </Grid>
 </Window>
