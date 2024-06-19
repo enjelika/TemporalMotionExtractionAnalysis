@@ -1092,7 +1092,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
 
             // Step 3: Reduce Alpha/Opacity
-            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage);
+            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage, 0.5);
 
             // Step 4: Add Blur
             Mat blurCurrentImage = motionExtraction.BlurImage(reducedAlphaCurrentImage, CurrentKernelSize);
@@ -1248,9 +1248,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 if (_isForeMarksModeSelected)
                 {
                     // Glyph Rendering
-                    glyphRendering.PositiveGlyph = PositiveGlyph;
-                    glyphRendering.NegativeGlyph = NegativeGlyph;
-                    glyphRendering.NoDifferenceGlyph = NoDifferenceGlyph;
+                    glyphRendering.PositiveMark = PositiveMark;
+                    glyphRendering.PositiveMark = NegativeMark;
+                    glyphRendering.PositiveMark = NoDifferenceMark;
 
                     Mat compositedFrame = glyphRendering.RenderDifferences(tintedSourceImage, tintedDestinationImage, AreaSize);
 
