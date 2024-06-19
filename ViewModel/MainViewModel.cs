@@ -18,6 +18,8 @@ using System.Linq;
 using TemporalMotionExtractionAnalysis.Converters;
 using static System.Resources.ResXFileRef;
 using System.Globalization;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
+using System.Security.Policy;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -1061,11 +1063,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// Processes frame transformations on an image, including optional XOR rendering, color inversion, alpha reduction, and blurring.
         /// </summary>
         /// <param name="frameImagePath">The file path of the image to be processed.</param>
-        /// <param name="isXORselected">A boolean indicating whether XOR rendering should be applied.</param>
+        /// <param name="isReduceNoiseSelected">A boolean indicating whether XOR rendering should be applied.</param>
         /// <returns>The file path of the transformed image.</returns>
         /// <exception cref="FileNotFoundException">Thrown if the specified image file does not exist.</exception>
         /// <exception cref="InvalidOperationException">Thrown if the image fails to load from the specified path.</exception>
-        private string ProcessFraneTransforms(string frameImagePath, bool isXORselected)
+        private string ProcessFraneTransforms(string frameImagePath, bool isReduceNoiseSelected)
         {
             // Check if the file exists before attempting to load
             if (!File.Exists(frameImagePath))
@@ -1086,9 +1088,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Step 1: Invert
             Mat invertedImage = motionExtraction.InvertColors(originalImage);
 
-            // Step 2: Apply XOR rendering (if selected)
+            // Step 2: Apply Reduction of Noise (if selected)
             Mat transformedImage;
-            if (isXORselected)
+            if (isReduceNoiseSelected)
             {
                 transformedImage = ReduceNoise(invertedImage);
             }
@@ -1098,7 +1100,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
 
             // Step 3: Reduce Alpha/Opacity
-            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage);
+            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage, 0.4);
 
             // Step 4: Add Blur
             Mat blurCurrentImage = motionExtraction.BlurImage(reducedAlphaCurrentImage, CurrentKernelSize);
@@ -1177,9 +1179,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     switch (SelectedForegroundCompositionMode)
                     {
                         case "SourceOver":
-                            Mat composedImage = compositeModeRendering.SourceOver(tintedSourceImage, tintedDestinationImage);
+                            Mat combinedImage = compositeModeRendering.SourceOver(tintedSourceImage, tintedDestinationImage);
 
-                            string composedImagePath = SaveComposedImage(composedImage); // Save and get the file path
+                            // Create a black background with the same size as the source image
+                            //Mat blackBackground = new Mat(sourceImage.Size(), sourceImage.Type(), new Scalar(0, 0, 0));
+                            //Mat composedImage = compositeModeRendering.SourceOver(combinedImage, blackBackground);
+
+                            string composedImagePath = SaveComposedImage(combinedImage); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath); // Add to the collection
                             UpdateDisplayedImage(composedImagePath); // Update the displayed image
                             break;

@@ -17,6 +17,25 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
         #region MotionExtraction Image Processing Steps
+        /// <summary>
+        /// Inverts the colors of the input image.
+        /// </summary>
+        /// <param name="inputImage">The input Mat image whose colors need to be inverted.</param>
+        /// <returns>
+        /// A new Mat object containing the inverted image.
+        /// </returns>
+        /// <remarks>
+        /// This function creates a new Mat object to store the inverted image. 
+        /// It uses the OpenCV function Cv2.BitwiseNot to invert the colors of the input image.
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// Mat inputImage = Cv2.ImRead("path_to_image.jpg");
+        /// Mat invertedImage = InvertColors(inputImage);
+        /// Cv2.ImWrite("path_to_save_inverted_image.jpg", invertedImage);
+        /// </code>
+        /// This example demonstrates how to use the InvertColors function to invert the colors of an image and save the result.
+        /// </example>
         public Mat InvertColors(Mat inputImage)
         {
             // Create a new Mat to store the inverted image
@@ -37,14 +56,14 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// This method converts the input image to grayscale, converts it to RGBA mode if necessary,
         /// and then reduces the opacity based on pixel intensity.
         /// </remarks>
-        public Mat ReduceAlpha(Mat image)
+        public Mat ReduceAlpha(Mat image, double transparencyValue)
         {
             Mat result = image.Clone();
             Mat[] channels = Cv2.Split(result);
             if (channels.Length == 4)
             {
                 Mat alpha = channels[3];
-                alpha *= 0.6; // Reduce alpha by 60%
+                alpha *= transparencyValue;
                 channels[3] = alpha;
                 Cv2.Merge(channels, result);
             }
