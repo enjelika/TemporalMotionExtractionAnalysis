@@ -655,20 +655,23 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         public MainViewModel()
         {
             // Initialize the Color values
-            SelectedSourceColor = System.Windows.Media.Color.FromRgb(255,0,0); //Red
-            SelectedDestinationColor = System.Windows.Media.Color.FromRgb(0,0,255); //Blue
+            SelectedSourceColor = System.Windows.Media.Color.FromArgb(0,255,0,0); //Red - Transparent
+            SelectedDestinationColor = System.Windows.Media.Color.FromArgb(0,0,0,255); //Blue - Transparent
 
             // Initialize the variables for the View Textboxes & Combobox
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
-            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" };
-            BlurValue = new ObservableCollection<string>() { "5", "7", "9" };
+            
             SelectedFps = 4; // Default value is 4
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
             SelectedCurrentBlurSize = 7; // Default value is 7
             SelectedOffsetBlurSize = 7;
             AreaSize = 40; // Default value
+
+            // String values for comboboxes in the View
+            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" };
+            BlurValue = new ObservableCollection<string>() { "5", "7", "9" };
             SourceColors = new ObservableCollection<string>() { "Red", "Yellow", "Blue" };
             DestinationColors = new ObservableCollection<string>() { "Orange", "Green", "Purple" };
             CompositionModes =  new ObservableCollection<string>() { "SourceOver", "DestinationOver", "SourceIn", 
