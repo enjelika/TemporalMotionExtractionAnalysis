@@ -71,9 +71,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private bool _isOffsetXORSelected;
 
         private string _folderName;
-        private string _compositeImageLocation;
-        private string _transformedCurrentImageLocation;
-        private string _transformedOffsetImageLocation;
         private string _selectedForegroundCompositionMode;
         private string _selectedBackgroundCompositionMode;
         private string _selectedBackgroundMarksTextures;
