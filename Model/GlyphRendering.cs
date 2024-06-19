@@ -10,18 +10,18 @@ namespace TemporalMotionExtractionAnalysis.Model
     internal class GlyphRendering
     {
         // Glyphs for positive, negative, and no difference areas
-        public string PositiveGlyph { get; set; }
-        public string NegativeGlyph { get; set; }
-        public string NoDifferenceGlyph { get; set; }
+        public string PositiveMark { get; set; }
+        public string NegativeMark { get; set; }
+        public string NoDifferenceMark { get; set; }
 
         // Size for the sliding window (AreaSize x AreaSize)
         public int AreaSize { get; set; }
 
-        public GlyphRendering(string positiveGlyph, string negativeGlyph, string noDifferenceGlyph, int areaSize)
+        public GlyphRendering(string positiveMark, string negativeMark, string noDifferenceMark, int areaSize)
         {
-            PositiveGlyph = positiveGlyph;
-            NegativeGlyph = negativeGlyph;
-            NoDifferenceGlyph = noDifferenceGlyph;
+            PositiveMark = positiveMark;
+            NegativeMark = negativeMark;
+            NoDifferenceMark = noDifferenceMark;
             AreaSize = areaSize;
         }
 
@@ -68,17 +68,17 @@ namespace TemporalMotionExtractionAnalysis.Model
 
                     if (avgValue > 0)
                     {
-                        glyph = PositiveGlyph;
+                        glyph = PositiveMark;
                         brush = Brushes.Green;
                     }
                     else if (avgValue < 0)
                     {
-                        glyph = NegativeGlyph;
+                        glyph = NegativeMark;
                         brush = Brushes.Red;
                     }
                     else
                     {
-                        glyph = NoDifferenceGlyph;
+                        glyph = NoDifferenceMark;
                         brush = Brushes.Blue;
                     }
 
