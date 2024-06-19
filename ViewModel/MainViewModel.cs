@@ -37,6 +37,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private ImageModel _previousImage;
         private ImageModel _currentImage;
+        private ImageModel _indicationImage;
         private ImageModel _nextImage;
         private ImageModel _offsetFrame;
         private ImageModel _compositiedImage;
@@ -552,6 +553,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public ImageModel IndicationImage
+        {
+            get => _indicationImage;
+            set
+            {
+                _indicationImage = value;
+                OnPropertyChanged(nameof(IndicationImage));
+            }
+        }
+
         public ImageModel NextImage
         {
             get => _nextImage;
@@ -934,6 +945,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         SetZoomedCurrentFrame(0);
                         CurrentImage = Images.First();
                         CurrentIndex = 0;
+                        IndicationImage = Images.First();
                     }
 
                     FolderName = System.IO.Path.GetFileName(selectedPath);
@@ -1438,11 +1450,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 // Log an error
                 Debug.WriteLine("Error: More than two items were selected.");
             }
+        }
 
-            // Notify property changed for any UI updates
-            OnPropertyChanged(nameof(TimelineCells));
-            OnPropertyChanged(nameof(ZoommedTimelineCells));
-            OnPropertyChanged(nameof(SelectedFrames));
+        /// <summary>
+        /// Handles the changing of the indication image upon mouse over in Zoomed Timeline.
+        /// </summary>
+        /// <param name="image">The image that is moused over.</param>
+        /// <remarks>
+        /// </remarks>
+        public void HandleIndicationSelectionChanged(ImageModel image)
+        {
+            IndicationImage = image;
         }
 
 
