@@ -739,7 +739,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
 
             // Initialize zoomed timeline cells with default values
-            for (int i = 0; i < 11; i++)
+            for (int i = 0; i < 9; i++)
             {
                 ZoommedTimelineCells.Add(new ImageModel
                 {
@@ -827,7 +827,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 return;
 
             int totalFrames = Images.Count;
-            int centerCellIndex = 0; // Center cell is always at index 0
+            int centerCellIndex = 4; // Center cell is always at index 4
 
             // Calculate the start index based on the desired center index
             int startIndex = currentFrameIndex - centerCellIndex;
@@ -842,7 +842,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 int frameIndex = (startIndex + i + totalFrames) % totalFrames;
                 ZoommedTimelineCells[i].FrameNumber = frameIndex;
                 ZoommedTimelineCells[i].ImagePath = Images[frameIndex].ImagePath;
-                ZoommedTimelineCells[i].IsCurrent = (i == centerCellIndex); // Center cell is always at index 2
+                ZoommedTimelineCells[i].IsCurrent = (i == centerCellIndex); // Center cell is always at index 4
 
                 if (ZoommedTimelineCells[i].IsCurrent)
                 {
@@ -1384,6 +1384,19 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         {
             // Reset all selections
             foreach (var image in TimelineCells)
+            {
+                if (selectedItems.Contains(image))
+                {
+                    image.IsOffsetSelection = true;
+                }
+                else
+                {
+                    image.IsOffsetSelection = false;
+                }
+            }
+
+            // Reset all selections
+            foreach (var image in ZoommedTimelineCells)
             {
                 if (selectedItems.Contains(image))
                 {

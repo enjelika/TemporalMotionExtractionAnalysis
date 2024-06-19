@@ -127,15 +127,6 @@
                         <StackPanel Orientation="Vertical">
                             <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top" Margin="0,5,0,0"/>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontWeight="Bold" Content="Frame Index: "/>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CurrentIndex, RelativeSource={RelativeSource AncestorType=Window}}" />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
-                                <Label Content="Total Frames: " FontWeight="Bold"/>
-                                <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.ImageCount, RelativeSource={RelativeSource AncestorType=Window}}" />
-                            </StackPanel>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -460,6 +451,19 @@
                                             </TextBlock.Style>
                                         </TextBlock>
 
+                                        <!-- Empty triangle pointing up, visible if the cell is the offset frame -->
+                                        <TextBlock Text="△" FontFamily="Segoe UI" FontSize="15" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsOffsetSelection}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
@@ -471,10 +475,25 @@
                     <!-- Animation Frame -->
                     <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="240">
                         <DockPanel Background="White">
-                            <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                            
-                            <!-- Animation of images in selected folder -->
-                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="400" Margin="0,2,0,15"/>
+                            <TextBlock DockPanel.Dock="Top" Text="Current Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3,5,15">
+
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Label FontWeight="Bold" Content="Frame Index: "/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CurrentIndex, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+                                        <Label Content="Total Frames: " FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.ImageCount, RelativeSource={RelativeSource AncestorType=Window}}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!-- Animation of images in selected folder -->
+                                <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="400" Margin="0"/>
+                            </StackPanel>
 
                         </DockPanel>
                     </Border>
