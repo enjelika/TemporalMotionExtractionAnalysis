@@ -32,46 +32,24 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// Reduces the alpha/opacity of an image, preparing it to be a mask for motion enhancement.
         /// </summary>
         /// <param name="image">The input image as a Mat object.</param>
+        /// <param name="transparencyFactor">The input value for amound of transparency to be applied to the image.</param>
         /// <returns>A modified image with reduced alpha/opacity.</returns>
         /// <remarks>
         /// This method converts the input image to grayscale, converts it to RGBA mode if necessary,
         /// and then reduces the opacity based on pixel intensity.
         /// </remarks>
-        public Mat ReduceAlpha(Mat image)
+        public Mat ReduceAlpha(Mat image, double transparencyFactor)
         {
-            Mat modifiedImage;
-
-            // Convert to grayscale
-            Mat grayscale = Mat.Zeros(image.Width, image.Height);
-            Cv2.CvtColor(image, grayscale, ColorConversionCodes.BGR2GRAY);
-
-            // Convert the image to RGBA mode (if it's not already in RGBA mode)
-            Cv2.CvtColor(grayscale, image, ColorConversionCodes.GRAY2RGBA);
-
-            // Get pixel data
-            int width = image.Width;
-            int height = image.Height;
-
-            // Create a new image to store the modified pixels
-            modifiedImage = image.Clone(); // Clone to avoid modifying the input image directly
-
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            Mat result = image.Clone();
+            Mat[] channels = Cv2.Split(result);
+            if (channels.Length == 4)
             {
-                for (int j = 0; j < width; j++)
-                {
-                    // Reduce opacity based on the pixel intensity
-                    if (modifiedImage.Channels() == 4)
-                    {
-                        Vec4b color = modifiedImage.At<Vec4b>(i, j);
-                        double colorValue = (double)color.Item3;
-                        color.Item3 = BitConverter.GetBytes((int)(colorValue * 0.5))[0];
-                        modifiedImage.Set<Vec4b>(i, j, color);
-                    }
-                }
+                Mat alpha = channels[3];
+                alpha *= transparencyFactor; // Reduce alpha by the specified factor
+                channels[3] = alpha;
+                Cv2.Merge(channels, result);
             }
-
-            return modifiedImage;
+            return result;
         }
 
         /// <summary>

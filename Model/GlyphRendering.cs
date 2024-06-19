@@ -12,14 +12,123 @@ namespace TemporalMotionExtractionAnalysis.Model
         public string NegativeGlyph { get; set; }
         public string NoDifferenceGlyph { get; set; }
 
-        public GlyphRendering(string positiveGlyph, string negativeGlyph, string noDifferenceGlyph)
+        public string BackgroundMark { get; set; }
+
+        public GlyphRendering(string positiveMark, string negativeMark, string noDifferenceMark)
         {
-            PositiveGlyph = positiveGlyph;
-            NegativeGlyph = negativeGlyph;
-            NoDifferenceGlyph = noDifferenceGlyph;
+            PositiveMark = positiveMark;
+            NegativeMark = negativeMark;
+            NoDifferenceMark = noDifferenceMark;
+
+            // Define BackgroundMark as the Segoe UI Symbol "&#xE10A;"
+            BackgroundMark = "\xE10A"; // Unicode escape sequence for '&#xE10A;'
         }
 
         public Mat RenderDifferences(Mat mat1, Mat mat2)
+        {
+            // Perform XOR operation between the current image and the offset image
+            Mat xorImage = new Mat();
+            Cv2.BitwiseXor(currentImage, offsetImage, xorImage);
+
+            return xorImage;
+        }
+
+        public Mat RenderDifferences(Mat currentImage, Mat offsetImage, int areaSize)
+        {
+            if (currentImage.Size() != offsetImage.Size() || currentImage.Type() != offsetImage.Type())
+                throw new ArgumentException("Mats must have the same size and type.");
+
+            Mat xorImage = XorImages(currentImage, offsetImage);
+            Mat diffMat = offsetImage - currentImage;
+            Mat xorMar = new Mat();
+            Cv2.Threshold(diffMat, xorMar, 1, 255, ThresholdTypes.Binary); // where is this being saved?
+
+            Mat result = new Mat(currentImage.Size(), currentImage.Type());
+            currentImage.CopyTo(result);
+
+            Bitmap bitmap = BitmapConverter.ToBitmap(result);
+            List<(string glyph, Brush brush, PointF position)> glyphsToDraw = new List<(string, Brush, PointF)>();
+
+            for (int y = 0; y <= diffMat.Rows - 1; y += areaSize / 2)
+            {
+                for (int x = 0; x <= diffMat.Cols - 1; x += areaSize / 2)
+                {
+                    int windowWidth = Math.Min(areaSize, diffMat.Cols - x);
+                    int windowHeight = Math.Min(areaSize, diffMat.Rows - y);
+                    Rect window = new Rect(x, y, windowWidth, windowHeight);
+                    Mat xorWindowMat = new Mat(xorImage, window);
+                    Mat windowMat = new Mat(diffMat, window);
+
+                    // Print sizes and types for debugging
+                    Console.WriteLine("windowMat Size: " + windowMat.Size());
+                    Console.WriteLine("windowMat Type: " + windowMat.Type());
+                    Console.WriteLine("xorMar Size: " + xorMar.Size());
+                    Console.WriteLine("xorMar Type: " + xorMar.Type());
+
+                    Mat foregroundMask = new Mat();
+                    Cv2.BitwiseAnd(windowMat, xorMar, foregroundMask);
+
+                    Mat backgroundMask = new Mat();
+                    Cv2.BitwiseXor(xorMar, foregroundMask, backgroundMask);
+
+                    Scalar sumForeground = Cv2.Sum(foregroundMask);
+                    Scalar sumBackground = Cv2.Sum(backgroundMask);
+
+                    // Calculate the average value within the windowMat
+                    Scalar avgScalar = Cv2.Mean(windowMat);
+                    double avgValue = avgScalar.Val0;
+
+                    // Determine the appropriate mark and brush based on the average value
+                    string mark;
+                    Brush brush;
+                    float centerX = x + windowWidth / 2.0f - areaSize / 2;
+                    float centerY = y + windowHeight / 2.0f - areaSize / 2;
+
+                    if (sumForeground.Val0 > 0) // Foreground areas of interest
+                    {
+                        if (avgValue > 0)
+                        {
+                            mark = PositiveMark;
+                            brush = Brushes.Green;
+                        }
+                        else if (avgValue < 0)
+                        {
+                            mark = NegativeMark;
+                            brush = Brushes.Red;
+                        }
+                        else
+                        {
+                            mark = NoDifferenceMark;
+                            brush = Brushes.Blue;
+                        }
+                        glyphsToDraw.Add((mark, brush, new PointF(centerX, centerY)));
+                    }
+                    else if (sumBackground.Val0 > 0) // Background areas
+                    {
+                        // Determine appropriate mark and brush for background areas
+                        mark = BackgroundMark;
+                        brush = Brushes.Gray;
+                        glyphsToDraw.Add((mark, brush, new PointF(centerX, centerY)));
+                    }
+                }
+            }
+
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.TextRenderingHint = TextRenderingHint.AntiAlias;
+                Font font = new Font("Segoe UI Symbol", 13);
+
+                foreach (var glyph in glyphsToDraw)
+                {
+                    g.DrawString(glyph.glyph, font, glyph.brush, glyph.position);
+                }
+            }
+
+            return BitmapConverter.ToMat(bitmap);
+        }
+
+
+        public Mat RenderDifferences2(Mat currentImage, Mat offsetImage, int areaSize)
         {
             // Ensure both Mats have the same size and type
             if (mat1.Size() != mat2.Size() || mat1.Type() != mat2.Type())

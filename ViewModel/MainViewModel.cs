@@ -781,9 +781,111 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         // Method to update glyphs from the View
         public void UpdateGlyphs(string positive, string negative, string noDifference)
         {
-            glyphRendering.PositiveGlyph = positive;
-            glyphRendering.NegativeGlyph = negative;
-            glyphRendering.NoDifferenceGlyph = noDifference;
+            glyphRendering.PositiveMark = positive;
+            glyphRendering.NegativeMark = negative;
+            glyphRendering.NoDifferenceMark = noDifference;
+        }
+
+        private void UpdateCurrentKernelSize()
+        { 
+            // Update the OpenCv.Kernel.Size based on the selected blur size
+            // Small size:  5x5 kernel
+            // Medium size: 7x7 kernel
+            // Medium size: 9x9 kernel
+            CurrentKernelSize = new OpenCvSharp.Size(SelectedCurrentBlurSize, SelectedCurrentBlurSize);
+        }
+
+        private void UpdateOffsetKernelSize()
+        {
+            // Update the OpenCv.Kernel.Size based on the selected blur size
+            // Small size:  5x5 kernel
+            // Medium size: 7x7 kernel
+            // Medium size: 9x9 kernel
+            OffsetKernelSize = new OpenCvSharp.Size(SelectedOffsetBlurSize, SelectedOffsetBlurSize);
+        }
+
+        /// <summary>
+        /// Processes frame transformations on an image, including optional XOR rendering, color inversion, alpha reduction, and blurring.
+        /// </summary>
+        /// <param name="frameImagePath">The file path of the image to be processed.</param>
+        /// <param name="isXORselected">A boolean indicating whether XOR rendering should be applied.</param>
+        /// <returns>The file path of the transformed image.</returns>
+        /// <exception cref="FileNotFoundException">Thrown if the specified image file does not exist.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the image fails to load from the specified path.</exception>
+        private string ProcessFraneTransforms(string frameImagePath, bool isXORselected)
+        {
+            // Check if the file exists before attempting to load
+            if (!File.Exists(frameImagePath))
+            {
+                throw new FileNotFoundException("The specified image file does not exist.", frameImagePath);
+            }
+
+            // Load the image from its path
+            Mat originalImage = Cv2.ImRead(frameImagePath);
+            if (originalImage.Empty())
+            {
+                throw new InvalidOperationException("Failed to load the image from the specified path.");
+            }
+
+            // Motion Extraction of the current image
+            MotionExtraction motionExtraction = new MotionExtraction();
+
+            // Step 1: Invert
+            Mat invertedImage = motionExtraction.InvertColors(originalImage);
+
+            // Step 2: Apply XOR rendering (if selected)
+            Mat transformedImage;
+            if (isXORselected)
+            {
+                transformedImage = ReduceNoise(invertedImage);
+            }
+            else
+            {
+                transformedImage = invertedImage.Clone();
+            }
+
+            // Step 3: Reduce Alpha/Opacity
+            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage, 0.5);
+
+            // Step 4: Add Blur
+            Mat blurCurrentImage = motionExtraction.BlurImage(reducedAlphaCurrentImage, CurrentKernelSize);
+            string transformedCurrentImagePath = SaveComposedImage(blurCurrentImage); // Save and get the file path
+
+            return transformedCurrentImagePath;
+        }
+
+
+        /// <summary>
+        /// Reduces background noise from an image using a series of image processing techniques.
+        /// </summary>
+        /// <param name="image">The input image from which to reduce noise.</param>
+        /// <returns>A Mat object containing the processed image with reduced background noise.</returns>
+        public Mat ReduceNoise(Mat image)
+        {
+            Mat result = new Mat();
+
+            // Step 1: Convert the image to grayscale
+            Mat grayImage = new Mat();
+            Cv2.CvtColor(image, grayImage, ColorConversionCodes.BGR2GRAY);
+
+            // Step 2: Apply Gaussian Blur to reduce noise
+            Mat blurredImage = new Mat();
+            Cv2.GaussianBlur(grayImage, blurredImage, new OpenCvSharp.Size(5, 5), 0);
+
+            // Step 3: Apply adaptive thresholding to create a binary image
+            Mat binaryImage = new Mat();
+            Cv2.AdaptiveThreshold(blurredImage, binaryImage, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.BinaryInv, 11, 2);
+
+            // Step 4: Apply morphological operations to remove small noise
+            Mat morphImage = new Mat();
+            Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(3, 3));
+            Cv2.MorphologyEx(binaryImage, morphImage, MorphTypes.Open, kernel);
+
+            // Step 5: Bitwise AND with the original image to retain the actual colors in the foreground
+            Mat colorForeground = new Mat();
+            Cv2.BitwiseAnd(image, image, colorForeground, morphImage);
+
+            return colorForeground;
         }
 
         // Composition logic based on the selected mode
