@@ -39,40 +39,18 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// </remarks>
         public Mat ReduceAlpha(Mat image)
         {
-            Mat modifiedImage;
-
-            // Convert to grayscale
-            Mat grayscale = Mat.Zeros(image.Width, image.Height);
-            Cv2.CvtColor(image, grayscale, ColorConversionCodes.BGR2GRAY);
-
-            // Convert the image to RGBA mode (if it's not already in RGBA mode)
-            Cv2.CvtColor(grayscale, image, ColorConversionCodes.GRAY2RGBA);
-
-            // Get pixel data
-            int width = image.Width;
-            int height = image.Height;
-
-            // Create a new image to store the modified pixels
-            modifiedImage = image.Clone(); // Clone to avoid modifying the input image directly
-
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            Mat result = image.Clone();
+            Mat[] channels = Cv2.Split(result);
+            if (channels.Length == 4)
             {
-                for (int j = 0; j < width; j++)
-                {
-                    // Reduce opacity based on the pixel intensity
-                    if (modifiedImage.Channels() == 4)
-                    {
-                        Vec4b color = modifiedImage.At<Vec4b>(i, j);
-                        double colorValue = (double)color.Item3;
-                        color.Item3 = BitConverter.GetBytes((int)(colorValue * 0.5))[0];
-                        modifiedImage.Set<Vec4b>(i, j, color);
-                    }
-                }
+                Mat alpha = channels[3];
+                alpha *= 0.6; // Reduce alpha by 60%
+                channels[3] = alpha;
+                Cv2.Merge(channels, result);
             }
-
-            return modifiedImage;
+            return result;
         }
+
 
         /// <summary>
         /// Applies Gaussian blur to a given image Mat.

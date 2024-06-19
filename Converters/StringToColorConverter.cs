@@ -28,7 +28,7 @@ namespace TemporalMotionExtractionAnalysis.Converters
 
                 if (value.Equals("none"))
                 {
-                    color = System.Windows.Media.Colors.Transparent;
+                    color = System.Windows.Media.Colors.DarkGray; // Transparent;
                 }
                 else
                 {

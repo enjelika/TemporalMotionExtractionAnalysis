@@ -52,7 +52,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private int _offsetBlurSize;
 
         private const int TotalCells = 120; //57
-        private const int CenterIndex = 2; //26
+        private const int CenterIndex = 1; //26
 
         private double _calculatedEmeasure;
         private double _calculatedMAE;
@@ -645,7 +645,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         public ICommand StopCommand { get; }
         public ICommand PreviousCommand { get; }
         public ICommand NextCommand { get; }
-        public ICommand StartMotionExtractionCommand { get; }
         #endregion
 
         /// <summary>
@@ -719,7 +718,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             StopCommand = new RelayCommand(OnStop);
             PreviousCommand = new RelayCommand(OnPrevious);
             NextCommand = new RelayCommand(OnNext);
-            StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
             SelectedForegroundCompositionMode = "SourceOver";
 
             // Initialize the GlyphRendering class with default glyphs
@@ -783,7 +781,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 return;
 
             int totalFrames = Images.Count;
-            int centerCellIndex = 4; // Center cell is always at index 2
+            int centerCellIndex = 0; // Center cell is always at index 0
 
             // Calculate the start index based on the desired center index
             int startIndex = currentFrameIndex - centerCellIndex;
@@ -899,15 +897,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        private void StartMotionExtraction()
-        {
-            //Uri sourcePath = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\blue_triangle.jpg");
-            //Mat source = Cv2.ImRead(sourcePath.AbsolutePath, ImreadModes.Color);
-            //Uri destinationPath = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\red_triangle.jpg");
-            //Mat destination = Cv2.ImRead(destinationPath.AbsolutePath, ImreadModes.Color);
-            //MotionExtraction.XOR(source, destination);
-        }
-
         #region Animation Controls
         /// <summary>
         /// Initiates the playback animation for the images in the Images collection.
@@ -995,6 +984,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         }
         #endregion
 
+        #region ImageProcessing
         // Method to update glyphs from the View
         public void UpdateGlyphs(string positive, string negative, string noDifference)
         {
@@ -1050,7 +1040,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Step 1: Invert
             Mat invertedImage = motionExtraction.InvertColors(originalImage);
 
-            // Step 1: Apply XOR rendering (if selected)
+            // Step 2: Apply XOR rendering (if selected)
             Mat transformedImage;
             if (isXORselected)
             {
@@ -1061,15 +1051,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 transformedImage = invertedImage.Clone();
             }
 
-            // Step 2: Reduce Alpha/Opacity
+            // Step 3: Reduce Alpha/Opacity
             Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage);
 
-            // Step 3: Add Blur
+            // Step 4: Add Blur
             Mat blurCurrentImage = motionExtraction.BlurImage(reducedAlphaCurrentImage, CurrentKernelSize);
             string transformedCurrentImagePath = SaveComposedImage(blurCurrentImage); // Save and get the file path
 
             return transformedCurrentImagePath;
         }
+
 
         /// <summary>
         /// Reduces background noise from an image using a series of image processing techniques.
@@ -1130,7 +1121,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(sourceImage, destinationImage), 4);
                 CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(sourceImage, destinationImage), 4);
 
-                // Step 4: Tint the Source red, and the Destination blue (temporary until color selector controls are added)
+                // Step 4: Tint the Source and Destination according to the user selections
                 Mat tintedSourceImage = ApplyColorTint(sourceImage, SelectedSourceBrush);
                 Mat tintedDestinationImage = ApplyColorTint(destinationImage, SelectedDestinationBrush);
 
@@ -1277,18 +1268,23 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Merge the tinted RGB channels with the new alpha channel
             if (channels.Length == 4)
             {
-                Mat[] tintedChannels = Cv2.Split(tintedRGB);
+                Mat[] tintedChannels = new Mat[4];
+                Cv2.Split(tintedRGB, out tintedChannels);
                 tintedChannels[3] = alpha60; // Set the new alpha channel
                 Cv2.Merge(tintedChannels, tintedRGB);
             }
             else
             {
                 // If the original image did not have an alpha channel, add the alpha channel
-                Cv2.Merge(new Mat[] { tintedRGB, alpha60 }, tintedRGB);
+                Mat[] tintedChannels = Cv2.Split(tintedRGB);
+                Mat[] mergedChannels = new Mat[] { tintedChannels[0], tintedChannels[1], tintedChannels[2], alpha60 };
+                Cv2.Merge(mergedChannels, tintedRGB);
             }
 
             return tintedRGB;
         }
+
+        #endregion
 
         #region EventHandlers
         /// <summary>
