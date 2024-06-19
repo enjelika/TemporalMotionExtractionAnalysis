@@ -174,7 +174,7 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Label FontWeight="Bold">Composition Mode:</Label>
                                         <!-- TODO: convert to combobox -->
-                                        <ComboBox x:Name="CompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" SelectedValue="{Binding SelectedCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                        <ComboBox x:Name="ForegroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" SelectedValue="{Binding SelectedForegroundCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                                             <ComboBox.ItemTemplate>
                                                 <DataTemplate>
                                                     <TextBlock Text="{Binding}" />
@@ -293,7 +293,13 @@
 
                                     <Label FontWeight="Bold">Composition Mode:</Label>
                                     <!-- TODO: Add Combobox for Background Composition Mode Selections -->
-
+                                    <ComboBox x:Name="BackgroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" SelectedValue="{Binding SelectedBackgroundCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                             </StackPanel>
 
