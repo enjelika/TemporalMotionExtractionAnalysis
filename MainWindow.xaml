@@ -320,7 +320,13 @@
 
                                 <Label FontWeight="Bold" Content="Texture/Marks:"/>
                                 <!-- TODO: Combobox for Background Marks/Texture Selections -->
-
+                                <ComboBox x:Name="BackgroundMarksTextures" Width="100" Margin="5" ItemsSource="{Binding BackgroundMarksTextures}" SelectedValue="{Binding SelectedBackgroundMarksTextures, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
                             </StackPanel>
                         </StackPanel>
                     </DockPanel>
