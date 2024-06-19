@@ -47,13 +47,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private int _offsetValue;
         private int _timeDelay;
         private int _selectedFps;
+        private int _areaSize;
+        private int _currentBlurSize;
+        private int _offsetBlurSize;
+
+        private const int TotalCells = 120; //57
+        private const int CenterIndex = 2; //26
 
         private double _calculatedEmeasure;
         private double _calculatedMAE;
         private double _calculatedSSIM;
-
-        private const int TotalCells = 120; //57
-        private const int CenterIndex = 2; //26
 
         private bool _isAnimating;
         private bool _isReversePlayback;
@@ -71,23 +74,18 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private string _compositeImageLocation;
         private string _transformedCurrentImageLocation;
         private string _transformedOffsetImageLocation;
+        private string _selectedForegroundCompositionMode;
+        private string _selectedBackgroundCompositionMode;
+        private string _selectedBackgroundMarksTextures;
+        private string _positiveGlyph = "▲";
+        private string _negativeGlyph = "▼";
+        private string _noDifferenceGlyph = "■";
 
         private ObservableCollection<string> composedImagePaths = new ObservableCollection<string>();
         private ObservableCollection<string> transformedCurrentImagePaths = new ObservableCollection<string>();
         private ObservableCollection<string> transformedOffsetImagePaths = new ObservableCollection<string>();
 
-        private string _selectedForegroundCompositionMode;
-        private string _selectedBackgroundCompositionMode;
-        private string _selectedBackgroundMarksTextures;
-
         private GlyphRendering glyphRendering;
-
-        private string _positiveGlyph = "▲";
-        private string _negativeGlyph = "▼";
-        private string _noDifferenceGlyph = "■";
-        private int _areaSize;
-        private int _currentBlurSize;
-        private int _offsetBlurSize;
 
         private OpenCvSharp.Size _currentKernelSize;
         private OpenCvSharp.Size _offsetKernelSize;
@@ -279,6 +277,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         }
         #endregion
 
+        #region Strings
         public string SelectedForegroundCompositionMode
         {
             get => _selectedForegroundCompositionMode;
@@ -321,6 +320,48 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public string FolderName
+        {
+            get => _folderName;
+            set
+            {
+                _folderName = value;
+                OnPropertyChanged(nameof(FolderName));
+            }
+        }
+
+        public string NegativeMark
+        {
+            get => _negativeGlyph;
+            set
+            {
+                _negativeGlyph = value;
+                OnPropertyChanged(nameof(NegativeMark));
+            }
+        }
+
+        public string NoDifferenceMark
+        {
+            get => _noDifferenceGlyph;
+            set
+            {
+                _noDifferenceGlyph = value;
+                OnPropertyChanged(nameof(NoDifferenceMark));
+            }
+        }
+
+        public string PositiveMark
+        {
+            get => _positiveGlyph;
+            set
+            {
+                _positiveGlyph = value;
+                OnPropertyChanged(nameof(PositiveMark));
+            }
+        }
+        #endregion
+
+        #region Doubles
         public double CalculatedEmeasure
         {
             get => _calculatedEmeasure;
@@ -350,7 +391,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(CalculatedSSIM));
             }
         }
+        #endregion
 
+        #region Integers
         public int CurrentIndex
         {
             get => _currentIndex;
@@ -386,19 +429,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public ImageModel OffsetFrame
-        {
-            get => _offsetFrame;
-            set
-            {
-                _offsetFrame = value;
-                Console.WriteLine(OffsetFrame.ImagePath); // Debugging
-                OnPropertyChanged(nameof(OffsetValue));
-            }
-        }
-
-        
-
         public int SelectedFps
         {
             get => _selectedFps;
@@ -421,6 +451,61 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     _timeDelay = value;
                     OnPropertyChanged(nameof(TimeDelay)); // Notify property changed
                 }
+            }
+        }
+
+        public int ImageCount
+        {
+            get { return _imageCount; }
+            set
+            {
+                _imageCount = value;
+                OnPropertyChanged(nameof(ImageCount));
+            }
+        }
+
+        public int AreaSize
+        {
+            get => _areaSize;
+            set
+            {
+                _areaSize = value;
+                OnPropertyChanged(nameof(AreaSize));
+            }
+        }
+
+        public int SelectedCurrentBlurSize
+        {
+            get => _currentBlurSize;
+            set
+            {
+                _currentBlurSize = value;
+                OnPropertyChanged(nameof(SelectedCurrentBlurSize)); // Notify property changed
+                UpdateCurrentKernelSize();
+            }
+        }
+
+        public int SelectedOffsetBlurSize
+        {
+            get => _offsetBlurSize;
+            set
+            {
+                _offsetBlurSize = value;
+                OnPropertyChanged(nameof(SelectedOffsetBlurSize)); // Notify property changed
+                UpdateOffsetKernelSize();
+            }
+        }
+        #endregion
+
+        #region ImageModels
+        public ImageModel OffsetFrame
+        {
+            get => _offsetFrame;
+            set
+            {
+                _offsetFrame = value;
+                Console.WriteLine(OffsetFrame.ImagePath); // Debugging
+                OnPropertyChanged(nameof(OffsetValue));
             }
         }
 
@@ -453,6 +538,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(NextImage));
             }
         }
+        #endregion
 
         #region Boolean Flags
         public bool IsReversePlayback
@@ -520,27 +606,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(IsOffsetXORSelected));
             }
         }
-        #endregion
-
-        public int ImageCount
-        {
-            get { return _imageCount; }
-            set
-            {
-                _imageCount = value;
-                OnPropertyChanged(nameof(ImageCount));
-            }
-        }
-
-        public string FolderName
-        {
-            get => _folderName;
-            set
-            {
-                _folderName = value;
-                OnPropertyChanged(nameof(FolderName));
-            }
-        }
 
         public bool IsImagesLoaded
         {
@@ -551,69 +616,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(IsImagesLoaded));
             }
         }
+        #endregion
 
-        public string PositiveMark
-        {
-            get => _positiveGlyph;
-            set
-            {
-                _positiveGlyph = value;
-                OnPropertyChanged(nameof(PositiveMark));
-            }
-        }
-
-        public string NegativeMark
-        {
-            get => _negativeGlyph; 
-            set
-            {
-                _negativeGlyph = value;
-                OnPropertyChanged(nameof(NegativeMark));
-            }
-        }
-
-        public string NoDifferenceMark
-        {
-            get => _noDifferenceGlyph; 
-            set
-            {
-                _noDifferenceGlyph = value;
-                OnPropertyChanged(nameof(NoDifferenceMark));
-            }
-        }
-
-        public int AreaSize
-        {
-            get => _areaSize;
-            set
-            {
-                _areaSize = value;
-                OnPropertyChanged(nameof(AreaSize));
-            }
-        }
-
-        public int SelectedCurrentBlurSize
-        {
-            get => _currentBlurSize;
-            set
-            {
-                _currentBlurSize = value;
-                OnPropertyChanged(nameof(SelectedCurrentBlurSize)); // Notify property changed
-                UpdateCurrentKernelSize();
-            }
-        }
-
-        public int SelectedOffsetBlurSize
-        {
-            get => _offsetBlurSize;
-            set
-            {
-                _offsetBlurSize = value;
-                OnPropertyChanged(nameof(SelectedOffsetBlurSize)); // Notify property changed
-                UpdateOffsetKernelSize();
-            }
-        }
-
+        #region OpenCvSharp.Size Variables
         public OpenCvSharp.Size CurrentKernelSize
         {
             get => _currentKernelSize;
@@ -633,6 +638,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(OffsetKernelSize));
             }
         }
+        #endregion
         #endregion
 
         #region ICommands
