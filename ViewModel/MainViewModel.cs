@@ -14,6 +14,10 @@ using System.Windows.Media;
 using System.Drawing;
 using System;
 using System.Diagnostics.Eventing.Reader;
+using System.Linq;
+using TemporalMotionExtractionAnalysis.Converters;
+using static System.Resources.ResXFileRef;
+using System.Globalization;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -25,6 +29,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ObservableCollection<ImageModel> _zoomedTimelineCells;
         private ObservableCollection<ImageModel> _selectedFrames;
         private ObservableCollection<string> _fpsValue;
+        private ObservableCollection<string> _blurValue;
+        private ObservableCollection<string> _sourceColors;
+        private ObservableCollection<string> _destinationColors;
+        private ObservableCollection<string> _compositionModes;
+        private ObservableCollection<string> _backgroundMarksTextures;
 
         private ImageModel _previousImage;
         private ImageModel _currentImage;
@@ -42,51 +51,52 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private int _offsetValue;
         private int _timeDelay;
         private int _selectedFps;
+        private int _areaSize;
+        private int _currentBlurSize;
+        private int _offsetBlurSize;
+        private int _currentFrameTransparency;
+        private int _offsetFrameTransparency;
+
+        private const int TotalCells = 120; //57
+        private const int CenterIndex = 1; //26
 
         private double _calculatedEmeasure;
         private double _calculatedMAE;
         private double _calculatedSSIM;
 
-        private const int TotalCells = 57;
-        private const int CenterIndex = 26;
-
         private bool _isAnimating;
         private bool _isReversePlayback;
         private bool _isImagesLoaded;
-        private bool isPixelModeSelected;
-        private bool isMarksModeSelected;
-        
+
+        private bool _isForePixelModeSelected;
+        private bool _isForeMarksModeSelected;
+        private bool _isBackPixelModeSelected;
+        private bool _isBackMarksModeSelected;
+
+        private bool _isCurrentXORSelected;
+        private bool _isOffsetXORSelected;
+
         private string _folderName;
-        private string _compositeImageLocation;
-        private ObservableCollection<string> composedImagePaths = new ObservableCollection<string>();
-
-        private CompositionMode _selectedCompositionMode;
-
-        private GlyphRendering glyphRendering;
-
+        private string _selectedForegroundCompositionMode;
+        private string _selectedBackgroundCompositionMode;
+        private string _selectedBackgroundMarksTextures;
         private string _positiveGlyph = "▲";
         private string _negativeGlyph = "▼";
         private string _noDifferenceGlyph = "■";
-        private int _areaSize;
-        #endregion
 
-        #region Enums
-        public enum CompositionMode
-        {
-            SourceOver,     // 1
-            DestinationOver,// 2
-            SourceIn,       // 3
-            DestinationIn,  // 4
-            SourceOut,      // 5
-            DestinationOut, // 6
-            SourceAtop,     // 7
-            DestinationAtop,// 8
-            Clear,          // 9
-            XOR             // 10
-        }
+        private ObservableCollection<string> composedImagePaths = new ObservableCollection<string>();
+        private ObservableCollection<string> transformedCurrentImagePaths = new ObservableCollection<string>();
+        private ObservableCollection<string> transformedOffsetImagePaths = new ObservableCollection<string>();
+
+        private GlyphRendering glyphRendering;
+
+        private OpenCvSharp.Size _currentKernelSize;
+        private OpenCvSharp.Size _offsetKernelSize;
         #endregion
 
         #region Public Variables
+
+        #region Color / Brushes
         public System.Windows.Media.Color SelectedSourceColor
         {
             get => _selectedSourceColor;
@@ -118,7 +128,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         {
             get { return new SolidColorBrush(SelectedDestinationColor); }
         }
+        #endregion
 
+        #region ObservableCollections
         public ObservableCollection<ImageModel> Images
         {
             get => _images;
@@ -145,6 +157,18 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             set { composedImagePaths = value; OnPropertyChanged(nameof(ComposedImagePaths)); }
         }
 
+        public ObservableCollection<string> TransformedCurrentImagePaths
+        {
+            get { return transformedCurrentImagePaths; }
+            set { transformedCurrentImagePaths = value; OnPropertyChanged(nameof(TransformedCurrentImagePaths)); }
+        }
+
+        public ObservableCollection<string> TransformedOffsetImagePaths
+        {
+            get { return transformedOffsetImagePaths; }
+            set { transformedOffsetImagePaths = value; OnPropertyChanged(nameof(TransformedOffsetImagePaths)); }
+        }
+
         public ObservableCollection<ImageModel> TimelineCells
         {
             get => _timelineCells;
@@ -165,20 +189,182 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public CompositionMode SelectedCompositionMode
+        public ObservableCollection<string> FpsValue
         {
-            get => _selectedCompositionMode;
+            get => _fpsValue;
             set
             {
-                _selectedCompositionMode = value;
-                Console.WriteLine("Selected Composition Mode: " + _selectedCompositionMode.ToString());
-                OnPropertyChanged(nameof(CompositionMode));
+                if (_fpsValue != value)
+                {
+                    _fpsValue = value;
+                    OnPropertyChanged(nameof(FpsValue)); // Notify property changed
+                                                         // Update the time delay based on the new FPS value
+                }
+            }
+        }
+
+        public ObservableCollection<string> BlurValue
+        {
+            get => _blurValue;
+            set
+            {
+                if (_blurValue != value)
+                {
+                    _blurValue = value;
+                    OnPropertyChanged(nameof(BlurValue)); // Notify property changed
+                                                          // Update the time delay based on the new Blur value
+                }
+            }
+        }
+
+        public ObservableCollection<string> SourceColors
+        {
+            get => _sourceColors;
+            set
+            {
+                if (_sourceColors != value)
+                {
+                    _sourceColors = value;
+                    OnPropertyChanged(nameof(SourceColors)); // Notify property changed
+                }
+            }
+        }
+
+        public ObservableCollection<string> DestinationColors
+        {
+            get => _destinationColors;
+            set
+            {
+                if (_destinationColors != value)
+                {
+                    _destinationColors = value;
+                    OnPropertyChanged(nameof(DestinationColors)); // Notify property changed
+                }
+            }
+        }
+
+        public ObservableCollection<string> CompositionModes
+        {
+            get => _compositionModes;
+            set
+            {
+                if (_compositionModes != value)
+                {
+                    _compositionModes = value;
+                    OnPropertyChanged(nameof(CompositionModes)); // Notify property changed
+                }
+            }
+        }
+
+        public ObservableCollection<string> BackgroundMarksTextures
+        {
+            get => _backgroundMarksTextures;
+            set
+            {
+                if (_backgroundMarksTextures != value)
+                {
+                    _backgroundMarksTextures = value;
+                    OnPropertyChanged(nameof(BackgroundMarksTextures)); // Notify property changed
+                }
+            }
+        }
+
+        public ObservableCollection<ImageModel> SelectedFrames
+        {
+            get => _selectedFrames;
+            set
+            {
+                _selectedFrames = value;
+                OnPropertyChanged(nameof(SelectedFrames));
+            }
+        }
+        #endregion
+
+        #region Strings
+        public string SelectedForegroundCompositionMode
+        {
+            get => _selectedForegroundCompositionMode;
+            set
+            {
+                _selectedForegroundCompositionMode = value;
+                Console.WriteLine("Selected Foreground Composition Mode: " + _selectedForegroundCompositionMode.ToString());
+                OnPropertyChanged(nameof(SelectedForegroundCompositionMode));
 
                 // Trigger composition whenever the mode changes
                 ComposeImages();
             }
         }
 
+        public string SelectedBackgroundCompositionMode
+        {
+            get => _selectedBackgroundCompositionMode;
+            set
+            {
+                _selectedBackgroundCompositionMode = value;
+                Console.WriteLine("Selected Background Composition Mode: " + _selectedBackgroundCompositionMode.ToString());
+                OnPropertyChanged(nameof(SelectedBackgroundCompositionMode));
+
+                // Trigger composition whenever the mode changes
+                ComposeImages();
+            }
+        }
+
+        public string SelectedBackgroundMarksTextures
+        {
+            get => _selectedBackgroundMarksTextures;
+            set
+            {
+                _selectedBackgroundMarksTextures = value;
+                Console.WriteLine("Selected Background Marks Textures: " + _selectedBackgroundMarksTextures.ToString());
+                OnPropertyChanged(nameof(SelectedBackgroundMarksTextures));
+
+                // Trigger composition whenever the mode changes
+                ComposeImages();
+            }
+        }
+
+        public string FolderName
+        {
+            get => _folderName;
+            set
+            {
+                _folderName = value;
+                OnPropertyChanged(nameof(FolderName));
+            }
+        }
+
+        public string NegativeMark
+        {
+            get => _negativeGlyph;
+            set
+            {
+                _negativeGlyph = value;
+                OnPropertyChanged(nameof(NegativeMark));
+            }
+        }
+
+        public string NoDifferenceMark
+        {
+            get => _noDifferenceGlyph;
+            set
+            {
+                _noDifferenceGlyph = value;
+                OnPropertyChanged(nameof(NoDifferenceMark));
+            }
+        }
+
+        public string PositiveMark
+        {
+            get => _positiveGlyph;
+            set
+            {
+                _positiveGlyph = value;
+                OnPropertyChanged(nameof(PositiveMark));
+            }
+        }
+        #endregion
+
+        #region Doubles
         public double CalculatedEmeasure
         {
             get => _calculatedEmeasure;
@@ -208,7 +394,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(CalculatedSSIM));
             }
         }
+        #endregion
 
+        #region Integers
         public int CurrentIndex
         {
             get => _currentIndex;
@@ -244,31 +432,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public ImageModel OffsetFrame
-        {
-            get => _offsetFrame;
-            set
-            {
-                _offsetFrame = value;
-                Console.WriteLine(OffsetFrame.ImagePath); // Debugging
-                OnPropertyChanged(nameof(OffsetValue));
-            }
-        }
-
-        public ObservableCollection<string> FpsValue
-        {
-            get => _fpsValue;
-            set
-            {
-                if (_fpsValue != value)
-                {
-                    _fpsValue = value;
-                    OnPropertyChanged(nameof(FpsValue)); // Notify property changed
-                                                         // Update the time delay based on the new FPS value
-                }
-            }
-        }
-
         public int SelectedFps
         {
             get => _selectedFps;
@@ -291,6 +454,81 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     _timeDelay = value;
                     OnPropertyChanged(nameof(TimeDelay)); // Notify property changed
                 }
+            }
+        }
+
+        public int ImageCount
+        {
+            get { return _imageCount; }
+            set
+            {
+                _imageCount = value;
+                OnPropertyChanged(nameof(ImageCount));
+            }
+        }
+
+        public int AreaSize
+        {
+            get => _areaSize;
+            set
+            {
+                _areaSize = value;
+                OnPropertyChanged(nameof(AreaSize));
+            }
+        }
+
+        public int SelectedCurrentBlurSize
+        {
+            get => _currentBlurSize;
+            set
+            {
+                _currentBlurSize = value;
+                OnPropertyChanged(nameof(SelectedCurrentBlurSize)); // Notify property changed
+                UpdateCurrentKernelSize();
+            }
+        }
+
+        public int SelectedOffsetBlurSize
+        {
+            get => _offsetBlurSize;
+            set
+            {
+                _offsetBlurSize = value;
+                OnPropertyChanged(nameof(SelectedOffsetBlurSize)); // Notify property changed
+                UpdateOffsetKernelSize();
+            }
+        }
+
+        public int CurrentFrameTransparency
+        {
+            get => _currentFrameTransparency;
+            set
+            {
+                _currentFrameTransparency = value;
+                OnPropertyChanged(nameof(CurrentFrameTransparency)); // Notify property changed
+            }
+        }
+
+        public int OffsetFrameTransparency
+        {
+            get => _offsetFrameTransparency;
+            set
+            {
+                _offsetFrameTransparency = value;
+                OnPropertyChanged(nameof(OffsetFrameTransparency)); // Notify property changed
+            }
+        }
+        #endregion
+
+        #region ImageModels
+        public ImageModel OffsetFrame
+        {
+            get => _offsetFrame;
+            set
+            {
+                _offsetFrame = value;
+                Console.WriteLine(OffsetFrame.ImagePath); // Debugging
+                OnPropertyChanged(nameof(OffsetValue));
             }
         }
 
@@ -323,7 +561,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(NextImage));
             }
         }
+        #endregion
 
+        #region Boolean Flags
         public bool IsReversePlayback
         {
             get => _isReversePlayback;
@@ -334,51 +574,59 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public bool IsPixelModeSelected
+        public bool IsForePixelModeSelected
         {
-            get => isPixelModeSelected; 
+            get => _isForePixelModeSelected; 
             set 
             { 
-                isPixelModeSelected = value; OnPropertyChanged(nameof(IsPixelModeSelected)); 
+                _isForePixelModeSelected = value; OnPropertyChanged(nameof(IsForePixelModeSelected)); 
             }
         }
 
-        public bool IsMarksModeSelected
+        public bool IsForeMarksModeSelected
         {
-            get => isMarksModeSelected; 
+            get => _isForeMarksModeSelected; 
             set 
             {
-                isMarksModeSelected = value; OnPropertyChanged(nameof(IsMarksModeSelected)); 
+                _isForeMarksModeSelected = value; OnPropertyChanged(nameof(IsForeMarksModeSelected)); 
             }
         }
 
-        public int ImageCount
+        public bool IsBackPixelModeSelected
         {
-            get { return _imageCount; }
+            get => _isBackPixelModeSelected;
             set
             {
-                _imageCount = value;
-                OnPropertyChanged(nameof(ImageCount));
+                _isBackPixelModeSelected = value; OnPropertyChanged(nameof(IsBackPixelModeSelected));
             }
         }
 
-        public string FolderName
+        public bool IsBackMarksModeSelected
         {
-            get => _folderName;
+            get => _isBackMarksModeSelected;
             set
             {
-                _folderName = value;
-                OnPropertyChanged(nameof(FolderName));
+                _isBackMarksModeSelected = value; OnPropertyChanged(nameof(IsBackMarksModeSelected));
             }
         }
 
-        public ObservableCollection<ImageModel> SelectedFrames
+        public bool IsCurrentXORSelected
         {
-            get => _selectedFrames;
+            get => _isCurrentXORSelected;
             set
             {
-                _selectedFrames = value;
-                OnPropertyChanged(nameof(SelectedFrames));
+                _isCurrentXORSelected = value;
+                OnPropertyChanged(nameof(IsCurrentXORSelected));
+            }
+        }
+
+        public bool IsOffsetXORSelected
+        {
+            get => _isOffsetXORSelected;
+            set
+            {
+                _isOffsetXORSelected = value;
+                OnPropertyChanged(nameof(IsOffsetXORSelected));
             }
         }
 
@@ -391,46 +639,29 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 OnPropertyChanged(nameof(IsImagesLoaded));
             }
         }
+        #endregion
 
-        public string PositiveGlyph
+        #region OpenCvSharp.Size Variables
+        public OpenCvSharp.Size CurrentKernelSize
         {
-            get => _positiveGlyph;
-            set
+            get => _currentKernelSize;
+            private set
             {
-                _positiveGlyph = value;
-                OnPropertyChanged(nameof(PositiveGlyph));
+                _currentKernelSize = value;
+                OnPropertyChanged(nameof(CurrentKernelSize));
             }
         }
 
-        public string NegativeGlyph
+        public OpenCvSharp.Size OffsetKernelSize
         {
-            get => _negativeGlyph; 
-            set
+            get => _offsetKernelSize;
+            private set
             {
-                _negativeGlyph = value;
-                OnPropertyChanged(nameof(NegativeGlyph));
+                _offsetKernelSize = value;
+                OnPropertyChanged(nameof(OffsetKernelSize));
             }
         }
-
-        public string NoDifferenceGlyph
-        {
-            get => _noDifferenceGlyph; 
-            set
-            {
-                _noDifferenceGlyph = value;
-                OnPropertyChanged(nameof(NoDifferenceGlyph));
-            }
-        }
-
-        public int AreaSize
-        {
-            get => _areaSize;
-            set
-            {
-                _areaSize = value;
-                OnPropertyChanged(nameof(AreaSize));
-            }
-        }
+        #endregion
         #endregion
 
         #region ICommands
@@ -440,7 +671,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         public ICommand StopCommand { get; }
         public ICommand PreviousCommand { get; }
         public ICommand NextCommand { get; }
-        public ICommand StartMotionExtractionCommand { get; }
         #endregion
 
         /// <summary>
@@ -449,22 +679,48 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// </summary>
         public MainViewModel()
         {
-            // Initialize the Color values
-            SelectedSourceColor = System.Windows.Media.Color.FromRgb(255,0,0); //Red
-            SelectedDestinationColor = System.Windows.Media.Color.FromRgb(0,0,255); //Blue
-
             // Initialize the variables for the View Textboxes & Combobox
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
-            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" }; 
+            
             SelectedFps = 4; // Default value is 4
             FolderName = "No Selected Folder";
             SelectedFrames = new ObservableCollection<ImageModel>();
+            SelectedCurrentBlurSize = 7; // Default value is 7
+            SelectedOffsetBlurSize = 7;
+            AreaSize = 40; // Default value
+
+            // String values for comboboxes in the View
+            FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" };
+            BlurValue = new ObservableCollection<string>() { "5", "7", "9" };
+            SourceColors = new ObservableCollection<string>() { "none", "Red", "Yellow", "Green" };
+            DestinationColors = new ObservableCollection<string>() { "none", "Orange", "Purple", "Blue" };
+            CompositionModes =  new ObservableCollection<string>() { "SourceOver", "DestinationOver", "SourceIn", 
+                "DestinationIn", "SourceOut", "DestinationOut", "SourceAtop", "DestinationAtop", "Clear", "XOR" };
+            BackgroundMarksTextures = new ObservableCollection<string>() { "Texture1", "Texture2", "Texture3" };
+
+            // Create an instance of the StringToColorConverter
+            var converter = new StringToColorConverter();
+
+            // Initialize the Color values
+            // Set the default selected value to the first item in the collection
+            if (SourceColors.Any())
+            {
+                SelectedSourceColor = (System.Windows.Media.Color)converter.ConvertBack(SourceColors.First(), typeof(System.Windows.Media.Color), null, CultureInfo.InvariantCulture);
+            }
+
+            // Set the default selected value to the first item in the collection
+            if (DestinationColors.Any())
+            {
+                SelectedDestinationColor = (System.Windows.Media.Color)converter.ConvertBack(DestinationColors.First(), typeof(System.Windows.Media.Color), null, CultureInfo.InvariantCulture);
+            }
 
             // Initialize the ObservableCollection<ImageModel> for the Images
             Images = new ObservableCollection<ImageModel>();
             TimelineCells = new ObservableCollection<ImageModel>();
             ZoommedTimelineCells = new ObservableCollection<ImageModel>();
+
+            CurrentFrameTransparency = 0;
 
             // Initialize timeline cells with default values
             for (int i = 0; i < TotalCells; i++)
@@ -477,7 +733,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
 
             // Initialize zoomed timeline cells with default values
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 11; i++)
             {
                 ZoommedTimelineCells.Add(new ImageModel
                 {
@@ -502,8 +758,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             StopCommand = new RelayCommand(OnStop);
             PreviousCommand = new RelayCommand(OnPrevious);
             NextCommand = new RelayCommand(OnNext);
-            StartMotionExtractionCommand = new RelayCommand(StartMotionExtraction);
-            SelectedCompositionMode = CompositionMode.SourceOver;
+            SelectedForegroundCompositionMode = "SourceOver";
 
             // Initialize the GlyphRendering class with default glyphs
             glyphRendering = new GlyphRendering("▲", "▼", "■");
@@ -566,7 +821,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 return;
 
             int totalFrames = Images.Count;
-            int centerCellIndex = 2; // Center cell is always at index 2
+            int centerCellIndex = 0; // Center cell is always at index 0
 
             // Calculate the start index based on the desired center index
             int startIndex = currentFrameIndex - centerCellIndex;
@@ -599,6 +854,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         }
 
         /// <summary>
+        /// Resets the IsOffsetSelection property of all TimelineCells to false.
+        /// </summary>
+        public void ResetOffsetSelection()
+        {
+            foreach (var cell in TimelineCells)
+            {
+                cell.IsOffsetSelection = false;
+            }
+        }
+
+        /// <summary>
         /// Converts frames per second (FPS) to a time delay in milliseconds.
         /// </summary>
         /// <param name="fps">The frames per second value to convert.</param>
@@ -612,24 +878,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             else
             {
                 return 250;
-            }
-        }
-
-        /// <summary>
-        /// Converts a time delay in milliseconds to frames per second (FPS).
-        /// </summary>
-        /// <param name="timeDelay">The time delay in milliseconds.</param>
-        /// <returns>The FPS value calculated from the time delay.</returns>
-        /// <exception cref="ArgumentException">Thrown when the time delay is not a positive value greater than zero.</exception>
-        public double ConvertTimeDelayToFPS(int timeDelay)
-        {
-            if (timeDelay <= 250)
-            {
-                return 1000.0 / timeDelay;
-            }
-            else // FPS default value is 4
-            {
-                return 4;
             }
         }
 
@@ -649,6 +897,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                                                           f.EndsWith(".png", StringComparison.OrdinalIgnoreCase));
 
                     ImageCount = imageFiles.Count(); // Update image count
+
+                    if(SelectedFrames.Count >= 2) 
+                    {
+                        ResetOffsetSelection();
+                        CompositedImage.ImagePath = "";
+                        SelectedFrames.Clear();
+                    }
 
                     Images.Clear();
                     int frameNumber = 0;
@@ -680,15 +935,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     IsImagesLoaded = true;
                 }
             }
-        }
-
-        private void StartMotionExtraction()
-        {
-            //Uri sourcePath = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\blue_triangle.jpg");
-            //Mat source = Cv2.ImRead(sourcePath.AbsolutePath, ImreadModes.Color);
-            //Uri destinationPath = new Uri("C:\\Users\\dse41_mi11\\Documents\\OU\\D-70\\motion_extraction-main\\pillow\\red_triangle.jpg");
-            //Mat destination = Cv2.ImRead(destinationPath.AbsolutePath, ImreadModes.Color);
-            //MotionExtraction.XOR(source, destination);
         }
 
         #region Animation Controls
@@ -778,6 +1024,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         }
         #endregion
 
+        #region ImageProcessing
         // Method to update glyphs from the View
         public void UpdateGlyphs(string positive, string negative, string noDifference)
         {
@@ -845,7 +1092,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
 
             // Step 3: Reduce Alpha/Opacity
-            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage, 0.5);
+            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage);
 
             // Step 4: Add Blur
             Mat blurCurrentImage = motionExtraction.BlurImage(reducedAlphaCurrentImage, CurrentKernelSize);
@@ -898,104 +1145,95 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 string sourceImagePath = CurrentImage.ImagePath;
                 string destinationImagePath = SelectedFrames[1].ImagePath;
 
+                // Do any image pre-processing from user selections
+                string processedSourceImage = ProcessFraneTransforms(sourceImagePath, IsCurrentXORSelected);
+                string processedDestinationImage = ProcessFraneTransforms(destinationImagePath, IsOffsetXORSelected);
+
                 // Load the images from their paths
-                Mat sourceImage = Cv2.ImRead(sourceImagePath);
-                Mat destinationImage = Cv2.ImRead(destinationImagePath);
+                Mat sourceImage = Cv2.ImRead(processedSourceImage);
+                Mat destinationImage = Cv2.ImRead(processedDestinationImage);
 
                 // Motion Extraction of the sourceImage and destinationImage
                 MotionExtraction motionExtraction = new MotionExtraction();
                 CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
 
-                // Step 1: Invert colors
-                Mat invertSourceImage = motionExtraction.InvertColors(sourceImage);
-                Mat invertDestinationImage = motionExtraction.InvertColors(destinationImage);
+                CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(sourceImage, destinationImage), 4);
+                CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(sourceImage, destinationImage), 4);
+                CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(sourceImage, destinationImage), 4);
 
-                // Step 2: Reduce Alpha/Opacity
-                Mat reducedAlphaSourceImage = motionExtraction.ReduceAlpha(invertSourceImage);
-                Mat reducedAlphaDestinationImage = motionExtraction.ReduceAlpha(invertDestinationImage);
+                // Step 4: Tint the Source and Destination according to the user selections
+                Mat tintedSourceImage = ApplyColorTint(sourceImage, SelectedSourceBrush);
+                Mat tintedDestinationImage = ApplyColorTint(destinationImage, SelectedDestinationBrush);
 
-                // Step 3: Add Blur
-                OpenCvSharp.Size kernelSize = new OpenCvSharp.Size(7,7); // Medium size: 7x7 kernel
-                Mat blurSourceImage = motionExtraction.BlurImage(reducedAlphaSourceImage, kernelSize);
-                Mat blurDestinationImage = motionExtraction.BlurImage(reducedAlphaDestinationImage, kernelSize);
-
-                CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(blurSourceImage, blurDestinationImage), 4);
-                CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(blurSourceImage, blurDestinationImage), 4);
-                CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(blurSourceImage, blurDestinationImage), 4);
-
-                // Step 4: Tint the Source red, and the Destination blue (temporary until color selector controls are added)
-                Mat tintedSourceImage = ApplyColorTint(blurSourceImage, SelectedSourceBrush);
-                Mat tintedDestinationImage = ApplyColorTint(blurDestinationImage, SelectedDestinationBrush);
-
-                if (IsPixelModeSelected)
+                if (IsForePixelModeSelected)
                 {
                     // Call the SourceOver method from the model
-                    switch (SelectedCompositionMode)
+                    switch (SelectedForegroundCompositionMode)
                     {
-                        case CompositionMode.SourceOver:
+                        case "SourceOver":
                             Mat composedImage = compositeModeRendering.SourceOver(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath = SaveComposedImage(composedImage); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath); // Add to the collection
                             UpdateDisplayedImage(composedImagePath); // Update the displayed image
                             break;
-                        case CompositionMode.DestinationOver:
+                        case "DestinationOver":
                             Mat composedImage2 = compositeModeRendering.DestinationOver(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath2 = SaveComposedImage(composedImage2); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath2); // Add to the collection
                             UpdateDisplayedImage(composedImagePath2); // Update the displayed image
                             break;
-                        case CompositionMode.SourceIn:
+                        case "SourceIn":
                             Mat composedImage3 = compositeModeRendering.SourceIn(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath3 = SaveComposedImage(composedImage3); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath3); // Add to the collection
                             UpdateDisplayedImage(composedImagePath3); // Update the displayed image
                             break;
-                        case CompositionMode.DestinationIn:
+                        case "DestinationIn":
                             Mat composedImage4 = compositeModeRendering.DestinationIn(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath4 = SaveComposedImage(composedImage4); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath4); // Add to the collection
                             UpdateDisplayedImage(composedImagePath4); // Update the displayed image
                             break;
-                        case CompositionMode.SourceOut:
+                        case "SourceOut":
                             Mat composedImage5 = compositeModeRendering.SourceOut(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath5 = SaveComposedImage(composedImage5); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath5); // Add to the collection
                             UpdateDisplayedImage(composedImagePath5); // Update the displayed image
                             break;
-                        case CompositionMode.DestinationOut:
+                        case "DestinationOut":
                             Mat composedImage6 = compositeModeRendering.DestinationOut(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath6 = SaveComposedImage(composedImage6); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath6); // Add to the collection
                             UpdateDisplayedImage(composedImagePath6); // Update the displayed image
                             break;
-                        case CompositionMode.SourceAtop:
+                        case "SourceAtop":
                             Mat composedImage7 = compositeModeRendering.SourceAtop(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath7 = SaveComposedImage(composedImage7); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath7); // Add to the collection
                             UpdateDisplayedImage(composedImagePath7); // Update the displayed image
                             break;
-                        case CompositionMode.DestinationAtop:
+                        case "DestinationAtop":
                             Mat composedImage8 = compositeModeRendering.DestinationAtop(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath8 = SaveComposedImage(composedImage8); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath8); // Add to the collection
                             UpdateDisplayedImage(composedImagePath8); // Update the displayed image
                             break;
-                        case CompositionMode.Clear:
+                        case "Clear":
                             Mat composedImage9 = compositeModeRendering.Clear(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath9 = SaveComposedImage(composedImage9); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath9); // Add to the collection
                             UpdateDisplayedImage(composedImagePath9); // Update the displayed image
                             break;
-                        case CompositionMode.XOR:
+                        case "XOR":
                             Mat composedImage10 = compositeModeRendering.XOR(tintedSourceImage, tintedDestinationImage);
 
                             string composedImagePath10 = SaveComposedImage(composedImage10); // Save and get the file path
@@ -1007,19 +1245,19 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                             break;
                     }
                 }
-                if(isMarksModeSelected)
+                if (_isForeMarksModeSelected)
                 {
                     // Glyph Rendering
-                    glyphRendering.PositiveMark = PositiveGlyph;
-                    glyphRendering.NegativeMark = NegativeGlyph;
-                    glyphRendering.NoDifferenceMark = NoDifferenceGlyph;
+                    glyphRendering.PositiveGlyph = PositiveGlyph;
+                    glyphRendering.NegativeGlyph = NegativeGlyph;
+                    glyphRendering.NoDifferenceGlyph = NoDifferenceGlyph;
 
-                    Mat compositedFrame = glyphRendering.RenderDifferences(blurSourceImage, blurDestinationImage);
+                    Mat compositedFrame = glyphRendering.RenderDifferences(tintedSourceImage, tintedDestinationImage, AreaSize);
 
                     string composedImagePath = SaveComposedImage(compositedFrame);
                     ComposedImagePaths.Add(composedImagePath); // Add to the collection
                     UpdateDisplayedImage(composedImagePath); // Update the displayed image
-                }  
+                }
             }
         }
 
@@ -1037,7 +1275,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             OnPropertyChanged(nameof(CompositedImage));
         }
 
-
         /// <summary>
         /// Applies a color tint to the given image using the specified brush color, ensuring 60% opacity.
         /// </summary>
@@ -1048,7 +1285,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// This method extracts the color values from the given brush and creates a Scalar
         /// object representing the tint color. It then applies the tint color to the input image
         /// by blending the input image with the tint color and sets the opacity to 60%.
-        /// </remarks>
         private Mat ApplyColorTint(Mat image, SolidColorBrush tintColorBrush)
         {
             // Extract color values from the brush
@@ -1060,29 +1296,31 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             Mat alphaChannel = channels.Length == 4 ? channels[3] : Mat.Ones(image.Size(), MatType.CV_8UC1) * 255;
 
             // Create a new Mat for the tinted image
-            Mat tintedRGB = new Mat();
-            Cv2.Multiply(image, new Scalar(0.5, 0.5, 0.5, 1.0), tintedRGB); // Reduce the original image brightness by 50%
+            Mat tintedImage = new Mat();
+            Cv2.Multiply(image, new Scalar(0.5, 0.5, 0.5, 1.0), tintedImage); // Reduce the original image brightness by 50%
             Mat tintMat = new Mat(image.Size(), image.Type(), tint);
-            Cv2.AddWeighted(tintedRGB, 1.0, tintMat, 0.5, 0, tintedRGB); // Apply the tint color
+            Cv2.AddWeighted(tintedImage, 0.5, tintMat, 0.5, 0, tintedImage); // Apply the tint color
 
             // Create a new alpha channel with 60% opacity
-            Mat alpha60 = new Mat(image.Size(), MatType.CV_8UC1, new Scalar(153)); // 60% of 255 is 153
+            Mat alpha60 = alphaChannel * 0.6; // 60% of the original alpha values
 
-            // Merge the tinted RGB channels with the new alpha channel
             if (channels.Length == 4)
             {
-                Mat[] tintedChannels = Cv2.Split(tintedRGB);
-                tintedChannels[3] = alpha60; // Set the new alpha channel
-                Cv2.Merge(tintedChannels, tintedRGB);
+                // If the original image had an alpha channel, update the alpha channel
+                channels[3] = alpha60;
+                Cv2.Merge(channels, tintedImage);
             }
             else
             {
                 // If the original image did not have an alpha channel, add the alpha channel
-                Cv2.Merge(new Mat[] { tintedRGB, alpha60 }, tintedRGB);
+                Mat[] tintedChannels = Cv2.Split(tintedImage);
+                Mat[] mergedChannels = new Mat[] { tintedChannels[0], tintedChannels[1], tintedChannels[2], alpha60 };
+                Cv2.Merge(mergedChannels, tintedImage);
             }
 
-            return tintedRGB;
+            return tintedImage;
         }
+        #endregion
 
         #region EventHandlers
         /// <summary>
@@ -1099,16 +1337,20 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-            if (name == nameof(SelectedCompositionMode))
+            if (name == nameof(SelectedForegroundCompositionMode))
             {
-                OnCompositionModeChanged(this, new PropertyChangedEventArgs(nameof(SelectedCompositionMode)));
+                OnCompositionModeChanged(this, new PropertyChangedEventArgs(nameof(SelectedForegroundCompositionMode)));
+            }
+            if(name == nameof(SelectedBackgroundCompositionMode))
+            {
+                OnCompositionModeChanged(this, new PropertyChangedEventArgs(nameof(SelectedBackgroundCompositionMode)));
             }
         }
 
         // Event handler for composition mode changes
         private void OnCompositionModeChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(SelectedCompositionMode))
+            if (e.PropertyName == nameof(SelectedForegroundCompositionMode) || e.PropertyName == nameof(SelectedBackgroundCompositionMode))
             {
                 if (CompositedImage != null)
                 {

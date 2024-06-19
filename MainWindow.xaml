@@ -8,8 +8,9 @@
         xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
         mc:Ignorable="d"
         Title="Temporal Motion Analysis App" 
-        Width="1120"
+        Width="1400"
         Height="980"
+        Background="Gray"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
@@ -31,28 +32,31 @@
                                   SecondItemTemplate="{StaticResource SecondItemTemplate}"
                                   DefaultTemplate="{StaticResource DefaultTemplate}"/>
         <converters:IndexConverter x:Key="IndexConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:FrameIndexVisibilityConverter x:Key="FrameIndexVisibilityConverter"/>
         <converters:FrameIndexTickVisibilityConverter x:Key="FrameIndexTickVisibilityConverter"/>
         <converters:SelectedFramesMultiValueConverter x:Key="SelectedFramesMultiValueConverter"/>
         <converters:StringToIntConverter x:Key="StringToIntConverter"/>
         <converters:RadioButtonConverter x:Key="RadioButtonConverter"/>
+        <converters:StringToColorConverter x:Key="StringToColorConverter"/>
         <converters:GlyphConverter x:Key="GlyphConverter" />
     </Window.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
             <!-- Parent Control Pane : Left -->
-            <StackPanel Orientation="Vertical">
+            <StackPanel Orientation="Vertical" Margin="5,5,0,0">
 
+                <!-- Folder Loader Controls -->
                 <StackPanel Orientation="Horizontal"  HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="5,5,0,5" Width="250" Height="60">
-                        <DockPanel>
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5,5,0,5" Width="250" Height="70">
+                        <DockPanel Background="White">
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Label Content="Folder Name: " FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                     <Label Content="{Binding FolderName}" MaxWidth="300" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </StackPanel>
-                                <Button Content="Browse" Command="{Binding LoadImagesCommand}" Width="100" Margin="5,0,10,0"/>
+                                <Button Content="Browse" Command="{Binding LoadImagesCommand}" Width="100" Margin="5,8,10,0"/>
                             </StackPanel>
 
                         </DockPanel>
@@ -60,8 +64,8 @@
                 </StackPanel>
 
                 <!-- Playback Controls Border with Label -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5">
-                    <DockPanel>
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Height="130">
+                    <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Playback Controls" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,5">
@@ -115,173 +119,13 @@
                     </DockPanel>
                 </Border>
 
-                <!-- Visual Encoding Options Border with Label -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="445">
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                        <StackPanel Orientation="Vertical" Margin="5,0">
-                            
-                            <StackPanel Orientation="Vertical">
-                                <!-- Radio Buttons for Pixel and Marks -->
-                                <StackPanel Orientation="Horizontal">
-                                    <DockPanel VerticalAlignment="Center" Margin="5">
-                                        <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
-                                        <RadioButton x:Name="PixelRadioButton" Content="Pixel" GroupName="Mode" Margin="5" IsChecked="{Binding IsPixelModeSelected}" />
-                                        <RadioButton x:Name="MarksRadioButton" Content="Marks" GroupName="Mode" Margin="5" IsChecked="{Binding IsMarksModeSelected}" />
-                                    </DockPanel>
-                                </StackPanel>
-
-                                <!-- Submenu for Composition Modes, visible only when Pixel is selected -->
-                                <StackPanel Orientation="Vertical" Margin="5">
-                                    <StackPanel.Style>
-                                        <Style TargetType="StackPanel">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPixelModeSelected}" Value="True">
-                                                    <Setter Property="Visibility" Value="Visible" />
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding IsPixelModeSelected}" Value="False">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </StackPanel.Style>
-
-                                    <Label FontWeight="Bold">Composition Modes:</Label>
-                                    <RadioButton x:Name="SourceOver" Content="SourceOver" GroupName="CompositionMode" Margin="5" 
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.SourceOver}}"/>
-                                    <RadioButton x:Name="DestinationOver" Content="DestinationOver" GroupName="CompositionMode" Margin="5"
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.DestinationOver}}"/>
-                                    <RadioButton x:Name="SourceIn" Content="SourceIn" GroupName="CompositionMode" Margin="5" 
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.SourceIn}}"/>
-                                    <RadioButton x:Name="DestinationIn" Content="DestinationIn" GroupName="CompositionMode" Margin="5"
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.DestinationIn}}"/>
-                                    <RadioButton x:Name="SourceOut" Content="SourceOut" GroupName="CompositionMode" Margin="5"
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.SourceOut}}"/>
-                                    <RadioButton x:Name="DestinationOut" Content="DestinationOut" GroupName="CompositionMode" Margin="5"
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.DestinationOut}}"/>
-                                    <RadioButton x:Name="SourceAtop" Content="SourceAtop" GroupName="CompositionMode" Margin="5"
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.SourceAtop}}"/>
-                                    <RadioButton x:Name="DestinationAtop" Content="DestinationAtop" GroupName="CompositionMode" Margin="5"
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.DestinationAtop}}"/>
-                                    <RadioButton x:Name="Clear" Content="Clear" GroupName="CompositionMode" Margin="5"
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.Clear}}"/>
-                                    <RadioButton x:Name="XOR" Content="XOR" GroupName="CompositionMode" Margin="5" 
-                                                 IsChecked="{Binding SelectedCompositionMode, Converter={StaticResource RadioButtonConverter},
-                                                 ConverterParameter={x:Static local:MainViewModel+CompositionMode.XOR}}"/>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="Source Color:" FontWeight="Bold"/>
-                                        
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="Destination Color:" FontWeight="Bold"/>
-                                        
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <!-- Submenu for Marks, visible only when Marks is selected -->
-                            <StackPanel Orientation="Vertical" Margin="5">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsMarksModeSelected}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsMarksModeSelected}" Value="False">
-                                                <Setter Property="Visibility" Value="Collapsed" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <Label FontWeight="Bold">Glyphs:</Label>
-                                <StackPanel Orientation="Vertical">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="Positive Difference: " />
-                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="△" />
-                                        </RadioButton>
-                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▲"/>
-                                        </RadioButton>
-                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="◆" />
-                                        </RadioButton>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="Negative Difference: " />
-                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▽}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▽" />
-                                        </RadioButton>
-                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▼}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▼" />
-                                        </RadioButton>
-                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=★}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="★" />
-                                        </RadioButton>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label Content="No Difference: "/>
-                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=■}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="■" />
-                                        </RadioButton>
-                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=□}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="□" />
-                                        </RadioButton>
-                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5" 
-                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=●}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="●" />
-                                        </RadioButton>
-                                    </StackPanel>
-
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label FontWeight="Bold">Area Size:</Label>
-                                        <TextBox Width="100" Margin="5" Text="{Binding AreaSize}" />
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal">
-                                <Label FontWeight="Bold">Blur:</Label>
-                                <TextBox Width="100" Margin="5" />
-                            </StackPanel>
-
-                            <StackPanel Orientation="Horizontal" Visibility="Hidden">
-                                <Label FontWeight="Bold">Offset:</Label>
-                                <TextBox Width="100" Margin="5" Text="{Binding OffsetValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" />
-                            </StackPanel>
-                        </StackPanel>
-                    </DockPanel>
-                </Border>
-
                 <!-- Indication Frame Preview Pane -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="250" Height="260">
-                    <DockPanel>
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="238">
+                    <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Indication Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <!-- Animation of images in selected folder -->
                         <StackPanel Orientation="Vertical">
-                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top"/>
+                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top" Margin="0,5,0,0"/>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Label FontWeight="Bold" Content="Frame Index: "/>
@@ -295,76 +139,211 @@
                         </StackPanel>
                     </DockPanel>
                 </Border>
-            </StackPanel>
 
-            <!-- Parent Control Pane : Center/Right -->
-            <StackPanel Orientation="Vertical">
-                <StackPanel Orientation="Horizontal">
-                    <!-- Offset Frame -->
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="240">
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                <!-- Foreground Visual Encoding Options Border with Label -->
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="280">
+                    <DockPanel Background="White">
+                        <TextBlock DockPanel.Dock="Top" Text="Foreground Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                        <StackPanel Orientation="Vertical" Margin="5,0">
 
-                            <ItemsControl ItemsSource="{Binding SelectedFrames}" 
-                                          ItemTemplateSelector="{StaticResource IndexBasedTemplateSelector}"/>
-
-                        </DockPanel>
-                    </Border>
-
-                    <!-- Animation Frame -->
-                    <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="410" Height="240">
-                        <DockPanel>
-                            <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
-
-                            <!-- Animation of images in selected folder -->
-                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="350" Margin="0,-5,0,0"/>
-                        </DockPanel>
-                    </Border>
-                </StackPanel>
-
-                <!-- Composite View -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="380" HorizontalAlignment="Left">
-                    <DockPanel>
-                        <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <!-- Composite Image from the SelectedFrames -->
-                            <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="600" Margin="0,-15,0,0" HorizontalAlignment="Left"/>
-
-                            <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="15,0,0,0">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                                    <Label Content="Frame Offset:" FontWeight="Bold"/>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.OffsetValue, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                            <StackPanel Orientation="Vertical">
+                                <!-- Radio Buttons for Pixel and Marks -->
+                                <StackPanel Orientation="Horizontal">
+                                    <DockPanel VerticalAlignment="Center" Margin="5">
+                                        <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
+                                        <RadioButton x:Name="ForePixelRadioButton" Content="Pixel" GroupName="ForeMode" Margin="5" IsChecked="{Binding IsForePixelModeSelected}" />
+                                        <RadioButton x:Name="ForeMarksRadioButton" Content="Marks" GroupName="ForeMode" Margin="5" IsChecked="{Binding IsForeMarksModeSelected}" />
+                                    </DockPanel>
                                 </StackPanel>
 
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="E-measure:" FontWeight="Bold"/>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedEmeasure, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                </StackPanel>
+                                <!-- Submenu for Composition Modes, visible only when Pixel is selected -->
+                                <StackPanel Orientation="Vertical" Margin="5">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsForePixelModeSelected}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsForePixelModeSelected}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
 
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="MAE:" FontWeight="Bold"/>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedMAE, RelativeSource={RelativeSource AncestorType=Window}}"/>
-                                </StackPanel>
-
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="SSIM:" FontWeight="Bold"/>
-                                    <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedSSIM, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label FontWeight="Bold">Composition Mode:</Label>
+                                        <!-- TODO: convert to combobox -->
+                                        <ComboBox x:Name="ForegroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" SelectedValue="{Binding SelectedForegroundCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </StackPanel>
                                 </StackPanel>
                             </StackPanel>
+
+                            <!-- Submenu for Marks, visible only when Marks is selected -->
+                            <StackPanel Orientation="Vertical" Margin="5">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsForeMarksModeSelected}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsForeMarksModeSelected}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Positive Difference: " />
+                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="△" Foreground="Green"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▲" Foreground="Green"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="◆" Foreground="Green"/>
+                                        </RadioButton>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Negative Difference: " />
+                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▽}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▽" Foreground="Red"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▼}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▼" Foreground="Red"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=★}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="★" Foreground="Red"/>
+                                        </RadioButton>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="No Difference: "/>
+                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=■}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="■" Foreground="Blue"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=□}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="□" Foreground="Blue"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=●}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="●" Foreground="Blue"/>
+                                        </RadioButton>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label FontWeight="Bold">Area Size:</Label>
+                                        <TextBox Width="100" Margin="5" Text="{Binding AreaSize}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+
                         </StackPanel>
-                        
                     </DockPanel>
                 </Border>
 
+                <!-- Background Visual Encoding Options Border with Label -->
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="160">
+                    <DockPanel Background="White">
+                        <TextBlock DockPanel.Dock="Top" Text="Background Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                        <StackPanel Orientation="Vertical" Margin="5,0">
+
+                            <StackPanel Orientation="Vertical">
+                                <!-- Radio Buttons for Pixel and Marks -->
+                                <StackPanel Orientation="Horizontal">
+                                    <DockPanel VerticalAlignment="Center" Margin="5">
+                                        <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
+                                        <RadioButton x:Name="BackPixelRadioButton" Content="Pixel" GroupName="BackMode" Margin="5" IsChecked="{Binding IsBackPixelModeSelected}" />
+                                        <RadioButton x:Name="BackMarksRadioButton" Content="Marks" GroupName="BackMode" Margin="5" IsChecked="{Binding IsBackMarksModeSelected}" />
+                                    </DockPanel>
+                                </StackPanel>
+
+                                <!-- Submenu for Composition Modes, visible only when Pixel is selected -->
+                                <StackPanel Orientation="Vertical" Margin="5">
+                                    <StackPanel.Style>
+                                        <Style TargetType="StackPanel">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsBackPixelModeSelected}" Value="True">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsBackPixelModeSelected}" Value="False">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </StackPanel.Style>
+
+                                    <Label FontWeight="Bold">Composition Mode:</Label>
+                                    <!-- TODO: Add Combobox for Background Composition Mode Selections -->
+                                    <ComboBox x:Name="BackgroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" SelectedValue="{Binding SelectedBackgroundCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Submenu for Marks, visible only when Marks is selected -->
+                            <StackPanel Orientation="Vertical" Margin="5">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsBackMarksModeSelected}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsBackMarksModeSelected}" Value="False">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+
+                                <Label FontWeight="Bold" Content="Texture/Marks:"/>
+                                <!-- TODO: Combobox for Background Marks/Texture Selections -->
+                                <ComboBox x:Name="BackgroundMarksTextures" Width="100" Margin="5" ItemsSource="{Binding BackgroundMarksTextures}" SelectedValue="{Binding SelectedBackgroundMarksTextures, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+            </StackPanel>
+
+            <!-- Parent Control Pane : Center/Right -->
+            <StackPanel Orientation="Vertical" Margin="0,5,0,0">
                 <!-- Timeline Overview -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="110">
-                    <DockPanel>
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="1100" Height="70">
+                    <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Timeline Overview" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
                         <ListBox ItemsSource="{Binding TimelineCells}" HorizontalAlignment="Stretch" Height="Auto" Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
-                                 SelectionMode="Single" SelectionChanged="ListBox_SelectionChanged" BorderBrush="Transparent">
+                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden" 
+                 SelectionMode="Single" SelectionChanged="ListBox_SelectionChanged" BorderBrush="Transparent">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal"/>
@@ -374,7 +353,7 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical">
                                         <!-- Empty triangle pointing down, visible if the cell is selected -->
-                                        <TextBlock Text="▽" FontFamily="Segoe UI" FontSize="12" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0">
+                                        <TextBlock Text="▽" FontFamily="Segoe UI" FontSize="10" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -388,7 +367,7 @@
                                         </TextBlock>
 
                                         <!-- Filled triangle pointing down, visible if the cell is the current frame -->
-                                        <TextBlock Text="▼" FontFamily="Segoe UI" FontSize="15" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-5,0,-2">
+                                        <TextBlock Text="▼" FontFamily="Segoe UI" FontSize="10" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,-5,0,-2">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -403,14 +382,14 @@
 
                                         <!-- Frame Number (if 0 or multiple of 6) -->
                                         <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"
-                                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
+                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexVisibilityConverter}}"/>
 
                                         <!-- Additional TextBlock for tick marks in between multiples of 6 -->
                                         <TextBlock Text="|" HorizontalAlignment="Center" Margin="0"
-                                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
+                            Visibility="{Binding FrameNumber, Converter={StaticResource FrameIndexTickVisibilityConverter}}"/>
 
                                         <!-- Filled triangle pointing up, visible if the cell is the current frame -->
-                                        <TextBlock Text="▲" FontFamily="Segoe UI" FontSize="15" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
+                                        <TextBlock Text="▲" FontFamily="Segoe UI" FontSize="10" FontWeight="ExtraBold" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,-2,0,-5">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -424,16 +403,13 @@
                                         </TextBlock>
 
                                         <!-- Empty triangle pointing up, visible if the cell is selected -->
-                                        <TextBlock Text="△" FontFamily="Segoe UI" FontSize="12" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0">
+                                        <TextBlock Text="△" FontFamily="Segoe UI" FontSize="10" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                        <DataTrigger Binding="{Binding IsOffsetSelection}" Value="True">
                                                             <Setter Property="Visibility" Value="Visible"/>
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="False">
-                                                            <Setter Property="Visibility" Value="Collapsed"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -448,13 +424,13 @@
                 </Border>
 
                 <!-- Zoomed Timeline View -->
-                <Border BorderBrush="Black" BorderThickness="1" Margin="5" Width="830" Height="160">
-                    <DockPanel>
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="1100" Height="130">
+                    <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Zoomed Timeline" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
                         <ListBox ItemsSource="{Binding ZoommedTimelineCells}" HorizontalAlignment="Stretch" Height="Auto" BorderBrush="Transparent"
-                                 Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                 Visibility="{Binding IsImagesLoaded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                             <ListBox.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"/>
@@ -464,8 +440,8 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical">
                                         <!-- Image Display -->
-                                        <Image Source="{Binding ImagePath}" Width="150" Height="Auto" Margin="0" HorizontalAlignment="Center"
-                                               VerticalAlignment="Top"/>
+                                        <Image Source="{Binding ImagePath}" Width="100" Height="Auto" Margin="0" HorizontalAlignment="Center"
+                               VerticalAlignment="Top"/>
 
                                         <!-- Frame Number -->
                                         <TextBlock Text="{Binding FrameNumber}" HorizontalAlignment="Center" Margin="0"/>
@@ -490,7 +466,193 @@
                         </ListBox>
                     </DockPanel>
                 </Border>
+                
+                <StackPanel Orientation="Horizontal">
+                    <!-- Animation Frame -->
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="240">
+                        <DockPanel Background="White">
+                            <TextBlock DockPanel.Dock="Top" Text="Animation Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                            
+                            <!-- Animation of images in selected folder -->
+                            <Image Source="{Binding CurrentImage.ImagePath}" Height="Auto" Width="400" Margin="0,2,0,15"/>
 
+                        </DockPanel>
+                    </Border>
+                    
+                    <!-- Offset Frame -->
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="240">
+                        <DockPanel Background="White">
+                            <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+
+                            <StackPanel Orientation="Horizontal">
+                                <ItemsControl ItemsSource="{Binding SelectedFrames}" 
+                                        ItemTemplateSelector="{StaticResource IndexBasedTemplateSelector}" Height="Auto" Width="400" Margin="0,0,0,0"/>
+
+                                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="10,0,0,0" Width="120">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                        <Label Content="Frame Offset:" FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.OffsetValue, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="E-measure:" FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedEmeasure, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="MAE:" FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedMAE, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="SSIM:" FontWeight="Bold"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedSSIM, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Current Frame Transforms-->
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical">
+                        <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="200" Height="450">
+                            <DockPanel Background="White">
+                                <TextBlock DockPanel.Dock="Top" Text="Current Frame Transforms" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
+
+                                <StackPanel Orientation="Vertical" Margin="5,5,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Reduce Noise:" FontWeight="Bold"/>
+                                        <RadioButton Content="On" IsChecked="{Binding IsCurrentXORSelected, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XORCurrentGroup" Margin="0,0,8,0"/>
+                                        <RadioButton Content="Off" IsChecked="{Binding IsCurrentXORSelected, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XORCurrentGroup"/>
+                                    </StackPanel>
+
+                                    <!-- TODO: Transparency Slider -->
+                                    <StackPanel>
+                                        <TextBlock Text = "Transparency" Margin = "10" />
+                                        <Slider x:Name = "CurrentFrameTransparency" Minimum = "0" Maximum = "100" TickFrequency = "2" 
+                                            TickPlacement = "BottomRight" ValueChanged = "currentFrameTransparency_ValueChanged" Margin = "5">
+                                            <Slider.Background>
+                                                <LinearGradientBrush EndPoint = "0.5,1" StartPoint = "0.5,0">
+                                                    <GradientStop Color = "DarkGray" Offset = "0" />
+                                                    <GradientStop Color = "DarkGray" Offset = "1" />
+                                                </LinearGradientBrush>
+                                            </Slider.Background>
+                                        </Slider>
+                                        <TextBlock x:Name = "textBlock1" Margin = "10" Text = "Level: 0" />
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Tint Color:" FontWeight="Bold"/>
+                                        <ComboBox x:Name="CurrentFrameSourceColor" Width="100" Margin="5" 
+                                                  ItemsSource="{Binding SourceColors}" 
+                                                  SelectedValue="{Binding SelectedSourceColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToColorConverter}}" >
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label FontWeight="Bold">Blur:</Label>
+                                        <ComboBox Width="100" Margin="5,0,0,0" 
+                                                  ItemsSource="{Binding BlurValue}" 
+                                                  SelectedValue="{Binding SelectedCurrentBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    
+                                    <!-- TODO: Preview of Image Transforms -->
+                                </StackPanel>
+
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Composite View -->
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="680" Height="450" HorizontalAlignment="Left">
+                        <DockPanel Background="White">
+                            <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <!-- Composite Image from the SelectedFrames -->
+                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="650" Margin="0,-10,0,0" HorizontalAlignment="Left"/>
+
+                            </StackPanel>
+
+                        </DockPanel>
+                    </Border>
+
+                    <!-- Offset Frame Transforms-->
+                    <StackPanel Orientation="Vertical">
+                        <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="200" Height="450">
+                            <DockPanel Background="White">
+                                <TextBlock DockPanel.Dock="Top" Text="Offset Frame Transforms" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
+
+                                <StackPanel Orientation="Vertical" Margin="5,5,0,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="Reduce Noise:" FontWeight="Bold"/>
+                                        <RadioButton Content="On" IsChecked="{Binding IsOffsetXORSelected, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XOROffsetGroup" Margin="0,0,8,0"/>
+                                        <RadioButton Content="Off" IsChecked="{Binding IsOffsetXORSelected, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XOROffsetGroup"/>
+                                    </StackPanel>
+
+                                    <!-- TODO: Transparency/Opacity/Alpha Slider -->
+                                    <StackPanel>
+                                        <TextBlock Text = "Transparency" Margin = "10" />
+                                        <Slider x:Name = "OffsetFrameTransparency" Minimum = "0" Maximum = "100" TickFrequency = "2" 
+                                        TickPlacement = "BottomRight" ValueChanged = "offsetFrameTransparency_ValueChanged" Margin = "5">
+                                            <Slider.Background>
+                                                <LinearGradientBrush EndPoint = "0.5,1" StartPoint = "0.5,0">
+                                                    <GradientStop Color = "DarkGray" Offset = "0" />
+                                                    <GradientStop Color = "DarkGray" Offset = "1" />
+                                                </LinearGradientBrush>
+                                            </Slider.Background>
+                                        </Slider>
+                                        <TextBlock x:Name = "textBlock2" Margin = "10" Text = "Level: 0" />
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Label Content="Tint Color:" FontWeight="Bold"/>
+                                            <ComboBox x:Name="OffsetFrameDestinationColor" Width="100" Margin="5" 
+                                                      ItemsSource="{Binding DestinationColors}" 
+                                                      SelectedValue="{Binding SelectedDestinationColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToColorConverter}}" >
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+
+                                        <!-- Current Blur Kernel Size Selection -->
+                                        <StackPanel Orientation="Horizontal">
+                                            <Label FontWeight="Bold">Blur:</Label>
+                                            <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedOffsetBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+
+                                        <!-- TODO: Preview of Image Transforms -->
+                                    </StackPanel>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </StackPanel>
+
+                </StackPanel>
+                
             </StackPanel>
         </StackPanel>
     </Grid>

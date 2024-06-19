@@ -45,12 +45,13 @@ namespace TemporalMotionExtractionAnalysis.Model
             if (channels.Length == 4)
             {
                 Mat alpha = channels[3];
-                alpha *= transparencyFactor; // Reduce alpha by the specified factor
+                alpha *= 0.6; // Reduce alpha by 60%
                 channels[3] = alpha;
                 Cv2.Merge(channels, result);
             }
             return result;
         }
+
 
         /// <summary>
         /// Applies Gaussian blur to a given image Mat.
