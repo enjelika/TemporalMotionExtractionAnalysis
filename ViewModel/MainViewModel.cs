@@ -723,7 +723,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             SelectedForegroundCompositionMode = "SourceOver";
 
             // Initialize the GlyphRendering class with default glyphs
-            glyphRendering = new GlyphRendering("▲", "▼", "■", AreaSize);
+            glyphRendering = new GlyphRendering("▲", "▼", "■");
 
             // Initialize commands or event handlers for composition mode changes
             // For simplicity, assume there's a PropertyChanged event handler wired up to trigger composition

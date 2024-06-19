@@ -24,7 +24,16 @@ namespace TemporalMotionExtractionAnalysis.Converters
         {
             if (value is string)
             {
-                System.Windows.Media.Color color = (Color)System.Windows.Media.ColorConverter.ConvertFromString(value.ToString());
+                System.Windows.Media.Color color;
+
+                if (value.Equals("none"))
+                {
+                    color = System.Windows.Media.Colors.Transparent;
+                }
+                else
+                {
+                   color  = (Color)System.Windows.Media.ColorConverter.ConvertFromString(value.ToString());
+                }
                 return color;
             }
             return 0; // Default value in case of an error
