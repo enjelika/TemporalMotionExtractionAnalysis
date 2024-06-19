@@ -123,10 +123,14 @@
                 <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="238">
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Indication Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                        <!-- Animation of images in selected folder -->
+                        
                         <StackPanel Orientation="Vertical">
                             <Image Source="{Binding IndicationImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Top" Margin="0,5,0,0"/>
 
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Label Content="Frame Number:" FontWeight="Bold" />
+                                <TextBlock Text="{Binding IndicationImage.FrameNumber}" HorizontalAlignment="Center" Margin="0"/>
+                            </StackPanel>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -555,7 +559,7 @@
                                         <RadioButton Content="Off" IsChecked="{Binding IsCurrentXORSelected, Converter={StaticResource InverseBooleanConverter}, Mode=TwoWay}" VerticalAlignment="Center" GroupName="XORCurrentGroup"/>
                                     </StackPanel>
 
-                                    <!-- TODO: Transparency Slider -->
+                                    <!-- Transparency Slider -->
                                     <StackPanel>
                                         <TextBlock Text = "Transparency" Margin = "5,0,0,0" FontWeight="Bold" />
                                         <Slider x:Name = "CurrentFrameTransparency" Minimum = "0" Maximum = "100" TickFrequency = "2" 
@@ -596,7 +600,6 @@
                                         </ComboBox>
                                     </StackPanel>
 
-                                    <!-- TODO: Preview of Image Transforms -->
                                 </StackPanel>
 
                             </DockPanel>
@@ -671,7 +674,6 @@
                                             </ComboBox>
                                         </StackPanel>
 
-                                        <!-- TODO: Preview of Image Transforms -->
                                     </StackPanel>
                                 </StackPanel>
                             </DockPanel>
