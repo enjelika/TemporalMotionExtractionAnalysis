@@ -672,8 +672,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // String values for comboboxes in the View
             FpsValue = new ObservableCollection<string>() { "4", "10", "20", "30", "40", "60" };
             BlurValue = new ObservableCollection<string>() { "5", "7", "9" };
-            SourceColors = new ObservableCollection<string>() { "Red", "Yellow", "Blue" };
-            DestinationColors = new ObservableCollection<string>() { "Orange", "Green", "Purple" };
+            SourceColors = new ObservableCollection<string>() { "none", "Red", "Yellow", "Green" };
+            DestinationColors = new ObservableCollection<string>() { "none", "Orange", "Purple", "Blue" };
             CompositionModes =  new ObservableCollection<string>() { "SourceOver", "DestinationOver", "SourceIn", 
                 "DestinationIn", "SourceOut", "DestinationOut", "SourceAtop", "DestinationAtop", "Clear", "XOR" };
             BackgroundMarksTextures = new ObservableCollection<string>() { "Texture1", "Texture2", "Texture3" };
