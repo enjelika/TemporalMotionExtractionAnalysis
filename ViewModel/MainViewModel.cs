@@ -54,6 +54,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private int _areaSize;
         private int _currentBlurSize;
         private int _offsetBlurSize;
+        private int _currentFrameTransparency;
+        private int _offsetFrameTransparency;
 
         private const int TotalCells = 120; //57
         private const int CenterIndex = 1; //26
@@ -496,6 +498,26 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 UpdateOffsetKernelSize();
             }
         }
+
+        public int CurrentFrameTransparency
+        {
+            get => _currentFrameTransparency;
+            set
+            {
+                _currentFrameTransparency = value;
+                OnPropertyChanged(nameof(CurrentFrameTransparency)); // Notify property changed
+            }
+        }
+
+        public int OffsetFrameTransparency
+        {
+            get => _offsetFrameTransparency;
+            set
+            {
+                _offsetFrameTransparency = value;
+                OnPropertyChanged(nameof(OffsetFrameTransparency)); // Notify property changed
+            }
+        }
         #endregion
 
         #region ImageModels
@@ -697,6 +719,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             Images = new ObservableCollection<ImageModel>();
             TimelineCells = new ObservableCollection<ImageModel>();
             ZoommedTimelineCells = new ObservableCollection<ImageModel>();
+
+            CurrentFrameTransparency = 0;
 
             // Initialize timeline cells with default values
             for (int i = 0; i < TotalCells; i++)
