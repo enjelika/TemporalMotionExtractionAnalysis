@@ -265,5 +265,46 @@ namespace TemporalMotionExtractionAnalysis.Model
             workbook.Close();
             Console.WriteLine("Spreadsheet with results saved.");
         }
+
+        #region InstanceMask
+        public Mat InstanceMask(Mat source, Mat destination, System.Windows.Media.Color tint)
+        {
+            Mat tintedSource = ApplyTint(source, System.Windows.Media.Color.FromArgb(255, 255, 0, 0));
+            Mat tintedDestination = ApplyTint(destination, System.Windows.Media.Color.FromArgb(255, 0, 0, 255));
+            CompositionModeRendering compositionModeRendering = new CompositionModeRendering();
+            Mat composite = compositionModeRendering.XOR(source, destination);
+
+            return composite;
+        }
+
+        public Mat ApplyTint(Mat image, System.Windows.Media.Color tint)
+        {
+            // Convert the image to the same type as the input image if necessary
+            if (image.Type() != MatType.CV_8UC3)
+            {
+                image.ConvertTo(image, MatType.CV_8UC3);
+            }
+            // Create a new Mat with the same size and type as the input image to store the tinted image
+            Mat tintedImage = new Mat(image.Size(), image.Type());
+            // Create a Scalar with the tint color
+            Scalar tintScalar = new Scalar(tint.B, tint.G, tint.R); // Note the order BGR for OpenCV
+                                                                    // Iterate through each pixel and apply the tint
+            for (int i = 0; i < image.Rows; i++)
+            {
+                for (int j = 0; j < image.Cols; j++)
+                {
+                    Vec3b pixel = image.At<Vec3b>(i, j);
+                    Vec3b tintedPixel = new Vec3b
+                    {
+                        Item0 = (byte)(pixel.Item0 * tintScalar.Val0 / 255),
+                        Item1 = (byte)(pixel.Item1 * tintScalar.Val1 / 255),
+                        Item2 = (byte)(pixel.Item2 * tintScalar.Val2 / 255)
+                    };
+                    tintedImage.Set(i, j, tintedPixel);
+                }
+            }
+            return tintedImage;
+        }
+        #endregion
     }
 }
