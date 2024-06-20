@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="Temporal Motion Analysis App" 
         Width="1400"
-        Height="980"
+        Height="960"
         Background="Gray"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
@@ -120,10 +120,10 @@
                 </Border>
 
                 <!-- Indication Frame Preview Pane -->
-                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="238">
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="220">
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Indication Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
-                        
+
                         <StackPanel Orientation="Vertical" VerticalAlignment="Center">
                             <Image Source="{Binding IndicationImage.ImagePath}" Height="Auto" Width="230" VerticalAlignment="Center" Margin="0,5,0,0"/>
 
@@ -136,7 +136,7 @@
                 </Border>
 
                 <!-- Foreground Visual Encoding Options Border with Label -->
-                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="220">
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="209">
                     <DockPanel Background="White">
                         <TextBlock DockPanel.Dock="Top" Text="Foreground Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="5,0">
@@ -270,8 +270,8 @@
                 </Border>
 
                 <!-- Background Visual Encoding Options Border with Label -->
-                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="220">
-                    <DockPanel Background="White">
+                <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="250" Height="217">
+                    <DockPanel Background="White" Margin="0,0,0,-1">
                         <TextBlock DockPanel.Dock="Top" Text="Background Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
                         <StackPanel Orientation="Vertical" Margin="5,0">
 
@@ -518,14 +518,14 @@
 
                 <StackPanel Orientation="Horizontal">
                     <!-- Animation Frame -->
-                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="240">
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="220">
                         <DockPanel Background="White">
-                            <TextBlock DockPanel.Dock="Top" Text="Current Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                            <TextBlock DockPanel.Dock="Top" Text="Current Frame" FontWeight="Bold" HorizontalAlignment="Left" Margin="20,10,0,0"/>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,3,5,15">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,-18,-8,13">
 
-                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Center"  Margin="0,0,10,0">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <Label FontWeight="Bold" Content="Frame Index: "/>
                                         <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CurrentIndex, RelativeSource={RelativeSource AncestorType=Window}}" />
                                     </StackPanel>
@@ -544,13 +544,13 @@
                     </Border>
 
                     <!-- Offset Frame -->
-                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="240">
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="545" Height="220">
                         <DockPanel Background="White">
-                            <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+                            <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Right" Margin="5,10,20,0"/>
 
-                            <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="-15,-20,0,0">
                                 <ItemsControl ItemsSource="{Binding SelectedFrames}" 
-                                        ItemTemplateSelector="{StaticResource IndexBasedTemplateSelector}" Height="Auto" Width="400" Margin="0,0,0,0"/>
+                                        ItemTemplateSelector="{StaticResource IndexBasedTemplateSelector}" Height="Auto" Width="400"/>
 
                                 <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="10,0,0,0" Width="120">
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
@@ -581,8 +581,8 @@
                 <!-- Current Frame Transforms-->
                 <StackPanel Orientation="Horizontal">
                     <StackPanel Orientation="Vertical">
-                        <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="200" Height="450">
-                            <DockPanel Background="White">
+                        <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="200" Height="435">
+                            <DockPanel Background="White" Margin="0,0,0,-1">
                                 <TextBlock DockPanel.Dock="Top" Text="Current Frame Transforms" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
                                 <StackPanel Orientation="Vertical" Margin="5,-10,0,0" VerticalAlignment="Center">
@@ -604,7 +604,8 @@
                                                 </LinearGradientBrush>
                                             </Slider.Background>
                                         </Slider>
-                                        <TextBlock x:Name = "textBlock1" Margin = "10" Text ="{Binding Path=CurrentFrameTransparency, Mode=TwoWay, Converter={StaticResource StringToIntConverter}}"/>
+                                        <TextBlock x:Name = "textBlock1" Margin = "10" Visibility="Collapsed"
+                                                   Text ="{Binding Path=CurrentFrameTransparency, Mode=TwoWay, Converter={StaticResource StringToIntConverter}}"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
@@ -640,13 +641,13 @@
                     </StackPanel>
 
                     <!-- Composite View -->
-                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="680" Height="450" HorizontalAlignment="Left">
-                        <DockPanel Background="White">
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Margin="22" Width="640" Height="419">
+                        <DockPanel Background="White" Margin="0">
                             <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <!-- Composite Image from the SelectedFrames -->
-                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="650" Margin="0,-10,0,0" HorizontalAlignment="Left"/>
+                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="625" Margin="0,-10,0,0"/>
 
                             </StackPanel>
 
@@ -655,8 +656,8 @@
 
                     <!-- Offset Frame Transforms-->
                     <StackPanel Orientation="Vertical">
-                        <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="200" Height="450">
-                            <DockPanel Background="White">
+                        <Border BorderBrush="DarkGray" BorderThickness="1" Margin="5" Width="205" Height="435">
+                            <DockPanel Background="White" Margin="0,0,-1,-1">
                                 <TextBlock DockPanel.Dock="Top" Text="Offset Frame Transforms" FontWeight="Bold" HorizontalAlignment="Center" Margin="5,5,5,0"/>
 
                                 <StackPanel Orientation="Vertical" Margin="5,-10,0,0" VerticalAlignment="Center">
@@ -678,7 +679,8 @@
                                                 </LinearGradientBrush>
                                             </Slider.Background>
                                         </Slider>
-                                        <TextBlock x:Name = "textBlock2" Margin = "10" Text ="{Binding Path=OffsetFrameTransparency, Mode=TwoWay, Converter={StaticResource StringToIntConverter}}"/>
+                                        <TextBlock x:Name = "textBlock2" Margin = "10" Visibility="Collapsed"
+                                                   Text ="{Binding Path=OffsetFrameTransparency, Mode=TwoWay, Converter={StaticResource StringToIntConverter}}"/>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Vertical">
@@ -722,33 +724,33 @@
         <TextBlock FontFamily="Segoe UI Symbol"
                    FontSize="40"
                    FontWeight="Bold"
-                   Text="&#x2193;"
+                   Text="&#x27F1;"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Foreground="Black" Margin="626,448,0,0"/>
+                   Foreground="Black" Margin="626,433,0,0"/>
 
         <TextBlock FontFamily="Segoe UI Symbol"
                    FontSize="40"
                    FontWeight="Bold"
-                   Text="&#x2193;"
+                   Text="&#x27F1;"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Foreground="Black" Margin="1005,448,0,0"/>
+                   Foreground="Black" Margin="1005,433,0,0"/>
 
         <TextBlock FontFamily="Segoe UI Symbol"
                    FontSize="40"
                    FontWeight="Bold"
-                   Text="&#x2192;"
+                   Text="&#x21DB;"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Foreground="Black" Margin="457,676,0,0"/>
-        
+                   Foreground="Black" Margin="465,660,0,0"/>
+
         <TextBlock FontFamily="Segoe UI Symbol"
                    FontSize="40"
                    FontWeight="Bold"
-                   Text="&#x2190;"
+                   Text="&#x21DA;"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
-                   Foreground="Black" Margin="1145,676,0,0"/>
+                   Foreground="Black" Margin="1133,666,0,0"/>
     </Grid>
 </Window>
