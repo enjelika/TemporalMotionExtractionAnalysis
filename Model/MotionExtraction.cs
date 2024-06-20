@@ -2,6 +2,7 @@
 using MOIE = Microsoft.Office.Interop.Excel;
 using OpenCvSharp;
 using OpenCvSharp.Quality;
+using System.Windows.Media.Media3D;
 using System.Windows.Xps.Packaging;
 using System.Windows.Media;
 
@@ -379,6 +380,12 @@ namespace TemporalMotionExtractionAnalysis.Model
             return combinedImage;
         }
 
+        /// <summary>
+        /// Applies a tint to an image.
+        /// </summary>
+        /// <param name="image">Source image matrix.</param>
+        /// <param name="tint">Tint applied to the image.</param>
+        /// <returns>Tinted image.</returns>
         public Mat ApplyTint(Mat image, System.Windows.Media.Color tint)
         {
             // Convert the image to the same type as the input image if necessary
@@ -406,6 +413,48 @@ namespace TemporalMotionExtractionAnalysis.Model
                 }
             }
             return tintedImage;
+        }
+        #endregion
+
+        #region DrawForeground 
+        /// <summary>
+        /// Creates an image containing only the foreground pixels.
+        /// </summary>
+        /// <param name="instanceMask">masked instance image matrix.</param>
+        /// <returns>Foreground image.</returns>
+        public Mat DrawForeground(Mat instanceMask)
+        {
+            // Get pixel data
+            int width = instanceMask.Width;
+            int height = instanceMask.Height;
+
+            // Instantiate composition matrix
+            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+
+            // Iterate through each pixel and adjust opacity
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    // Create foreground composition image from instanceMask                    
+                    Vec4b instanceMaskColor = instanceMask.At<Vec4b>(i, j);
+
+                    // Set pixel to mask color(s) or blank (if background color)
+                    if (instanceMaskColor.Item0 > 0 || instanceMaskColor.Item1 > 0 || instanceMaskColor.Item2 > 0)
+                    {
+                        composition.Set<Vec4b>(i, j, instanceMaskColor);
+                    }
+                    else
+                    {
+                        instanceMaskColor.Item0 = 0;
+                        instanceMaskColor.Item1 = 0;
+                        instanceMaskColor.Item2 = 0;
+                        instanceMaskColor.Item3 = 0;
+                        composition.Set<Vec4b>(i, j, instanceMaskColor);
+                    }
+                }
+            }
+            return composition;
         }
         #endregion
     }
