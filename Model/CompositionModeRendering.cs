@@ -446,7 +446,27 @@ namespace TemporalMotionExtractionAnalysis.Model
                     }
                 }
             }
+
             return composition;
+
+            //if (source.Size() != destination.Size() || source.Type() != destination.Type())
+            //{
+            //    throw new ArgumentException("Source and destination Mats must have the same size and type.");
+            //}
+
+            //Mat sourceAlpha = new Mat();
+            //Mat destinationAlpha = new Mat();
+            //Cv2.ExtractChannel(source, sourceAlpha, 3); // Extract alpha channel from source
+            //Cv2.ExtractChannel(destination, destinationAlpha, 3); // Extract alpha channel from destination
+
+            //Mat xorAlpha = new Mat();
+            //Cv2.BitwiseXor(sourceAlpha, destinationAlpha, xorAlpha); // XOR the alpha channels
+
+            //Mat result = new Mat();
+            //Cv2.AddWeighted(source, 1, destination, 1, 0, result); // Combine source and destination images
+            //Cv2.InsertChannel(xorAlpha, result, 3); // Insert the XORed alpha channel into the result
+
+            //return result;
         }
     }
 }

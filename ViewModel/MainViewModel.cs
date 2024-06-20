@@ -20,6 +20,8 @@ using static System.Resources.ResXFileRef;
 using System.Globalization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 using System.Security.Policy;
+using System.Windows.Media.Media3D;
+using Point = OpenCvSharp.Point;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -86,6 +88,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private string _positiveGlyph = "▲";
         private string _negativeGlyph = "▼";
         private string _noDifferenceGlyph = "■";
+                
+        private string executionDirectory;
+        private string crosshatch;
 
         private ObservableCollection<string> composedImagePaths = new ObservableCollection<string>();
         private ObservableCollection<string> transformedCurrentImagePaths = new ObservableCollection<string>();
@@ -692,6 +697,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// </summary>
         public MainViewModel()
         {
+            // Get the directory where the application is executing
+            executionDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+            crosshatch = System.IO.Path.Combine(executionDirectory, "Images", "crosshatch-vector-illustration.jpg");
+
             // Initialize the variables for the View Textboxes & Combobox
             OffsetValue = 0; // Default value
             TimeDelay = 250; // Default value
@@ -1184,12 +1193,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         case "SourceOver":
                             // Use the instanceMask to render the Foreground
                             Mat combinedImage = compositeModeRendering.SourceOver(instanceMask, tintedDestinationImage);
+                            Mat foregroundResult = AddAlphaChannel(combinedImage, instanceMask);
 
-                            // Create a black background with the same size as the source image
-                            //Mat blackBackground = new Mat(sourceImage.Size(), sourceImage.Type(), new Scalar(0, 0, 0));
-                            //Mat composedImage = compositeModeRendering.SourceOver(combinedImage, blackBackground);
+                            // Use the instanceMask to render the Background
+                            Mat finalImage = RenderBackground(foregroundResult, instanceMask);
 
-                            string composedImagePath = SaveComposedImage(combinedImage); // Save and get the file path
+                            string composedImagePath = SaveComposedImage(finalImage); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath); // Add to the collection
                             UpdateDisplayedImage(composedImagePath); // Update the displayed image
                             break;
@@ -1275,6 +1284,66 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     UpdateDisplayedImage(composedImagePath); // Update the displayed image
                 }
             }
+        }
+        static Mat AddAlphaChannel(Mat image, Mat alphaMask)
+        {
+            // Ensure the image is in BGRA format
+            Mat imageWithAlpha = new Mat();
+            Cv2.CvtColor(image, imageWithAlpha, ColorConversionCodes.BGR2BGRA);
+
+            // Split the image into channels
+            Mat[] channels = Cv2.Split(imageWithAlpha);
+
+            // Set the alpha channel
+            channels[3] = alphaMask;
+
+            // Merge the channels back into one image
+            Cv2.Merge(channels, imageWithAlpha);
+
+            Mat result = RemoveAlphaChannel(imageWithAlpha);
+
+            return result;
+        }
+
+        static Mat RemoveAlphaChannel(Mat imageWithAlpha)
+        {
+            // Split the image with alpha channel into channels
+            Mat[] channelsWithAlpha = Cv2.Split(imageWithAlpha);
+
+            // Remove the alpha channel (set it to a fully opaque value)
+            channelsWithAlpha[3] = Mat.Ones(imageWithAlpha.Size(), MatType.CV_8UC1) * 255;
+
+            // Merge the channels without the alpha channel
+            Mat imageWithoutAlpha = new Mat();
+            Cv2.Merge(channelsWithAlpha.Take(3).ToArray(), imageWithoutAlpha);
+
+            return imageWithoutAlpha;
+        }
+
+
+        private Mat RenderBackground(Mat composedForeground, Mat instanceMask)
+        {
+            // Load the crosshatch image using Cv2.ImRead
+            Mat background = Cv2.ImRead(crosshatch);
+
+            // Check if the background is successfully loaded and has valid size
+            if (background.Empty() || background.Size() != composedForeground.Size())
+            {
+                Console.WriteLine("Failed to load background image or invalid size.");
+                return composedForeground; // Return null or handle the error accordingly
+            }
+
+            // Ensure that the background has the same type as composedForeground
+            if (background.Type() != composedForeground.Type())
+            {
+                background.ConvertTo(background, composedForeground.Type());
+            }
+
+            // Combine the Foreground and Background
+            Mat result = new Mat();
+            Cv2.VConcat(new Mat[] { composedForeground, background }, result);
+
+            return result;
         }
 
         private string SaveComposedImage(Mat composedImage)

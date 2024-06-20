@@ -12,11 +12,15 @@ namespace TemporalMotionExtractionAnalysis.Model
         public string NegativeMark { get; set; }
         public string NoDifferenceMark { get; set; }
 
+        private MotionExtraction motionExtraction { get; set; }
+
         public GlyphRendering(string positiveMark, string negativeMark, string noDifferenceMark)
         {
             PositiveMark = positiveMark;
             NegativeMark = negativeMark;
             NoDifferenceMark = noDifferenceMark;
+
+            motionExtraction = new MotionExtraction();
         }
 
         private Mat XorImages(Mat currentImage, Mat offsetImage)
@@ -39,7 +43,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             Mat xorImage = XorImages(currentImage, offsetImage);
 
             // Calculate the difference between the two images
-            Mat diffMat = offsetImage - currentImage;
+            Mat diffMat = motionExtraction.CalculateSSIMMatrix(offsetImage, currentImage, areaSize);
 
             // Create a result Mat of the same size and type
             Mat result = new Mat(currentImage.Size(), currentImage.Type());
