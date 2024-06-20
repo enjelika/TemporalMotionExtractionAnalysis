@@ -2,15 +2,12 @@
 using MOIE = Microsoft.Office.Interop.Excel;
 using OpenCvSharp;
 using OpenCvSharp.Quality;
+using System.Windows.Xps.Packaging;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
     internal class MotionExtraction
     {
-        const string gif_root = "gifs";
-        const string moca_folder = "MoCA";
-        const string jpeg_images_folder = moca_folder + "\\JPEGImages";
-
         public MotionExtraction()
         {
 
@@ -152,6 +149,67 @@ namespace TemporalMotionExtractionAnalysis.Model
             }
             return score;
         }
+
+        /// <summary>
+        /// Calculates the Structural Similarity Index (SSIM) for each block of the given size in two input images
+        /// and returns a matrix of SSIM values.
+        /// </summary>
+        /// <param name="prev_frame">The first input image (previous frame).</param>
+        /// <param name="curr_frame">The second input image (current frame).</param>
+        /// <param name="blockSize">The size of the blocks to use for SSIM calculation. Default is 8x8.</param>
+        /// <returns>A Mat object containing SSIM values for each block in the input images.</returns>
+        /// <exception cref="ArgumentException">Thrown when the input images have different sizes or types.</exception>
+        /// 
+        /// <remarks>
+        /// The function divides the input images into blocks of the specified size, calculates the SSIM
+        /// for each block, and stores the SSIM values in a matrix. The SSIM values provide a measure
+        /// of similarity between corresponding blocks in the two images, with higher values indicating
+        /// greater similarity.
+        /// 
+        /// The `CalculateSSIM` helper function computes the SSIM value for a given pair of blocks.
+        /// 
+        /// Example usage:
+        /// <code>
+        /// Mat prevFrame = Cv2.ImRead("prev_frame.png");
+        /// Mat currFrame = Cv2.ImRead("curr_frame.png");
+        /// Mat ssimMatrix = CalculateSSIMMatrix(prevFrame, currFrame, 8);
+        /// </code>
+        /// </remarks>
+        public Mat CalculateSSIMMatrix(Mat prev_frame, Mat curr_frame, int blockSize)
+        {
+            // Ensure both frames have the same size and type
+            if (prev_frame.Size() != curr_frame.Size() || prev_frame.Type() != curr_frame.Type())
+            {
+                throw new ArgumentException("Source and destination Mats must have the same size and type.");
+            }
+
+            // Get the width and height of the frames
+            int width = prev_frame.Width;
+            int height = prev_frame.Height;
+
+            // Initialize the SSIM matrix to store SSIM values
+            Mat ssimMatrix = new Mat(height / blockSize, width / blockSize, MatType.CV_64FC1, new Scalar(0));
+
+            // Iterate through the image with the block size
+            for (int y = 0; y < height; y += blockSize)
+            {
+                for (int x = 0; x < width; x += blockSize)
+                {
+                    // Define the region of interest (ROI) for each block
+                    Rect roi = new Rect(x, y, Math.Min(blockSize, width - x), Math.Min(blockSize, height - y));
+                    Mat prevBlock = new Mat(prev_frame, roi);
+                    Mat currBlock = new Mat(curr_frame, roi);
+
+                    // Calculate SSIM for the current block
+                    double ssimValue = CalculateSSIM(prevBlock, currBlock);
+
+                    // Set the SSIM value in the SSIM matrix
+                    ssimMatrix.Set(y / blockSize, x / blockSize, ssimValue);
+                }
+            }
+
+            return ssimMatrix;
+        }
         #endregion
 
         public void MotionExtractionToExcel(string selectedPath)
@@ -267,14 +325,55 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
         #region InstanceMask
-        public Mat InstanceMask(Mat source, Mat destination, System.Windows.Media.Color tint)
+        public Mat InstanceMask(Mat source, Mat destination)
         {
             Mat tintedSource = ApplyTint(source, System.Windows.Media.Color.FromArgb(255, 255, 0, 0));
-            Mat tintedDestination = ApplyTint(destination, System.Windows.Media.Color.FromArgb(255, 0, 0, 255));
-            CompositionModeRendering compositionModeRendering = new CompositionModeRendering();
-            Mat composite = compositionModeRendering.XOR(source, destination);
+            Mat tintedDestination = ApplyTint(destination, System.Windows.Media.Color.FromArgb(255, 255, 0, 0));
 
-            return composite;
+            // Create binary masks using color thresholding
+            Mat redMask = CreateColorMask(tintedSource, new Scalar(0, 0, 150), new Scalar(100, 100, 255));
+            Mat blueMask = CreateColorMask(tintedDestination, new Scalar(0, 0, 150), new Scalar(100, 100, 255)); //new Scalar(150, 0, 0), new Scalar(255, 100, 100));
+
+            // Apply masks to original images
+            Mat redHighlighted = ApplyMask(tintedSource, redMask);
+            Mat blueHighlighted = ApplyMask(tintedDestination, blueMask);
+
+            // Apply masks to original image
+            // Combine the highlighted areas
+            Mat combinedImage = new Mat();
+            //Cv2.BitwiseXor(redHighlighted, blueHighlighted, combinedImage);
+            Cv2.AddWeighted(redHighlighted, 1.0, blueHighlighted, 1.0, 0.0, combinedImage);
+
+            return combinedImage;
+        }
+
+        static Mat CreateColorMask(Mat tintedImage, Scalar lowerBound, Scalar upperBound)
+        {
+            Mat mask = new Mat();
+            Cv2.InRange(tintedImage, lowerBound, upperBound, mask);
+            return mask;
+        }
+
+        static Mat ApplyMask(Mat image, Mat mask)
+        {
+            Mat result = new Mat();
+            Cv2.BitwiseAnd(image, image, result, mask);
+            return result;
+        }
+
+        static Mat CombineMasks(Mat redTintedImage, Mat blueTintedImage, Mat redMask, Mat blueMask)
+        {
+            // Apply masks to the tinted images
+            Mat redHighlighted = new Mat();
+            Mat blueHighlighted = new Mat();
+            Cv2.BitwiseAnd(redTintedImage, redTintedImage, redHighlighted, redMask);
+            Cv2.BitwiseAnd(blueTintedImage, blueTintedImage, blueHighlighted, blueMask);
+
+            // Combine the highlighted areas
+            Mat combinedImage = new Mat();
+            Cv2.AddWeighted(redHighlighted, 1.0, blueHighlighted, 1.0, 0.0, combinedImage);
+
+            return combinedImage;
         }
 
         public Mat ApplyTint(Mat image, System.Windows.Media.Color tint)

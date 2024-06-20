@@ -1079,26 +1079,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         /// <returns>The file path of the transformed image.</returns>
         /// <exception cref="FileNotFoundException">Thrown if the specified image file does not exist.</exception>
         /// <exception cref="InvalidOperationException">Thrown if the image fails to load from the specified path.</exception>
-        private string ProcessFraneTransforms(string frameImagePath, bool isReduceNoiseSelected)
+        private Mat ProcessFrameTransforms(Mat frameImage, bool isReduceNoiseSelected)
         {
-            // Check if the file exists before attempting to load
-            if (!File.Exists(frameImagePath))
-            {
-                throw new FileNotFoundException("The specified image file does not exist.", frameImagePath);
-            }
-
-            // Load the image from its path
-            Mat originalImage = Cv2.ImRead(frameImagePath);
-            if (originalImage.Empty())
-            {
-                throw new InvalidOperationException("Failed to load the image from the specified path.");
-            }
-
             // Motion Extraction of the current image
             MotionExtraction motionExtraction = new MotionExtraction();
 
             // Step 1: Invert
-            Mat invertedImage = motionExtraction.InvertColors(originalImage);
+            Mat invertedImage = motionExtraction.InvertColors(frameImage);
 
             // Step 2: Apply Reduction of Noise (if selected)
             Mat transformedImage;
@@ -1112,13 +1099,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
 
             // Step 3: Reduce Alpha/Opacity
-            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage, 0.4);
+            Mat reducedAlphaCurrentImage = motionExtraction.ReduceAlpha(transformedImage, 0.5);
 
             // Step 4: Add Blur
             Mat blurCurrentImage = motionExtraction.BlurImage(reducedAlphaCurrentImage, CurrentKernelSize);
             string transformedCurrentImagePath = SaveComposedImage(blurCurrentImage); // Save and get the file path
 
-            return transformedCurrentImagePath;
+            return blurCurrentImage;
         }
 
 
@@ -1165,25 +1152,29 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 string sourceImagePath = CurrentImage.ImagePath;
                 string destinationImagePath = SelectedFrames[1].ImagePath;
 
-                // Do any image pre-processing from user selections
-                string processedSourceImage = ProcessFraneTransforms(sourceImagePath, IsCurrentXORSelected);
-                string processedDestinationImage = ProcessFraneTransforms(destinationImagePath, IsOffsetXORSelected);
-
                 // Load the images from their paths
-                Mat sourceImage = Cv2.ImRead(processedSourceImage);
-                Mat destinationImage = Cv2.ImRead(processedDestinationImage);
+                Mat sourceImage = Cv2.ImRead(sourceImagePath);
+                Mat destinationImage = Cv2.ImRead(destinationImagePath);
 
                 // Motion Extraction of the sourceImage and destinationImage
                 MotionExtraction motionExtraction = new MotionExtraction();
                 CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
+
+                // Do any image pre-processing from user selections
+                Mat processedSourceImage = ProcessFrameTransforms(sourceImage, IsCurrentXORSelected);
+                Mat processedDestinationImage = ProcessFrameTransforms(destinationImage, IsOffsetXORSelected);
+
+                // Create the Instance Mask - distinguish Foreground from Background
+                Mat instanceMask = motionExtraction.InstanceMask(processedSourceImage, processedDestinationImage);
+                string savedInstanceMask = SaveComposedImage(instanceMask);
 
                 CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(sourceImage, destinationImage), 4);
                 CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(sourceImage, destinationImage), 4);
                 CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(sourceImage, destinationImage), 4);
 
                 // Step 4: Tint the Source and Destination according to the user selections
-                Mat tintedSourceImage = ApplyColorTint(sourceImage, SelectedSourceBrush);
-                Mat tintedDestinationImage = ApplyColorTint(destinationImage, SelectedDestinationBrush);
+                Mat tintedSourceImage = motionExtraction.ApplyTint(sourceImage, Colors.Red);
+                Mat tintedDestinationImage = motionExtraction.ApplyTint(destinationImage, Colors.Blue);
 
                 if (IsForePixelModeSelected)
                 {
@@ -1191,7 +1182,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     switch (SelectedForegroundCompositionMode)
                     {
                         case "SourceOver":
-                            Mat combinedImage = compositeModeRendering.SourceOver(tintedSourceImage, tintedDestinationImage);
+                            // Use the instanceMask to render the Foreground
+                            Mat combinedImage = compositeModeRendering.SourceOver(instanceMask, tintedDestinationImage);
 
                             // Create a black background with the same size as the source image
                             //Mat blackBackground = new Mat(sourceImage.Size(), sourceImage.Type(), new Scalar(0, 0, 0));
