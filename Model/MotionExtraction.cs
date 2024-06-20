@@ -361,7 +361,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             Cv2.BitwiseAnd(image, image, result, mask);
             return result;
         }
-
+               
         static Mat CombineMasks(Mat redTintedImage, Mat blueTintedImage, Mat redMask, Mat blueMask)
         {
             // Apply masks to the tinted images
