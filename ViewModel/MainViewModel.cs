@@ -20,6 +20,10 @@ using static System.Resources.ResXFileRef;
 using System.Globalization;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
 using System.Security.Policy;
+using Point = OpenCvSharp.Point;
+using OpenCvSharp.Extensions;
+using System.Drawing.Text;
+using System.Windows.Xps.Packaging;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -1168,6 +1172,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat instanceMask = motionExtraction.InstanceMask(processedSourceImage, processedDestinationImage);
                 string savedInstanceMask = SaveComposedImage(instanceMask);
 
+                // Convert Instance Mask to Binary Mask
+                Mat binaryMask = ConvertInstanceMaskToWhite(instanceMask);
+                string savedBinaryMask = SaveComposedImage(binaryMask);
+
                 CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(sourceImage, destinationImage), 4);
                 CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(sourceImage, destinationImage), 4);
                 CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(sourceImage, destinationImage), 4);
@@ -1183,13 +1191,13 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     {
                         case "SourceOver":
                             // Use the instanceMask to render the Foreground
-                            Mat combinedImage = compositeModeRendering.SourceOver(instanceMask, tintedDestinationImage);
+                            Mat combinedImage = compositeModeRendering.SourceOver(tintedSourceImage, tintedDestinationImage);
+                            //Mat foregroundResult = AddInstanceMasking(combinedImage, instanceMask);
 
-                            // Create a black background with the same size as the source image
-                            //Mat blackBackground = new Mat(sourceImage.Size(), sourceImage.Type(), new Scalar(0, 0, 0));
-                            //Mat composedImage = compositeModeRendering.SourceOver(combinedImage, blackBackground);
+                            // Use the instanceMask to render the Background
+                            Mat finalImage = RenderBackground(instanceMask);
 
-                            string composedImagePath = SaveComposedImage(combinedImage); // Save and get the file path
+                            string composedImagePath = SaveComposedImage(finalImage); // Save and get the file path
                             ComposedImagePaths.Add(composedImagePath); // Add to the collection
                             UpdateDisplayedImage(composedImagePath); // Update the displayed image
                             break;
@@ -1276,6 +1284,116 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 }
             }
         }
+
+        static Mat ConvertInstanceMaskToWhite(Mat instanceMask)
+        {
+            // Create an output mask with the same size as the instance mask, initialized with all black pixels
+            Mat whiteMask = new Mat(instanceMask.Size(), MatType.CV_8UC1, new Scalar(0)); // Create a black mask
+
+            // Iterate through each pixel in the instance mask
+            for (int y = 0; y < instanceMask.Rows; y++)
+            {
+                for (int x = 0; x < instanceMask.Cols; x++)
+                {
+                    Vec3b pixel = instanceMask.At<Vec3b>(y, x); // Get the pixel value
+
+                    // Check if the pixel is not black (i.e., not (0, 0, 0))
+                    if (pixel.Item0 != 0 || pixel.Item1 != 0 || pixel.Item2 != 0)
+                    {
+                        whiteMask.Set(y, x, new Scalar(255)); // Set non-black pixels to white in the output mask
+                    }
+                }
+            }
+
+            return whiteMask;
+        }
+
+        static Mat AddInstanceMasking(Mat mask, Mat image)
+        {
+            if (mask.Size() != image.Size())
+            {
+                throw new ArgumentException("Mask and image sizes must be the same.");
+            }
+
+            if (mask.Type() != image.Type())
+            {
+                throw new ArgumentException("Mask and image types must be the same.");
+            }
+
+            Mat result = new Mat();
+            Cv2.BitwiseAnd(image, mask, result);
+            return result;
+        }
+
+        private Mat RenderBackground(Mat mask)
+        {
+            // Convert the mask to grayscale (assuming it has an alpha channel)
+            Mat maskGray = new Mat();
+            Cv2.CvtColor(mask, maskGray, ColorConversionCodes.BGRA2GRAY);
+
+            // Threshold the grayscale mask to create a binary mask
+            Mat binaryMask = new Mat();
+            Cv2.Threshold(maskGray, binaryMask, 1, 255, ThresholdTypes.Binary);
+
+            // Create a result Mat of the same size and type as the original mask
+            Mat result = new Mat(mask.Size(), mask.Type());
+            mask.CopyTo(result);
+
+            int areaSize = 40;
+
+            Bitmap bitmap = BitmapConverter.ToBitmap(result);
+
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.TextRenderingHint = TextRenderingHint.AntiAlias;
+                Font font = new Font("Segoe UI", 14, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
+
+                for (int y = 0; y <= result.Rows - 1; y += areaSize / 2)
+                {
+                    for (int x = 0; x <= result.Cols - 1; x += areaSize / 2)
+                    {
+                        // Define the window boundaries
+                        int windowWidth = Math.Min(areaSize, result.Cols - x);
+                        int windowHeight = Math.Min(areaSize, result.Rows - y);
+
+                        // Extract the window from xorImage to check for active areas
+                        OpenCvSharp.Rect window = new OpenCvSharp.Rect(x, y, windowWidth, windowHeight);
+                        Mat xorWindowMat = new Mat(mask, window);
+
+                        // Check if there are active areas in the xorWindowMat
+                        Scalar sumXor = Cv2.Sum(xorWindowMat);
+                        if (sumXor.Val0 == 0) // Skip non-active areas
+                        {
+                            continue;
+                        }
+
+                        // Convert the windowMat to grayscale
+                        Mat windowMat = new Mat(result, window);
+                        Cv2.CvtColor(windowMat, windowMat, ColorConversionCodes.BGR2GRAY);
+
+                        // Calculate the percentage of black pixels in the window
+                        double totalPixels = windowWidth * windowHeight;
+                        double blackPixels = totalPixels - Cv2.CountNonZero(windowMat);
+
+                        if (blackPixels / totalPixels >= 0.75) // Check if 75% or more are black
+                        {
+                            // Determine the center of the window and apply the offset
+                            float centerX = x + windowWidth / 2.0f - areaSize / 2;
+                            float centerY = y + windowHeight / 2.0f - areaSize / 2;
+
+                            // Draw the gray X in the center of the window
+                            PointF position = new PointF(centerX, centerY);
+                            g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
+                        }
+                    }
+                }
+            }
+
+            // Convert the bitmap back to a Mat
+            return BitmapConverter.ToMat(bitmap);
+        }
+
+
 
         private string SaveComposedImage(Mat composedImage)
         {
