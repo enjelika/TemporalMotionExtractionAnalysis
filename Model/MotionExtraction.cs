@@ -360,25 +360,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             Cv2.BitwiseAnd(image, image, result, mask);
             return result;
         }
-
-        static Mat AddAlphaChannel(Mat image, Mat alphaMask)
-        {
-            // Ensure the image is in BGRA format
-            Mat imageWithAlpha = new Mat();
-            Cv2.CvtColor(image, imageWithAlpha, ColorConversionCodes.BGR2BGRA);
-
-            // Split the image into channels
-            Mat[] channels = Cv2.Split(imageWithAlpha);
-
-            // Set the alpha channel
-            channels[3] = alphaMask;
-
-            // Merge the channels back into one image
-            Cv2.Merge(channels, imageWithAlpha);
-
-            return imageWithAlpha;
-        }
-
+               
         static Mat CombineMasks(Mat redTintedImage, Mat blueTintedImage, Mat redMask, Mat blueMask)
         {
             // Apply masks to the tinted images
