@@ -327,17 +327,40 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
         #region InstanceMask
-        public Mat InstanceMask(Mat source, Mat destination)
+        public Mat InstanceMask(Mat source, Mat destination, Color sourceTint, Color destinationTint)
         {
-            Mat tintedSource = ApplyTint(source, Colors.Red);
+            Mat tintedSource0 = ApplyTint(source, Colors.Red);
             Mat tintedDestination0 = ApplyTint(destination, Colors.Red);
 
             // Create binary masks using color thresholding
-            Mat redMask = CreateColorMask(tintedSource, new Scalar(0, 0, 150), new Scalar(100, 100, 255));
-            Mat blueMask0 = CreateColorMask(tintedDestination0, new Scalar(0, 0, 150), new Scalar(100, 100, 255)); //new Scalar(150, 0, 0), new Scalar(255, 100, 100));
+            Mat redMask0 = CreateColorMask(tintedSource0, new Scalar(0, 0, 150), new Scalar(100, 100, 255));
+            Mat blueMask0 = CreateColorMask(tintedDestination0, new Scalar(0, 0, 150), new Scalar(100, 100, 255)); // Purposely using Red to filter out the background
 
-            Mat tintedDestination = ApplyTint(destination, Colors.Blue);
-            Mat blueMask = ApplyTint(blueMask0, Colors.Blue);
+            Mat tintedSource = new Mat();
+            Mat redMask = new Mat();
+            if (sourceTint != null && !sourceTint.Equals(Colors.Transparent)) 
+            {
+                tintedSource = ApplyTint(source, sourceTint);
+                redMask = ApplyTint(redMask0, sourceTint);
+            }
+            if(sourceTint == null || sourceTint.Equals(Colors.Transparent)) 
+            {
+                tintedSource = ApplyTint(source, Colors.White);
+                redMask = ApplyTint(redMask0, Colors.White);
+            }
+
+            Mat tintedDestination = new Mat();
+            Mat blueMask = new Mat();
+            if (destinationTint != null && !destinationTint.Equals(Colors.Transparent))
+            {
+                tintedDestination = ApplyTint(destination, destinationTint);
+                blueMask = ApplyTint(blueMask0, destinationTint);
+            }
+            if (destinationTint == null || destinationTint.Equals(Colors.Transparent))
+            {
+                tintedDestination = ApplyTint(destination, Colors.DarkGray);
+                blueMask = ApplyTint(blueMask0, Colors.DarkGray);
+            }
 
             // Apply masks to original images
             Mat redHighlighted = ApplyMask(tintedSource, redMask);
