@@ -740,7 +740,7 @@
         <TextBlock FontFamily="Segoe UI Symbol"
                    FontSize="40"
                    FontWeight="Bold"
-                   Text="&#x21DB;"
+                   Text="&#x2B46;"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Foreground="Black" Margin="465,660,0,0"/>
@@ -748,7 +748,7 @@
         <TextBlock FontFamily="Segoe UI Symbol"
                    FontSize="40"
                    FontWeight="Bold"
-                   Text="&#x21DA;"
+                   Text="&#x2B45;"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
                    Foreground="Black" Margin="1133,666,0,0"/>
