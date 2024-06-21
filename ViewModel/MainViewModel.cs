@@ -1337,14 +1337,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         // Extract the window from xorImage to check for active areas
                         OpenCvSharp.Rect window = new OpenCvSharp.Rect(x, y, windowWidth, windowHeight);
                         Mat xorWindowMat = new Mat(mask, window);
-
-                        // Check if there are active areas in the xorWindowMat
-                        Scalar sumXor = Cv2.Sum(xorWindowMat);
-                        if (sumXor.Val0 == 0) // Skip non-active areas
-                        {
-                            continue;
-                        }
-
+                                                
                         // Convert the windowMat to grayscale
                         Mat windowMat = new Mat(result, window);
                         Cv2.CvtColor(windowMat, windowMat, ColorConversionCodes.BGR2GRAY);
