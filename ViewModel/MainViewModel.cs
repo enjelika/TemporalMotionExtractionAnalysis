@@ -5,25 +5,14 @@ using System.Windows.Input;
 using System.Windows.Forms;
 using System.IO;
 using TemporalMotionExtractionAnalysis.Model;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using OpenCvSharp;
 using System.Diagnostics;
-using System.Windows;
 using System.Windows.Media;
 using System.Drawing;
-using System;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
 using TemporalMotionExtractionAnalysis.Converters;
-using static System.Resources.ResXFileRef;
 using System.Globalization;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrayNotify;
-using System.Security.Policy;
-using Point = OpenCvSharp.Point;
 using OpenCvSharp.Extensions;
 using System.Drawing.Text;
-using System.Windows.Xps.Packaging;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -1168,21 +1157,24 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat processedSourceImage = ProcessFrameTransforms(sourceImage, IsCurrentXORSelected);
                 Mat processedDestinationImage = ProcessFrameTransforms(destinationImage, IsOffsetXORSelected);
 
+                // Create an instance of the StringToColorConverter
+                var converter = new StringToColorConverter();
+
                 // Create the Instance Mask - distinguish Foreground from Background
-                Mat instanceMask = motionExtraction.InstanceMask(processedSourceImage, processedDestinationImage);
+                Mat instanceMask = motionExtraction.InstanceMask(processedSourceImage, processedDestinationImage, SelectedSourceColor, SelectedDestinationColor);
                 string savedInstanceMask = SaveComposedImage(instanceMask);
 
                 // Convert Instance Mask to Binary Mask
-                Mat binaryMask = ConvertInstanceMaskToWhite(instanceMask);
-                string savedBinaryMask = SaveComposedImage(binaryMask);
+                //Mat binaryMask = ConvertInstanceMaskToWhite(instanceMask);
+                //string savedBinaryMask = SaveComposedImage(binaryMask);
 
                 CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(sourceImage, destinationImage), 4);
                 CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(sourceImage, destinationImage), 4);
                 CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(sourceImage, destinationImage), 4);
 
                 // Step 4: Tint the Source and Destination according to the user selections
-                Mat tintedSourceImage = motionExtraction.ApplyTint(sourceImage, Colors.Red);
-                Mat tintedDestinationImage = motionExtraction.ApplyTint(destinationImage, Colors.Blue);
+                Mat tintedSourceImage = motionExtraction.ApplyTint(sourceImage, SelectedSourceColor);
+                Mat tintedDestinationImage = motionExtraction.ApplyTint(destinationImage,SelectedDestinationColor);
 
                 if (IsForePixelModeSelected)
                 {
@@ -1308,23 +1300,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             return whiteMask;
         }
 
-        static Mat AddInstanceMasking(Mat mask, Mat image)
-        {
-            if (mask.Size() != image.Size())
-            {
-                throw new ArgumentException("Mask and image sizes must be the same.");
-            }
-
-            if (mask.Type() != image.Type())
-            {
-                throw new ArgumentException("Mask and image types must be the same.");
-            }
-
-            Mat result = new Mat();
-            Cv2.BitwiseAnd(image, mask, result);
-            return result;
-        }
-
         private Mat RenderBackground(Mat mask)
         {
             // Convert the mask to grayscale (assuming it has an alpha channel)
@@ -1339,14 +1314,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             Mat result = new Mat(mask.Size(), mask.Type());
             mask.CopyTo(result);
 
-            int areaSize = 40;
+            int areaSize = 50;
 
             Bitmap bitmap = BitmapConverter.ToBitmap(result);
+
+            // Patch holes with 
+            //Bitmap bitmap = PatchHolesAndDrawX(bitmap0);
 
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
-                Font font = new Font("Segoe UI", 14, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
+                Font font = new Font("Segoe UI", 16, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
 
                 for (int y = 0; y <= result.Rows - 1; y += areaSize / 2)
                 {
@@ -1368,6 +1346,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         double totalPixels = windowWidth * windowHeight;
                         double blackPixels = totalPixels - Cv2.CountNonZero(windowMat);
 
+                        // Debug: Print the number of blank pixels
+                        Console.WriteLine($"Blank Pixels at ({x}, {y}): {blackPixels}");
+
                         if (blackPixels / totalPixels >= 0.75) // Check if 75% or more are black
                         {
                             // Determine the center of the window and apply the offset
@@ -1378,6 +1359,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                             PointF position = new PointF(centerX, centerY);
                             g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
                         }
+                        
                     }
                 }
             }
@@ -1386,6 +1368,47 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             return BitmapConverter.ToMat(bitmap);
         }
 
+        public Bitmap PatchHolesAndDrawX(Bitmap inputBitmap)
+        {
+            Mat inputMat = BitmapConverter.ToMat(inputBitmap);
+
+            // Convert to grayscale
+            Mat grayMat = new Mat();
+            Cv2.CvtColor(inputMat, grayMat, ColorConversionCodes.BGRA2GRAY);
+
+            // Threshold to create a binary mask of holes
+            Mat binaryMask = new Mat();
+            Cv2.Threshold(grayMat, binaryMask, 1, 255, ThresholdTypes.BinaryInv);
+
+            // Fill holes using morphological closing
+            Mat filledMask = new Mat();
+            Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(5, 5));
+            Cv2.MorphologyEx(binaryMask, filledMask, MorphTypes.Close, kernel);
+
+            // Draw gray "X" in patched areas
+            Bitmap resultBitmap = BitmapConverter.ToBitmap(inputMat);
+            using (Graphics g = Graphics.FromImage(resultBitmap))
+            {
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                Font font = new Font("Segoe UI", 14, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
+
+                for (int y = 0; y < filledMask.Rows; y++)
+                {
+                    for (int x = 0; x < filledMask.Cols; x++)
+                    {
+                        if (filledMask.Get<byte>(y, x) > 0)
+                        {
+                            // Draw black square
+                            int squareSize = 40; // Size of the square
+                            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(x - squareSize / 2, y - squareSize / 2, squareSize, squareSize);
+                            g.FillRectangle(System.Drawing.Brushes.Black, rect);
+                        }
+                    }
+                }
+            }
+
+            return resultBitmap;
+        }
 
 
         private string SaveComposedImage(Mat composedImage)

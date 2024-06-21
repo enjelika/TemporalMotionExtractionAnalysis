@@ -17,6 +17,8 @@ namespace TemporalMotionExtractionAnalysis.Converters
             {
                 if (value.Equals(System.Windows.Media.Colors.Transparent))
                     return "none";
+                else if (value.Equals(System.Windows.Media.Colors.LimeGreen))
+                    return "Green";
                 else
                     return ((Color)value).ToString();
             }
@@ -32,6 +34,10 @@ namespace TemporalMotionExtractionAnalysis.Converters
                 if (value.Equals("none"))
                 {
                     color = System.Windows.Media.Colors.Transparent;
+                }
+                else if (value.Equals("Green"))
+                {
+                    color = System.Windows.Media.Colors.LimeGreen;
                 }
                 else
                 {
