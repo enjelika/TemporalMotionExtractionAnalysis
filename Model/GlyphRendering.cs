@@ -48,9 +48,11 @@ namespace TemporalMotionExtractionAnalysis.Model
             Bitmap bitmap = BitmapConverter.ToBitmap(result);
             List<(string glyph, Brush brush, PointF position)> glyphsToDraw = new List<(string, Brush, PointF)>();
 
-            for (int y = 0; y <= diffMat.Rows - 1; y += areaSize / 2)
+            int halfAreaSize = areaSize / 2;
+
+            for (int y = 5; y <= diffMat.Rows - halfAreaSize; y += halfAreaSize)
             {
-                for (int x = 0; x <= diffMat.Cols - 1; x += areaSize / 2)
+                for (int x = 5; x <= diffMat.Cols - halfAreaSize; x += halfAreaSize)
                 {
                     // Define the window boundaries
                     int windowWidth = Math.Min(areaSize, diffMat.Cols - x);
@@ -75,8 +77,8 @@ namespace TemporalMotionExtractionAnalysis.Model
                     double avgValue = avgScalar.Val0;
 
                     // Determine the center of the window and apply the offset
-                    float centerX = x + windowWidth / 2.0f - areaSize / 2;
-                    float centerY = y + windowHeight / 2.0f - areaSize / 2;
+                    float centerX = x + windowWidth / 2.0f - halfAreaSize;
+                    float centerY = y + windowHeight / 2.0f - halfAreaSize;
 
                     // Determine the appropriate mark and brush based on the average value
                     string mark;
