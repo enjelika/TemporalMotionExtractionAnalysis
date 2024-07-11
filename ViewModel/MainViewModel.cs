@@ -1314,7 +1314,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             Mat result = new Mat(mask.Size(), mask.Type());
             mask.CopyTo(result);
 
-            int areaSize = 50;
+            int areaSize = 20;
 
             Bitmap bitmap = BitmapConverter.ToBitmap(result);
 
@@ -1326,18 +1326,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
                 Font font = new Font("Segoe UI", 16, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
 
-                int halfAreaSize = areaSize / 2;
-
-                for (int y = 0; y <= result.Rows - areaSize; y += halfAreaSize)
+                for (int y = 0; y < result.Rows; y += areaSize)
                 {
-                    for (int x = 0; x <= result.Cols - areaSize; x += halfAreaSize)
+                    for (int x = 0; x < result.Cols; x += areaSize)
                     {
-                        // Define the window boundaries
-                        int windowWidth = Math.Min(areaSize, 2 * (result.Cols - x));
-                        int windowHeight = Math.Min(areaSize, 2 * (result.Rows - y));
-
                         // Extract the window from xorImage to check for active areas
-                        OpenCvSharp.Rect window = new OpenCvSharp.Rect(x, y, windowWidth, windowHeight);
+                        OpenCvSharp.Rect window = new OpenCvSharp.Rect(x, y, areaSize, areaSize);
                         Mat xorWindowMat = new Mat(mask, window);
 
                         // Convert the windowMat to grayscale
@@ -1345,7 +1339,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         Cv2.CvtColor(windowMat, windowMat, ColorConversionCodes.BGR2GRAY);
 
                         // Calculate the percentage of black pixels in the window
-                        double totalPixels = windowWidth * windowHeight;
+                        double totalPixels = Math.Pow(areaSize, 2);
                         double blackPixels = totalPixels - Cv2.CountNonZero(windowMat);
 
                         // Debug: Print the number of blank pixels
@@ -1353,12 +1347,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
                         if (blackPixels / totalPixels >= 0.75) // Check if 75% or more are black
                         {
-                            // Determine the center of the window and apply the offset
-                            float centerX = x + windowWidth / 2.0f - halfAreaSize / 2;
-                            float centerY = y + windowHeight / 2.0f - halfAreaSize / 2;
-
                             // Draw the gray X in the center of the window
-                            PointF position = new PointF(centerX, centerY);
+                            PointF position = new PointF(x, y);
                             g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
                         }
                         
