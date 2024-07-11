@@ -1326,13 +1326,15 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
                 Font font = new Font("Segoe UI", 16, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
 
-                for (int y = 0; y <= result.Rows - 1; y += areaSize / 2)
+                int halfAreaSize = areaSize / 2;
+
+                for (int y = 0; y <= result.Rows - areaSize; y += halfAreaSize)
                 {
-                    for (int x = 0; x <= result.Cols - 1; x += areaSize / 2)
+                    for (int x = 0; x <= result.Cols - areaSize; x += halfAreaSize)
                     {
                         // Define the window boundaries
-                        int windowWidth = Math.Min(areaSize, result.Cols - x);
-                        int windowHeight = Math.Min(areaSize, result.Rows - y);
+                        int windowWidth = Math.Min(areaSize, 2 * (result.Cols - x));
+                        int windowHeight = Math.Min(areaSize, 2 * (result.Rows - y));
 
                         // Extract the window from xorImage to check for active areas
                         OpenCvSharp.Rect window = new OpenCvSharp.Rect(x, y, windowWidth, windowHeight);
@@ -1352,8 +1354,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         if (blackPixels / totalPixels >= 0.75) // Check if 75% or more are black
                         {
                             // Determine the center of the window and apply the offset
-                            float centerX = x + windowWidth / 2.0f - areaSize / 2;
-                            float centerY = y + windowHeight / 2.0f - areaSize / 2;
+                            float centerX = x + windowWidth / 2.0f - halfAreaSize / 2;
+                            float centerY = y + windowHeight / 2.0f - halfAreaSize / 2;
 
                             // Draw the gray X in the center of the window
                             PointF position = new PointF(centerX, centerY);
