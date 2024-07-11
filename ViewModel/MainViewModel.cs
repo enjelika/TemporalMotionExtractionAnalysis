@@ -703,7 +703,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             DestinationColors = new ObservableCollection<string>() { "none", "Orange", "Purple", "Blue" };
             CompositionModes =  new ObservableCollection<string>() { "SourceOver", "DestinationOver", "SourceIn", 
                 "DestinationIn", "SourceOut", "DestinationOut", "SourceAtop", "DestinationAtop", "Clear", "XOR" };
-            BackgroundMarksTextures = new ObservableCollection<string>() { "Crosshatch", "Circle", "Plus", "Minus", "Slash", "Double Circle", "Dot", "Asterisk" };
+            BackgroundMarksTextures = new ObservableCollection<string>() { "Crosshatch", "Double Helix", "Circle", "Plus", "Minus", "Slash", "Double Circle", "Dot", "Asterisk" };
 
             // Create an instance of the StringToColorConverter
             var converter = new StringToColorConverter();
@@ -1365,6 +1365,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                                 case "Crosshatch":
                                     font = new Font("Segoe UI", 36, System.Drawing.FontStyle.Regular);
                                     g.DrawString("\u00D7", font, System.Drawing.Brushes.Gray, position);
+                                    break;
+                                case "Double Helix":
+                                    font = new Font("Segoe UI", 22, System.Drawing.FontStyle.Regular);
+                                    g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
                                     break;
                                 case "Slash":
                                     g.DrawString("/", font, System.Drawing.Brushes.Gray, position);
