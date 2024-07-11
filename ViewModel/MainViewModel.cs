@@ -1348,7 +1348,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                         if (blackPixels / totalPixels >= 0.75) // Check if 75% or more are black
                         {
                             // Draw the gray X in the center of the window
-                            PointF position = new PointF(centerX, centerY);
+                            PointF position = new PointF(x, y);
 
                             switch (SelectedBackgroundMarksTextures)
                             {
@@ -1377,6 +1377,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                                 case "Asterisk":
                                     font = new Font("Segoe UI", 30, System.Drawing.FontStyle.Regular);
                                     g.DrawString("*", font, System.Drawing.Brushes.Gray, position);
+                                    break;
+                                default:
+                                    g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
                                     break;
                             }
 
