@@ -703,7 +703,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             DestinationColors = new ObservableCollection<string>() { "none", "Orange", "Purple", "Blue" };
             CompositionModes =  new ObservableCollection<string>() { "SourceOver", "DestinationOver", "SourceIn", 
                 "DestinationIn", "SourceOut", "DestinationOut", "SourceAtop", "DestinationAtop", "Clear", "XOR" };
-            BackgroundMarksTextures = new ObservableCollection<string>() { "Crosshatch", "Screen", "Slash", "Bubbles", "Sand" };
+            BackgroundMarksTextures = new ObservableCollection<string>() { "Crosshatch", "Circle", "Plus", "Minus", "Slash", "Double Circle", "Dot", "Asterisk" };
 
             // Create an instance of the StringToColorConverter
             var converter = new StringToColorConverter();
@@ -1314,7 +1314,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             Mat result = new Mat(mask.Size(), mask.Type());
             mask.CopyTo(result);
 
-            int areaSize = 20;
+            int areaSize = 40;
 
             Bitmap bitmap = BitmapConverter.ToBitmap(result);
 
@@ -1324,7 +1324,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
-                Font font = new Font("Segoe UI", 14, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
+                Font font = new Font("Segoe UI", 20, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
 
                 int halfAreaSize = areaSize / 2;
 
@@ -1363,19 +1363,30 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                             switch (SelectedBackgroundMarksTextures)
                             {
                                 case "Crosshatch":
-                                    g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
+                                    font = new Font("Segoe UI", 36, System.Drawing.FontStyle.Regular);
+                                    g.DrawString("\u00D7", font, System.Drawing.Brushes.Gray, position);
                                     break;
                                 case "Slash":
                                     g.DrawString("/", font, System.Drawing.Brushes.Gray, position);
                                     break;
-                                case "Screen":
+                                case "Plus":
+                                    g.DrawString("+", font, System.Drawing.Brushes.Gray, position);
+                                    break;
+                                case "Minus":
+                                    g.DrawString("-", font, System.Drawing.Brushes.Gray, position);
+                                    break;
+                                case "Circle":
                                     g.DrawString("○", font, System.Drawing.Brushes.Gray, position);
                                     break;
-                                case "Bubbles":
+                                case "Double Circle":
                                     g.DrawString("⦾", font, System.Drawing.Brushes.Gray, position);
                                     break;
-                                case "Sand":
+                                case "Dot":
                                     g.DrawString("•", font, System.Drawing.Brushes.Gray, position);
+                                    break;
+                                case "Asterisk":
+                                    font = new Font("Segoe UI", 30, System.Drawing.FontStyle.Regular);
+                                    g.DrawString("*", font, System.Drawing.Brushes.Gray, position);
                                     break;
                             }
 
