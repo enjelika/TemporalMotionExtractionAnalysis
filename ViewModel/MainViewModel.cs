@@ -13,6 +13,7 @@ using TemporalMotionExtractionAnalysis.Converters;
 using System.Globalization;
 using OpenCvSharp.Extensions;
 using System.Drawing.Text;
+using static TemporalMotionExtractionAnalysis.Model.MarkRendering;
 
 namespace TemporalMotionExtractionAnalysis.ViewModel
 {
@@ -84,10 +85,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ObservableCollection<string> transformedCurrentImagePaths = new ObservableCollection<string>();
         private ObservableCollection<string> transformedOffsetImagePaths = new ObservableCollection<string>();
 
-        private GlyphRendering glyphRendering;
+        private MarkRendering glyphRendering;
 
         private OpenCvSharp.Size _currentKernelSize;
         private OpenCvSharp.Size _offsetKernelSize;
+
+        private RenderResult _renderResult;
         #endregion
 
         #region Public Variables
@@ -668,6 +671,16 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
         #endregion
+
+        public RenderResult RenderResult
+        {
+            get => _renderResult;
+            set
+            {
+                _renderResult = value;
+                OnPropertyChanged(nameof(RenderResult));
+            }
+        }
         #endregion
 
         #region ICommands
@@ -772,8 +785,8 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             NextCommand = new RelayCommand(OnNext);
             SelectedForegroundCompositionMode = "SourceOver";
 
-            // Initialize the GlyphRendering class with default glyphs
-            glyphRendering = new GlyphRendering("▲", "▼", "■");
+            // Initialize the MarkRendering class with default glyphs
+            glyphRendering = new MarkRendering("▲", "▼", "■");
 
             // Initialize commands or event handlers for composition mode changes
             // For simplicity, assume there's a PropertyChanged event handler wired up to trigger composition
@@ -1041,9 +1054,9 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         // Method to update glyphs from the View
         public void UpdateGlyphs(string positive, string negative, string noDifference)
         {
-            glyphRendering.PositiveMark = positive;
+            glyphRendering.StrongMotionMark = positive;
             glyphRendering.NegativeMark = negative;
-            glyphRendering.NoDifferenceMark = noDifference;
+            glyphRendering.NoMotionMark = noDifference;
         }
 
         private void UpdateCurrentKernelSize()
@@ -1263,10 +1276,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 }
                 if (_isForeMarksModeSelected)
                 {
-                    // Glyph Rendering
-                    glyphRendering.PositiveMark = PositiveMark;
+                    // Mark Rendering
+                    glyphRendering.StrongMotionMark = PositiveMark;
                     glyphRendering.NegativeMark = NegativeMark;
-                    glyphRendering.NoDifferenceMark = NoDifferenceMark;
+                    glyphRendering.NoMotionMark = NoDifferenceMark;
 
                     Mat compositedFrame = glyphRendering.RenderDifferences(tintedSourceImage, tintedDestinationImage, AreaSize);
 
@@ -1277,30 +1290,95 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        static Mat ConvertInstanceMaskToWhite(Mat instanceMask)
+        private Mat RenderCompositeImage(Mat sourceImage, Mat destinationImage, Mat instanceMask)
         {
-            // Create an output mask with the same size as the instance mask, initialized with all black pixels
-            Mat whiteMask = new Mat(instanceMask.Size(), MatType.CV_8UC1, new Scalar(0)); // Create a black mask
+            Mat foregroundMask = new Mat();
+            Mat backgroundMask = new Mat();
 
-            // Iterate through each pixel in the instance mask
-            for (int y = 0; y < instanceMask.Rows; y++)
+            // Create foreground and background masks
+            Cv2.Threshold(instanceMask, foregroundMask, 0, 255, ThresholdTypes.Binary);
+            Cv2.BitwiseNot(foregroundMask, backgroundMask);
+
+            // Extract foreground and background parts
+            Mat sourceForeground = new Mat();
+            Mat sourceBackground = new Mat();
+            Mat destForeground = new Mat();
+            Mat destBackground = new Mat();
+
+            sourceImage.CopyTo(sourceForeground, foregroundMask);
+            sourceImage.CopyTo(sourceBackground, backgroundMask);
+            destinationImage.CopyTo(destForeground, foregroundMask);
+            destinationImage.CopyTo(destBackground, backgroundMask);
+
+            Mat foregroundResult;
+            Mat backgroundResult;
+
+            if (IsForePixelModeSelected)
             {
-                for (int x = 0; x < instanceMask.Cols; x++)
-                {
-                    Vec3b pixel = instanceMask.At<Vec3b>(y, x); // Get the pixel value
-
-                    // Check if the pixel is not black (i.e., not (0, 0, 0))
-                    if (pixel.Item0 != 0 || pixel.Item1 != 0 || pixel.Item2 != 0)
-                    {
-                        whiteMask.Set(y, x, new Scalar(255)); // Set non-black pixels to white in the output mask
-                    }
-                }
+                CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
+                //foregroundResult = RenderForeground(sourceForeground, destForeground, compositeModeRendering);
+                //backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
+            }
+            else if (_isForeMarksModeSelected)
+            {
+                //MarkRendering glyphRendering = new GlyphRendering
+                //{
+                  //  StrongMotionMark = StrongMotionMark,
+                    //NegativeMark = NegativeMark,
+                    //NoMotionMark = NoMotionMark
+                //};
+                foregroundResult = glyphRendering.RenderDifferences(sourceForeground, destForeground, AreaSize);
+                //backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
+            }
+            else
+            {
+                throw new InvalidOperationException("Neither Pixel nor Marks mode is selected.");
             }
 
-            return whiteMask;
+            // Combine foreground and background
+            Mat result = new Mat();
+            //Cv2.Add(foregroundResult, backgroundResult, result);
+            return result;
         }
 
-        private Mat RenderBackground(Mat mask)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sourceImage"></param>
+        /// <param name="destinationImage"></param>
+        /// <param name="compositeModeRendering"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        private Mat RenderForeground(Mat sourceImage, Mat destinationImage, CompositionModeRendering compositeModeRendering)
+        {
+            switch (SelectedForegroundCompositionMode)
+            {
+                case "SourceOver":
+                    return compositeModeRendering.SourceOver(sourceImage, destinationImage);
+                case "DestinationOver":
+                    return compositeModeRendering.DestinationOver(sourceImage, destinationImage);
+                case "SourceIn":
+                    return compositeModeRendering.SourceIn(sourceImage, destinationImage);
+                case "DestinationIn":
+                    return compositeModeRendering.DestinationIn(sourceImage, destinationImage);
+                case "SourceOut":
+                    return compositeModeRendering.SourceOut(sourceImage, destinationImage);
+                case "DestinationOut":
+                    return compositeModeRendering.DestinationOut(sourceImage, destinationImage);
+                case "SourceAtop":
+                    return compositeModeRendering.SourceAtop(sourceImage, destinationImage);
+                case "DestinationAtop":
+                    return compositeModeRendering.DestinationAtop(sourceImage, destinationImage);
+                case "Clear":
+                    return compositeModeRendering.Clear(sourceImage, destinationImage);
+                case "XOR":
+                    return compositeModeRendering.XOR(sourceImage, destinationImage);
+                default:
+                    throw new ArgumentException("Invalid composition mode selected.", nameof(SelectedForegroundCompositionMode));
+            }
+        }
+
+        private Mat RenderBackground(Mat mask) //, Mat sourceImageBackground, Mat destinationImageBackground)
         {
             // Convert the mask to grayscale (assuming it has an alpha channel)
             Mat maskGray = new Mat();
@@ -1455,18 +1533,18 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         }
 
         /// <summary>
-        /// Applies a color tint to the given image using the specified brush color, ensuring 60% opacity.
+        /// Applies a color tint to the given image using the specified Brush color, ensuring 60% opacity.
         /// </summary>
         /// <param name="image">The input image to which the tint will be applied.</param>
-        /// <param name="tintColorBrush">The brush containing the tint color.</param>
+        /// <param name="tintColorBrush">The Brush containing the tint color.</param>
         /// <returns>A new image with the tint color applied and 60% opacity.</returns>
         /// <remarks>
-        /// This method extracts the color values from the given brush and creates a Scalar
+        /// This method extracts the color values from the given Brush and creates a Scalar
         /// object representing the tint color. It then applies the tint color to the input image
         /// by blending the input image with the tint color and sets the opacity to 60%.
         private Mat ApplyColorTint(Mat image, SolidColorBrush tintColorBrush)
         {
-            // Extract color values from the brush
+            // Extract color values from the Brush
             System.Windows.Media.Color tintColor = tintColorBrush.Color;
             Scalar tint = new Scalar(tintColor.B, tintColor.G, tintColor.R);
 

@@ -645,12 +645,11 @@
                         <DockPanel Background="White" Margin="0">
                             <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                 <!-- Composite Image from the SelectedFrames -->
                                 <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="625" Margin="0,-10,0,0"/>
 
                             </StackPanel>
-
                         </DockPanel>
                     </Border>
 
