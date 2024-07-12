@@ -1177,116 +1177,19 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat instanceMask = motionExtraction.InstanceMask(processedSourceImage, processedDestinationImage, SelectedSourceColor, SelectedDestinationColor);
                 string savedInstanceMask = SaveComposedImage(instanceMask);
 
-                // Convert Instance Mask to Binary Mask
-                //Mat binaryMask = ConvertInstanceMaskToWhite(instanceMask);
-                //string savedBinaryMask = SaveComposedImage(binaryMask);
+                // Step 4: Tint the Source and Destination according to the user selections
+                Mat tintedSourceImage = motionExtraction.ApplyTint(sourceImage, SelectedSourceColor);
+                Mat tintedDestinationImage = motionExtraction.ApplyTint(destinationImage, SelectedDestinationColor);
+
+                // RenderCompositeImage
+                Mat composedImage = RenderCompositeImage(tintedSourceImage, tintedDestinationImage, instanceMask);
+                string composedImagePath = SaveComposedImage(composedImage);
+                ComposedImagePaths.Add(composedImagePath); // Add to the collection
+                UpdateDisplayedImage(composedImagePath); // Update the displayed image
 
                 CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(sourceImage, destinationImage), 4);
                 CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(sourceImage, destinationImage), 4);
                 CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(sourceImage, destinationImage), 4);
-
-                // Step 4: Tint the Source and Destination according to the user selections
-                Mat tintedSourceImage = motionExtraction.ApplyTint(sourceImage, SelectedSourceColor);
-                Mat tintedDestinationImage = motionExtraction.ApplyTint(destinationImage,SelectedDestinationColor);
-
-                if (IsForePixelModeSelected)
-                {
-                    // Call the SourceOver method from the model
-                    switch (SelectedForegroundCompositionMode)
-                    {
-                        case "SourceOver":
-                            // Use the instanceMask to render the Foreground
-                            Mat combinedImage = compositeModeRendering.SourceOver(tintedSourceImage, tintedDestinationImage);
-                            //Mat foregroundResult = AddInstanceMasking(combinedImage, instanceMask);
-
-                            // Use the instanceMask to render the Background
-                            Mat finalImage = RenderBackground(instanceMask);
-
-                            string composedImagePath = SaveComposedImage(finalImage); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath); // Update the displayed image
-                            break;
-                        case "DestinationOver":
-                            Mat composedImage2 = compositeModeRendering.DestinationOver(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath2 = SaveComposedImage(composedImage2); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath2); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath2); // Update the displayed image
-                            break;
-                        case "SourceIn":
-                            Mat composedImage3 = compositeModeRendering.SourceIn(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath3 = SaveComposedImage(composedImage3); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath3); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath3); // Update the displayed image
-                            break;
-                        case "DestinationIn":
-                            Mat composedImage4 = compositeModeRendering.DestinationIn(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath4 = SaveComposedImage(composedImage4); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath4); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath4); // Update the displayed image
-                            break;
-                        case "SourceOut":
-                            Mat composedImage5 = compositeModeRendering.SourceOut(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath5 = SaveComposedImage(composedImage5); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath5); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath5); // Update the displayed image
-                            break;
-                        case "DestinationOut":
-                            Mat composedImage6 = compositeModeRendering.DestinationOut(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath6 = SaveComposedImage(composedImage6); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath6); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath6); // Update the displayed image
-                            break;
-                        case "SourceAtop":
-                            Mat composedImage7 = compositeModeRendering.SourceAtop(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath7 = SaveComposedImage(composedImage7); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath7); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath7); // Update the displayed image
-                            break;
-                        case "DestinationAtop":
-                            Mat composedImage8 = compositeModeRendering.DestinationAtop(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath8 = SaveComposedImage(composedImage8); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath8); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath8); // Update the displayed image
-                            break;
-                        case "Clear":
-                            Mat composedImage9 = compositeModeRendering.Clear(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath9 = SaveComposedImage(composedImage9); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath9); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath9); // Update the displayed image
-                            break;
-                        case "XOR":
-                            Mat composedImage10 = compositeModeRendering.XOR(tintedSourceImage, tintedDestinationImage);
-
-                            string composedImagePath10 = SaveComposedImage(composedImage10); // Save and get the file path
-                            ComposedImagePaths.Add(composedImagePath10); // Add to the collection
-                            UpdateDisplayedImage(composedImagePath10); // Update the displayed image
-                            break;
-                        // Add cases for other composition modes as needed
-                        default:
-                            break;
-                    }
-                }
-                if (_isForeMarksModeSelected)
-                {
-                    // Mark Rendering
-                    glyphRendering.StrongMotionMark = PositiveMark;
-                    glyphRendering.NegativeMark = NegativeMark;
-                    glyphRendering.NoMotionMark = NoDifferenceMark;
-
-                    Mat compositedFrame = glyphRendering.RenderDifferences(tintedSourceImage, tintedDestinationImage, AreaSize);
-
-                    string composedImagePath = SaveComposedImage(compositedFrame);
-                    ComposedImagePaths.Add(composedImagePath); // Add to the collection
-                    UpdateDisplayedImage(composedImagePath); // Update the displayed image
-                }
             }
         }
 
@@ -1316,19 +1219,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             if (IsForePixelModeSelected)
             {
                 CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
-                //foregroundResult = RenderForeground(sourceForeground, destForeground, compositeModeRendering);
-                //backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
+                foregroundResult = RenderForeground(sourceForeground, destForeground, compositeModeRendering);
+                backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
             }
             else if (_isForeMarksModeSelected)
             {
-                //MarkRendering glyphRendering = new GlyphRendering
-                //{
-                  //  StrongMotionMark = StrongMotionMark,
-                    //NegativeMark = NegativeMark,
-                    //NoMotionMark = NoMotionMark
-                //};
+                // Mark Rendering
+                glyphRendering.StrongMotionMark = PositiveMark;
+                glyphRendering.NegativeMark = NegativeMark;
+                glyphRendering.NoMotionMark = NoDifferenceMark;
                 foregroundResult = glyphRendering.RenderDifferences(sourceForeground, destForeground, AreaSize);
-                //backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
+                backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
             }
             else
             {
@@ -1337,7 +1238,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
             // Combine foreground and background
             Mat result = new Mat();
-            //Cv2.Add(foregroundResult, backgroundResult, result);
+            Cv2.Add(foregroundResult, backgroundResult, result);
             return result;
         }
 
@@ -1378,7 +1279,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        private Mat RenderBackground(Mat mask) //, Mat sourceImageBackground, Mat destinationImageBackground)
+        private Mat RenderBackground( Mat sourceImageBackground, Mat destinationImageBackground, Mat mask)
         {
             // Convert the mask to grayscale (assuming it has an alpha channel)
             Mat maskGray = new Mat();
