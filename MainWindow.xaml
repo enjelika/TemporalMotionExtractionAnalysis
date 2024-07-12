@@ -41,6 +41,7 @@
         <converters:RadioButtonConverter x:Key="RadioButtonConverter"/>
         <converters:StringToColorConverter x:Key="StringToColorConverter"/>
         <converters:GlyphConverter x:Key="GlyphConverter" />
+        <converters:GlyphConverter x:Key="AreaSizeConverter" />
     </Window.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
@@ -259,8 +260,21 @@
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <Label FontWeight="Bold">Area Size:</Label>
-                                        <TextBox Width="100" Margin="5" Text="{Binding AreaSize}" />
+                                        <!--<Label FontWeight="Bold">Area Size:</Label>
+                                        <TextBox Width="100" Margin="5" Text="{Binding AreaSize}" />-->
+                                        <Label Content="Area Size: "/>
+                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                                    IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=20}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="20"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                                    IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=40}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="40"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                                    IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=80}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="80"/>
+                                        </RadioButton>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
