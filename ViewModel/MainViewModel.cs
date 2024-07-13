@@ -30,6 +30,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private ObservableCollection<string> _destinationColors;
         private ObservableCollection<string> _compositionModes;
         private ObservableCollection<string> _backgroundMarksTextures;
+        private ObservableCollection<string> _backgroundTextureTints;
 
         private ImageModel _previousImage;
         private ImageModel _currentImage;
@@ -40,6 +41,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private System.Windows.Media.Color _selectedSourceColor;
         private System.Windows.Media.Color _selectedDestinationColor;
+        private System.Windows.Media.Color _selectedTextureColor;
         private SolidColorBrush _selectedSourceBrush;
         private SolidColorBrush _selectedDestinationBrush;
 
@@ -118,6 +120,17 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
+        public System.Windows.Media.Color SelectedTextureColor
+        {
+            get => _selectedTextureColor;
+            set
+            {
+                _selectedTextureColor = value;
+                OnPropertyChanged(nameof(SelectedTextureColor));
+                OnPropertyChanged(nameof(SelectedTextureBrush));
+            }
+        }
+
         public SolidColorBrush SelectedSourceBrush
         {
             get { return new SolidColorBrush(SelectedSourceColor); }
@@ -126,6 +139,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         public SolidColorBrush SelectedDestinationBrush
         {
             get { return new SolidColorBrush(SelectedDestinationColor); }
+        }
+
+        public SolidColorBrush SelectedTextureBrush
+        {
+            get { return new SolidColorBrush(SelectedTextureColor); }
         }
         #endregion
 
@@ -264,6 +282,19 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 {
                     _backgroundMarksTextures = value;
                     OnPropertyChanged(nameof(BackgroundMarksTextures)); // Notify property changed
+                }
+            }
+        }
+
+        public ObservableCollection<string> BackgroundMarksColors
+        {
+            get => _backgroundTextureTints;
+            set
+            {
+                if (_backgroundTextureTints != value)
+                {
+                    _backgroundTextureTints = value;
+                    OnPropertyChanged(nameof(_backgroundTextureTints));
                 }
             }
         }
@@ -717,6 +748,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             CompositionModes =  new ObservableCollection<string>() { "SourceOver", "DestinationOver", "SourceIn", 
                 "DestinationIn", "SourceOut", "DestinationOut", "SourceAtop", "DestinationAtop", "Clear", "XOR" };
             BackgroundMarksTextures = new ObservableCollection<string>() { "Crosshatch", "Double Helix", "Circle", "Plus", "Minus", "Slash", "Double Circle", "Dot", "Asterisk" };
+            BackgroundMarksColors = new ObservableCollection<string>() { "none", "White", "LightSlateGray", "Silver", "DarkGray", "DimGray", "SlateGray" };
 
             // Create an instance of the StringToColorConverter
             var converter = new StringToColorConverter();
@@ -732,6 +764,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             if (DestinationColors.Any())
             {
                 SelectedDestinationColor = (System.Windows.Media.Color)converter.ConvertBack(DestinationColors.First(), typeof(System.Windows.Media.Color), null, CultureInfo.InvariantCulture);
+            }
+
+            // Set the default selected value to the first item in the collection
+            if (BackgroundMarksColors.Any())
+            {
+                SelectedTextureColor = (System.Windows.Media.Color)converter.ConvertBack(BackgroundMarksColors.First(), typeof(System.Windows.Media.Color), null, CultureInfo.InvariantCulture);
             }
 
             // Initialize the ObservableCollection<ImageModel> for the Images
@@ -1247,37 +1285,44 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             if (IsForePixelModeSelected)
             {
                 CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
-                foregroundResult = RenderForeground(sourceForeground, destForeground, compositeModeRendering); // result is NOT transparent
-                
+                foregroundResult = RenderForeground(sourceForeground, destForeground, compositeModeRendering);                
                 foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
-
-                backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
-                backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
-
-                // Combine foreground and background
-                Mat comboResult = CombineWithBackground(backgroundResult, sourceBackground);
-                result = CombineWithBackground(foregroundResult, comboResult);
             }
-            else if (_isForeMarksModeSelected)
+            else if (IsForeMarksModeSelected)
             {
-                backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
-                backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
-
                 // Mark Rendering
                 glyphRendering.StrongMotionMark = PositiveMark;
                 glyphRendering.NegativeMark = NegativeMark;
                 glyphRendering.NoMotionMark = NoDifferenceMark;
                 foregroundResult = glyphRendering.RenderDifferences(sourceForeground, destForeground, AreaSize, instanceMask);
                 foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
-
-                // Combine foreground and background
-                Mat comboResult = CombineWithBackground(backgroundResult, sourceBackground);
-                result = CombineWithBackground(foregroundResult, comboResult);
             }
             else
             {
                 throw new InvalidOperationException("Neither Pixel nor Marks mode is selected.");
             }
+
+            if (IsBackPixelModeSelected)
+            {
+                CompositionModeRendering compositionModeRendering = new CompositionModeRendering();
+                backgroundResult = RenderForeground(sourceBackground, destBackground, compositionModeRendering);
+                backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            }
+            else if (IsBackMarksModeSelected)
+            {
+                backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
+                backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+
+                backgroundResult = ApplyColorTint(backgroundResult, SelectedSourceBrush);
+            }
+            else
+            {
+                throw new InvalidOperationException("Neither Pixel nor Marks mode is selected.");
+            }
+
+            // Combine foreground and background
+            Mat comboResult = CombineWithBackground(backgroundResult, sourceBackground);
+            result = CombineWithBackground(foregroundResult, comboResult);
 
             // Clean up
             foreach (var channel in sourceChannels) channel.Dispose();
@@ -1290,13 +1335,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             destinationBGMask.Dispose();
 
             return result;
-        }
-
-        public void ApplyMaskToAlpha(Mat image, Mat mask)
-        {
-            var channels = image.Split();
-            Cv2.BitwiseAnd(channels[3], mask, channels[3]);
-            Cv2.Merge(channels, image);
         }
 
         private Mat ApplyMask(Mat image, Mat mask)
@@ -1526,7 +1564,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                     }
                 }
             }
-
+                        
             // Convert the bitmap back to a Mat
             return BitmapConverter.ToMat(bitmap);
         }
