@@ -1487,9 +1487,14 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
             Bitmap bitmap = new Bitmap(result.Width, result.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
+            var textureColor = System.Drawing.Color.FromArgb(
+                SelectedTextureColor.A, SelectedTextureColor.R, SelectedTextureColor.G, SelectedTextureColor.B);
+
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
+
+                g.Clear(textureColor);
 
                 Font font = new Font("Segoe UI", 20, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
 
