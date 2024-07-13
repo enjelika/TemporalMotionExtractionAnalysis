@@ -448,5 +448,49 @@ namespace TemporalMotionExtractionAnalysis.Model
             }
             return composition;
         }
+
+        public Mat SourceInBlend(Mat src, Mat dst)
+        {
+            Mat result = new Mat();
+            Mat[] srcChannels = src.Split();
+            Mat[] dstChannels = dst.Split();
+
+            for (int i = 0; i < 3; i++) // For RGB channels
+            {
+                Cv2.Multiply(srcChannels[i], dstChannels[3], srcChannels[i], 1.0 / 255.0);
+            }
+
+            Cv2.Merge(new[] { srcChannels[0], srcChannels[1], srcChannels[2], dstChannels[3] }, result);
+            return result;
+        }
+
+        public Mat DestinationAtopBlend(Mat src, Mat dst)
+        {
+            Mat result = new Mat();
+            Mat[] srcChannels = src.Split();
+            Mat[] dstChannels = dst.Split();
+
+            Mat invSrcAlpha = new Mat();
+            Cv2.Subtract(new Mat(src.Rows, src.Cols, MatType.CV_8UC1, new Scalar(255)), srcChannels[3], invSrcAlpha);
+
+            for (int i = 0; i < 3; i++) // For RGB channels
+            {
+                Mat temp1 = new Mat();
+                Mat temp2 = new Mat();
+                Cv2.Multiply(dstChannels[i], srcChannels[3], temp1, 1.0 / 255.0);
+                Cv2.Multiply(srcChannels[i], invSrcAlpha, temp2, 1.0 / 255.0);
+                Cv2.Add(temp1, temp2, dstChannels[i]);
+            }
+
+            Cv2.Merge(new[] { dstChannels[0], dstChannels[1], dstChannels[2], srcChannels[3] }, result);
+            return result;
+        }
+
+        public Mat XorBlend(Mat src1, Mat src2)
+        {
+            Mat result = new Mat();
+            Cv2.BitwiseXor(src1, src2, result);
+            return result;
+        }
     }
 }

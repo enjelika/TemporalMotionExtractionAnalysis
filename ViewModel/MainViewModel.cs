@@ -1174,7 +1174,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 var converter = new StringToColorConverter();
 
                 // Create the Instance Mask - distinguish Foreground from Background
-                Mat instanceMask = motionExtraction.InstanceMask(processedSourceImage, processedDestinationImage, SelectedSourceColor, SelectedDestinationColor);
+                Mat sourceFGMask = new Mat();
+                Mat destinationFGMask = new Mat();
+                Mat instanceMask = new Mat();
+                (sourceFGMask, destinationFGMask, instanceMask) =  motionExtraction.InstanceMask(processedSourceImage, processedDestinationImage, SelectedSourceColor, SelectedDestinationColor);
+                string savedSourceMask = SaveComposedImage(sourceFGMask);
+                string savedDestMask = SaveComposedImage(destinationFGMask);
                 string savedInstanceMask = SaveComposedImage(instanceMask);
 
                 // Step 4: Tint the Source and Destination according to the user selections
@@ -1182,63 +1187,219 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat tintedDestinationImage = motionExtraction.ApplyTint(destinationImage, SelectedDestinationColor);
 
                 // RenderCompositeImage
-                Mat composedImage = RenderCompositeImage(tintedSourceImage, tintedDestinationImage, instanceMask);
+                Mat composedImage = RenderCompositeImage(tintedSourceImage, tintedDestinationImage, sourceFGMask, destinationFGMask, instanceMask);
                 string composedImagePath = SaveComposedImage(composedImage);
                 ComposedImagePaths.Add(composedImagePath); // Add to the collection
                 UpdateDisplayedImage(composedImagePath); // Update the displayed image
 
+                // Display the overall average metrics of the result
                 CalculatedEmeasure = Math.Round(motionExtraction.CalculateEmeasurePixelwise(sourceImage, destinationImage), 4);
                 CalculatedMAE = Math.Round(motionExtraction.CalculateMAE(sourceImage, destinationImage), 4);
                 CalculatedSSIM = Math.Round(motionExtraction.CalculateSSIM(sourceImage, destinationImage), 4);
             }
         }
 
-        private Mat RenderCompositeImage(Mat sourceImage, Mat destinationImage, Mat instanceMask)
+        private Mat RenderCompositeImage(Mat sourceImage, Mat destinationImage, Mat sourceMask, Mat destinationMask, Mat instanceMask)
         {
-            Mat foregroundMask = new Mat();
-            Mat backgroundMask = new Mat();
+            // Split the source and destination images into their channels
+            Mat[] sourceChannels = sourceImage.Split();
+            Mat[] destChannels = destinationImage.Split();
+            Mat[] sourceMaskChannels = sourceMask.Split();
+            Mat[] destMaskChannels = destinationMask.Split();
 
-            // Create foreground and background masks
-            Cv2.Threshold(instanceMask, foregroundMask, 0, 255, ThresholdTypes.Binary);
-            Cv2.BitwiseNot(foregroundMask, backgroundMask);
+            // Use the alpha channels from the masks
+            Mat sourceFGMask = sourceMaskChannels[3];
+            Mat destinationFGMask = destMaskChannels[3];
 
-            // Extract foreground and background parts
+            // Create background masks
+            Mat sourceBGMask = new Mat();
+            Mat destinationBGMask = new Mat();
+            Cv2.BitwiseNot(sourceFGMask, sourceBGMask);
+            Cv2.BitwiseNot(destinationFGMask, destinationBGMask);
+
+            // Extract foreground and background parts (4-channel)
             Mat sourceForeground = new Mat();
             Mat sourceBackground = new Mat();
             Mat destForeground = new Mat();
             Mat destBackground = new Mat();
 
-            sourceImage.CopyTo(sourceForeground, foregroundMask);
-            sourceImage.CopyTo(sourceBackground, backgroundMask);
-            destinationImage.CopyTo(destForeground, foregroundMask);
-            destinationImage.CopyTo(destBackground, backgroundMask);
+            Cv2.Merge(sourceChannels, sourceForeground);
+            Cv2.Merge(sourceChannels, sourceBackground);
 
-            Mat foregroundResult;
-            Mat backgroundResult;
+            Cv2.Merge(destChannels, destForeground);
+            Cv2.Merge(destChannels, destBackground);
+
+            sourceForeground = ApplyMask(sourceForeground, sourceFGMask);
+            sourceBackground = ApplyMask(sourceBackground, sourceBGMask);
+
+            destForeground = ApplyMask(destForeground, destinationFGMask);
+            destBackground = ApplyMask(destBackground, destinationBGMask);
+
+            // Save debug images
+            sourceForeground.SaveImage("debug_images/debug_sourceFG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            destForeground.SaveImage("debug_images/debug_destFG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            sourceBackground.SaveImage("debug_images/debug_sourceBG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            destBackground.SaveImage("debug_images/debug_destBG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+
+            Mat foregroundResult = new Mat(sourceImage.Height, sourceImage.Width, MatType.CV_8UC4, new Scalar(0, 0, 0, 128));
+            Mat backgroundResult = new Mat();
+            Mat result = new Mat();
 
             if (IsForePixelModeSelected)
             {
                 CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
-                foregroundResult = RenderForeground(sourceForeground, destForeground, compositeModeRendering);
+                foregroundResult = RenderForeground(sourceForeground, destForeground, compositeModeRendering); // result is NOT transparent
+                
+                foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+
                 backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
+                backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+
+                // Combine foreground and background
+                Mat comboResult = CombineWithBackground(backgroundResult, sourceBackground);
+                result = CombineWithBackground(foregroundResult, comboResult);
             }
             else if (_isForeMarksModeSelected)
             {
+                backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
+                backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+
                 // Mark Rendering
                 glyphRendering.StrongMotionMark = PositiveMark;
                 glyphRendering.NegativeMark = NegativeMark;
                 glyphRendering.NoMotionMark = NoDifferenceMark;
-                foregroundResult = glyphRendering.RenderDifferences(sourceForeground, destForeground, AreaSize);
-                backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
+                foregroundResult = glyphRendering.RenderDifferences(sourceForeground, destForeground, AreaSize, instanceMask);
+                foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+
+                // Combine foreground and background
+                Mat comboResult = CombineWithBackground(backgroundResult, sourceBackground);
+                result = CombineWithBackground(foregroundResult, comboResult);
             }
             else
             {
                 throw new InvalidOperationException("Neither Pixel nor Marks mode is selected.");
             }
 
-            // Combine foreground and background
+            // Clean up
+            foreach (var channel in sourceChannels) channel.Dispose();
+            foreach (var channel in destChannels) channel.Dispose();
+            foreach (var channel in sourceMaskChannels) channel.Dispose();
+            foreach (var channel in destMaskChannels) channel.Dispose();
+            sourceFGMask.Dispose();
+            sourceBGMask.Dispose();
+            destinationFGMask.Dispose();
+            destinationBGMask.Dispose();
+
+            return result;
+        }
+
+        public void ApplyMaskToAlpha(Mat image, Mat mask)
+        {
+            var channels = image.Split();
+            Cv2.BitwiseAnd(channels[3], mask, channels[3]);
+            Cv2.Merge(channels, image);
+        }
+
+        private Mat ApplyMask(Mat image, Mat mask)
+        {
             Mat result = new Mat();
-            Cv2.Add(foregroundResult, backgroundResult, result);
+            Mat[] channels = image.Split();
+
+            for (int i = 0; i < channels.Length; i++)
+            {
+                Cv2.Multiply(channels[i], mask, channels[i], 1.0 / 255.0);
+            }
+
+            // If the image doesn't have an alpha channel, add one
+            if (channels.Length == 3)
+            {
+                Array.Resize(ref channels, 4);
+                channels[3] = mask.Clone();
+            }
+            else if (channels.Length == 4)
+            {
+                // If it already has an alpha channel, multiply it with the mask
+                Cv2.Multiply(channels[3], mask, channels[3], 1.0 / 255.0);
+            }
+
+            Cv2.Merge(channels, result);
+
+            foreach (var channel in channels) channel.Dispose();
+
+            return result;
+        }
+
+        /// <summary>
+        /// Combines a foreground image with transparency over a background image without transparency.
+        /// </summary>
+        /// <param name="foreground">The foreground Mat with transparency (3 or 4 channels).</param>
+        /// <param name="background">The background Mat without transparency (3 or 4 channels).</param>
+        /// <returns>A new Mat with the foreground blended over the background, resulting in a 3-channel (BGR) image.</returns>
+        /// <remarks>
+        /// This function performs the following operations:
+        /// 1. Ensures the background is in BGR format (3 channels).
+        /// 2. Ensures the foreground is in BGRA format (4 channels) to utilize its alpha channel.
+        /// 3. For each color channel (B, G, R):
+        ///    - Multiplies the foreground by its alpha channel.
+        ///    - Multiplies the background by the inverse of the foreground's alpha channel.
+        ///    - Adds these results together to create the blended channel.
+        /// 4. Merges the blended channels into a final 3-channel (BGR) image.
+        /// 
+        /// The resulting image will show the foreground overlaid on the background, with the 
+        /// foreground's transparency determining how much of the background is visible.
+        /// The final image is fully opaque (no alpha channel).
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the foreground and background are not the same size, or if either image
+        /// doesn't have 3 or 4 channels.
+        /// </exception>
+        public Mat CombineWithBackground(Mat foreground, Mat background)
+        {
+            if (foreground.Size() != background.Size())
+                throw new ArgumentException("Foreground and background must be the same size.");
+
+            Mat result = new Mat();
+            Mat fgra = new Mat();
+            Mat bgra = new Mat();
+
+            // Ensure background has 3 channels (BGR)
+            if (background.Channels() == 3)
+                bgra = background.Clone();
+            else if (background.Channels() == 4)
+                Cv2.CvtColor(background, bgra, ColorConversionCodes.BGRA2BGR);
+            else
+                throw new ArgumentException("Background must have 3 or 4 channels");
+
+            // Ensure foreground has 4 channels (BGRA)
+            if (foreground.Channels() == 3)
+                Cv2.CvtColor(foreground, fgra, ColorConversionCodes.BGR2BGRA);
+            else if (foreground.Channels() == 4)
+                fgra = foreground.Clone();
+            else
+                throw new ArgumentException("Foreground must have 3 or 4 channels");
+
+            // Split the foreground into channels
+            Mat[] fgraSplit = fgra.Split();
+
+            // Create the result channels
+            Mat[] resultChannels = new Mat[3]; // Only 3 channels for BGR
+            for (int i = 0; i < 3; i++)  // For BGR channels
+            {
+                resultChannels[i] = new Mat();
+
+                // Blend foreground and background based on foreground alpha
+                Mat fgChannel = new Mat();
+                Mat bgChannel = new Mat();
+
+                Cv2.Multiply(fgraSplit[i], fgraSplit[3], fgChannel, 1.0 / 255);
+                Cv2.Multiply(bgra.ExtractChannel(i), new Mat(bgra.Size(), MatType.CV_8UC1, new Scalar(255)) - fgraSplit[3], bgChannel, 1.0 / 255);
+
+                Cv2.Add(fgChannel, bgChannel, resultChannels[i]);
+            }
+
+            // Merge the channels to create the final result
+            Cv2.Merge(resultChannels, result);
+
             return result;
         }
 
@@ -1259,7 +1420,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 case "DestinationOver":
                     return compositeModeRendering.DestinationOver(sourceImage, destinationImage);
                 case "SourceIn":
-                    return compositeModeRendering.SourceIn(sourceImage, destinationImage);
+                    return compositeModeRendering.SourceInBlend(sourceImage, destinationImage);
                 case "DestinationIn":
                     return compositeModeRendering.DestinationIn(sourceImage, destinationImage);
                 case "SourceOut":
@@ -1269,11 +1430,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 case "SourceAtop":
                     return compositeModeRendering.SourceAtop(sourceImage, destinationImage);
                 case "DestinationAtop":
-                    return compositeModeRendering.DestinationAtop(sourceImage, destinationImage);
+                    return compositeModeRendering.DestinationAtopBlend(sourceImage, destinationImage);
                 case "Clear":
                     return compositeModeRendering.Clear(sourceImage, destinationImage);
                 case "XOR":
-                    return compositeModeRendering.XOR(sourceImage, destinationImage);
+                    return compositeModeRendering.XorBlend(sourceImage, destinationImage);
                 default:
                     throw new ArgumentException("Invalid composition mode selected.", nameof(SelectedForegroundCompositionMode));
             }
@@ -1281,93 +1442,88 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
 
         private Mat RenderBackground( Mat sourceImageBackground, Mat destinationImageBackground, Mat mask)
         {
-            // Convert the mask to grayscale (assuming it has an alpha channel)
-            Mat maskGray = new Mat();
-            Cv2.CvtColor(mask, maskGray, ColorConversionCodes.BGRA2GRAY);
-
-            // Threshold the grayscale mask to create a binary mask
-            Mat binaryMask = new Mat();
-            Cv2.Threshold(maskGray, binaryMask, 1, 255, ThresholdTypes.Binary);
-
             // Create a result Mat of the same size and type as the original mask
             Mat result = new Mat(mask.Size(), mask.Type());
             mask.CopyTo(result);
 
             int areaSize = 20;
 
-            Bitmap bitmap = BitmapConverter.ToBitmap(result);
-
-            // Patch holes with 
-            //Bitmap bitmap = PatchHolesAndDrawX(bitmap0);
+            Bitmap bitmap = new Bitmap(result.Width, result.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
+
                 Font font = new Font("Segoe UI", 20, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
 
-                for (int y = 0; y < result.Rows; y += areaSize)
+                for (int y = -areaSize; y < result.Rows; y += areaSize)
                 {
-                    for (int x = 0; x < result.Cols; x += areaSize)
+                    for (int x = -areaSize; x < result.Cols; x += areaSize)
                     {
-                        // Extract the window from xorImage to check for active areas
-                        OpenCvSharp.Rect window = new OpenCvSharp.Rect(x, y, areaSize, areaSize);
-                        Mat xorWindowMat = new Mat(mask, window);
+                        int checkX = Math.Max(0, x);
+                        int checkY = Math.Max(0, y);
+
+                        // Extract the window from mask to check for active areas
+                        OpenCvSharp.Rect window = new OpenCvSharp.Rect(checkX, checkY,
+                            Math.Min(areaSize, result.Cols - checkX),
+                            Math.Min(areaSize, result.Rows - checkY));
 
                         // Convert the windowMat to grayscale
                         Mat windowMat = new Mat(result, window);
                         Cv2.CvtColor(windowMat, windowMat, ColorConversionCodes.BGR2GRAY);
 
                         // Calculate the percentage of black pixels in the window
-                        double totalPixels = Math.Pow(areaSize, 2);
+                        double totalPixels = window.Width * window.Height; 
                         double blackPixels = totalPixels - Cv2.CountNonZero(windowMat);
 
                         // Debug: Print the number of blank pixels
                         Console.WriteLine($"Blank Pixels at ({x}, {y}): {blackPixels}");
 
-                        if (blackPixels / totalPixels >= 0.75) // Check if 75% or more are black
+                        if (blackPixels / totalPixels >= 0.01)// Check if 45% or more are black
                         {
-                            // Draw the gray X in the center of the window
-                            PointF position = new PointF(x, y);
-
-                            switch (SelectedBackgroundMarksTextures)
+                            if (x >= areaSize && y >= areaSize)
                             {
-                                case "Crosshatch":
-                                    font = new Font("Segoe UI", 36, System.Drawing.FontStyle.Regular);
-                                    g.DrawString("\u00D7", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                case "Double Helix":
-                                    font = new Font("Segoe UI", 22, System.Drawing.FontStyle.Regular);
-                                    g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                case "Slash":
-                                    g.DrawString("/", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                case "Plus":
-                                    g.DrawString("+", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                case "Minus":
-                                    g.DrawString("-", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                case "Circle":
-                                    g.DrawString("○", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                case "Double Circle":
-                                    g.DrawString("⦾", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                case "Dot":
-                                    g.DrawString("•", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                case "Asterisk":
-                                    font = new Font("Segoe UI", 30, System.Drawing.FontStyle.Regular);
-                                    g.DrawString("*", font, System.Drawing.Brushes.Gray, position);
-                                    break;
-                                default:
-                                    g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
-                                    break;
+                                // Draw the gray X in the center of the window
+                                PointF position = new PointF(x - (int)(0.5*areaSize), y - (int)(1.25*areaSize));
+
+                                switch (SelectedBackgroundMarksTextures)
+                                {
+                                    case "Crosshatch":
+                                        font = new Font("Segoe UI", 22, System.Drawing.FontStyle.Regular);
+                                        g.DrawString("\u00D7", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    case "Double Helix":
+                                        font = new Font("Segoe UI", 22, System.Drawing.FontStyle.Regular);
+                                        g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    case "Slash":
+                                        g.DrawString("/", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    case "Plus":
+                                        g.DrawString("+", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    case "Minus":
+                                        g.DrawString("-", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    case "Circle":
+                                        g.DrawString("○", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    case "Double Circle":
+                                        g.DrawString("⦾", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    case "Dot":
+                                        g.DrawString("•", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    case "Asterisk":
+                                        font = new Font("Segoe UI", 30, System.Drawing.FontStyle.Regular);
+                                        g.DrawString("*", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                    default:
+                                        g.DrawString("X", font, System.Drawing.Brushes.Gray, position);
+                                        break;
+                                }
                             }
-
                         }
-
                     }
                 }
             }
@@ -1375,49 +1531,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Convert the bitmap back to a Mat
             return BitmapConverter.ToMat(bitmap);
         }
-
-        public Bitmap PatchHolesAndDrawX(Bitmap inputBitmap)
-        {
-            Mat inputMat = BitmapConverter.ToMat(inputBitmap);
-
-            // Convert to grayscale
-            Mat grayMat = new Mat();
-            Cv2.CvtColor(inputMat, grayMat, ColorConversionCodes.BGRA2GRAY);
-
-            // Threshold to create a binary mask of holes
-            Mat binaryMask = new Mat();
-            Cv2.Threshold(grayMat, binaryMask, 1, 255, ThresholdTypes.BinaryInv);
-
-            // Fill holes using morphological closing
-            Mat filledMask = new Mat();
-            Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(5, 5));
-            Cv2.MorphologyEx(binaryMask, filledMask, MorphTypes.Close, kernel);
-
-            // Draw gray "X" in patched areas
-            Bitmap resultBitmap = BitmapConverter.ToBitmap(inputMat);
-            using (Graphics g = Graphics.FromImage(resultBitmap))
-            {
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                Font font = new Font("Segoe UI", 14, System.Drawing.FontStyle.Regular); // Font 14 in Segoe UI
-
-                for (int y = 0; y < filledMask.Rows; y++)
-                {
-                    for (int x = 0; x < filledMask.Cols; x++)
-                    {
-                        if (filledMask.Get<byte>(y, x) > 0)
-                        {
-                            // Draw black square
-                            int squareSize = 40; // Size of the square
-                            System.Drawing.Rectangle rect = new System.Drawing.Rectangle(x - squareSize / 2, y - squareSize / 2, squareSize, squareSize);
-                            g.FillRectangle(System.Drawing.Brushes.Black, rect);
-                        }
-                    }
-                }
-            }
-
-            return resultBitmap;
-        }
-
 
         private string SaveComposedImage(Mat composedImage)
         {

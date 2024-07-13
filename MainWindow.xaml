@@ -661,8 +661,7 @@
 
                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                 <!-- Composite Image from the SelectedFrames -->
-                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="625" Margin="0,-10,0,0"/>
-
+                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="625" Margin="0,10,0,0"/>
                             </StackPanel>
                         </DockPanel>
                     </Border>

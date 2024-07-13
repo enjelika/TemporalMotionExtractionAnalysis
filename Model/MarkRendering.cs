@@ -1,7 +1,9 @@
 ﻿using System.Drawing;
 using System.Drawing.Text;
+using System.Threading.Tasks;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+using Point = OpenCvSharp.Point;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -43,17 +45,22 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// <param name="areaSize">The size of the sliding window area</param>
         /// <returns>Mat with rendered difference marks</returns>
         /// <exception cref="ArgumentException"></exception>
-        public Mat RenderDifferences(Mat currentImage, Mat offsetImage, int areaSize)
+        public Mat RenderDifferences(Mat currentImage, Mat offsetImage, int areaSize, Mat instanceMask)
         {
-            if (currentImage.Size() != offsetImage.Size() || currentImage.Type() != offsetImage.Type())
-                throw new ArgumentException("Mats must have the same size and type.");
+            if (currentImage.Size() != offsetImage.Size() || currentImage.Type() != offsetImage.Type() || currentImage.Size() != instanceMask.Size())
+                throw new ArgumentException("All Mats must have the same size and type.");
 
-            Mat result = new Mat(currentImage.Size(), currentImage.Type());
-            currentImage.CopyTo(result);
-            Bitmap bitmap = BitmapConverter.ToBitmap(result);
+            Mat result = currentImage.Clone();
+            // Create a bitmap with transparency
+            Bitmap bitmap = new Bitmap(currentImage.Width, currentImage.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            //Bitmap bitmap = BitmapConverter.ToBitmap(result);
 
-            //List<(string glyph, Brush Brush, PointF position, float fontSize)> glyphsToDraw = new List<(string, Brush, PointF, float)>();
             List<MarkData> glyphsToDraw = new List<MarkData>();
+
+            // Convert mask to grayscale if it's not already
+            Mat maskGray = instanceMask.Channels() == 1 ? instanceMask.Clone() : new Mat();
+            if (instanceMask.Channels() > 1)
+                Cv2.CvtColor(instanceMask, maskGray, ColorConversionCodes.BGR2GRAY);
 
             for (int y = 0; y < currentImage.Rows; y += areaSize)
             {
@@ -61,8 +68,12 @@ namespace TemporalMotionExtractionAnalysis.Model
                 {
                     int windowWidth = Math.Min(areaSize, currentImage.Cols - x);
                     int windowHeight = Math.Min(areaSize, currentImage.Rows - y);
-                    
+
                     Rect window = new Rect(x, y, windowWidth, windowHeight);
+
+                    // Check if the window intersects with any non-zero (active) area in the mask
+                    Mat maskWindow = new Mat(maskGray, window);
+                    if (Cv2.CountNonZero(maskWindow) == 0) continue; // Skip if window is not in active area
 
                     Mat currentWindow = new Mat(currentImage, window);
                     Mat offsetWindow = new Mat(offsetImage, window);
@@ -70,8 +81,8 @@ namespace TemporalMotionExtractionAnalysis.Model
                     // Calculate SSIM for the window
                     double ssim = CalculateSSIM(currentWindow, offsetWindow);
 
-                    float centerX = x + windowWidth / 2.0f; 
-                    float centerY = y + windowHeight / 2.0f; 
+                    float centerX = x + windowWidth / 2.0f;
+                    float centerY = y + windowHeight / 2.0f;
 
                     string mark;
                     Brush brush;
@@ -99,12 +110,11 @@ namespace TemporalMotionExtractionAnalysis.Model
                     }
 
                     // Determine font size based on areaSize
-                    float fontSize = (areaSize >=0 && areaSize <=39) ? 20 :
+                    float fontSize = (areaSize >= 0 && areaSize <= 39) ? 20 :
                              (areaSize >= 40 && areaSize <= 59) ? 40 :
                              (areaSize >= 60 && areaSize <= 80) ? 60 :
                              (areaSize >= 81 && areaSize <= 100) ? 80 : 95;
 
-                    //glyphsToDraw.Add((mark, Brush, new PointF(centerX, centerY), fontSize));
                     glyphsToDraw.Add(new MarkData
                     {
                         Mark = mark,
@@ -118,8 +128,9 @@ namespace TemporalMotionExtractionAnalysis.Model
 
             using (Graphics g = Graphics.FromImage(bitmap))
             {
+                g.Clear(Color.Transparent); // Set the entire bitmap to transparent
                 g.TextRenderingHint = TextRenderingHint.AntiAlias;
-                
+
                 foreach (var glyph in glyphsToDraw)
                 {
                     using (Font font = new Font("Segoe UI Symbol", glyph.FontSize))
