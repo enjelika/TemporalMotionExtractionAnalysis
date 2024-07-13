@@ -29,7 +29,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -70,7 +70,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -110,7 +110,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -153,7 +153,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -196,7 +196,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -240,7 +240,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -284,7 +284,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -333,7 +333,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -381,7 +381,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
@@ -416,7 +416,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             int height = source.Height;
 
             // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
+            Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
             // Iterate through each pixel and adjust opacity
             for (int i = 0; i < height; i++)
