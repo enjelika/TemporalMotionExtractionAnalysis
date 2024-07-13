@@ -15,482 +15,450 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
         /// <summary>
-        /// Composes two images using the Source Over composition mode.
-        /// Source image masks destination image in composition image.
-        /// Source pixel is displayed if not black.
+        /// Composes two images using the Porter-Duff Source Over composition mode.
         /// </summary>
         /// <param name="source">The source image to be composited.</param>
         /// <param name="destination">The destination image where the source image is composited onto.</param>
         /// <returns>The composited image using the Source Over composition mode.</returns>
         public Mat SourceOver(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // Source image masks destination image in composition image.
-                    // Source pixel is displayed if not black.
-                    if (sourceColor.Item0 > 100 && sourceColor.Item3 > 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = srcAlpha + dstAlpha * (1 - srcAlpha);
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, sourceColor);
+                        double blended = (srcColor[c] * srcAlpha + dstColor[c] * dstAlpha * (1 - srcAlpha)) / outAlpha;
+                        outColor[c] = (byte)Math.Round(blended);
                     }
-                    else
-                    {
-                        composition.Set<Vec4b>(i, j, destinationColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
         }
 
         /// <summary>
-        /// Composes two images using the Destination Over composition mode.
-        /// Destination image masks source destination image in composition image.
-        /// Destination pixel is displayed if not black.
+        /// Composes two images using the Porter-Duff Destination Over composition mode.
         /// </summary>
         /// <param name="source">The source image to be composited.</param>
-        /// <param name="destination">The destination image taht is composited onto the source image.</param>
+        /// <param name="destination">The destination image that is composited under the source image.</param>
         /// <returns>The composited image using the Destination Over composition mode.</returns>
         public Mat DestinationOver(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // Destination image masks source destination image in composition image.
-                    // Destination pixel is displayed if not black.
-                    if (destinationColor.Item2 > 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = dstAlpha + srcAlpha * (1 - dstAlpha);
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, destinationColor);
+                        double blended = (dstColor[c] * dstAlpha + srcColor[c] * srcAlpha * (1 - dstAlpha)) / outAlpha;
+                        outColor[c] = (byte)Math.Round(blended);
                     }
-                    else
-                    {
-                        composition.Set<Vec4b>(i, j, sourceColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
         }
 
         /// <summary>
-        /// Composes an intersection of two images using the Source In composition mode.
-        /// The intersection of source and destination images is displayed as the source color.
+        /// Composes two images using the Porter-Duff Source In composition mode.
+        /// The result shows the source image only where it overlaps with the destination image.
         /// </summary>
-        /// <param name="source">The source image for the intersction composit.</param>
-        /// <param name="destination">The destination image for the intersction composit.</param>
+        /// <param name="source">The source image for the composition.</param>
+        /// <param name="destination">The destination image for the composition.</param>
         /// <returns>The composited image using the Source In composition mode.</returns>
         public Mat SourceIn(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // The intersection of source and destination images 
-                    // is displayed as the source color.
-                    if (sourceColor.Item0 > 100 && destinationColor.Item2 > 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = srcAlpha * dstAlpha;
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, sourceColor);
+                        outColor[c] = (byte)Math.Round(srcColor[c] * outAlpha);
                     }
-                    else
-                    {
-                        destinationColor.Item0 = 0;
-                        destinationColor.Item1 = 0;
-                        destinationColor.Item2 = 0;
-                        composition.Set<Vec4b>(i, j, destinationColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
         }
 
         /// <summary>
-        /// Composes an intersection of two images using the Destination In composition mode.
-        /// The intersection of source and destination images is displayed as the destination color.
+        /// Composes two images using the Porter-Duff Destination In composition mode.
+        /// The result shows the destination image only where it overlaps with the source image.
         /// </summary>
-        /// <param name="source">The source image for the intersection composit.</param>
-        /// <param name="destination">The destination image for the intersection composit.</param>
+        /// <param name="source">The source image for the composition.</param>
+        /// <param name="destination">The destination image for the composition.</param>
         /// <returns>The composited image using the Destination In composition mode.</returns>
         public Mat DestinationIn(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // The intersection of source and destination images 
-                    // is displayed as the destination color.
-                    if (sourceColor.Item0 > 100 && destinationColor.Item2 > 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = srcAlpha * dstAlpha;
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, destinationColor);
+                        outColor[c] = (byte)Math.Round(dstColor[c] * outAlpha);
                     }
-                    else
-                    {
-                        sourceColor.Item0 = 0;
-                        sourceColor.Item1 = 0;
-                        sourceColor.Item2 = 0;
-                        composition.Set<Vec4b>(i, j, sourceColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
         }
 
         /// <summary>
-        /// Composes an area of exclusion of two images using the Source Out composition mode.
-        /// The intersection of source and destination images is displayed as the source color.
+        /// Composes two images using the Porter-Duff Source Out composition mode.
+        /// The result shows the source image only where it doesn't overlap with the destination image.
         /// </summary>
-        /// <param name="source">The source image for the composit.</param>
-        /// <param name="destination">The destination image for the composit.</param>
+        /// <param name="source">The source image for the composition.</param>
+        /// <param name="destination">The destination image for the composition.</param>
         /// <returns>The composited image using the Source Out composition mode.</returns>
         public Mat SourceOut(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // The intersection of source and destination images 
-                    // is displayed as the source color.
-                    if (sourceColor.Item0 > 100 && destinationColor.Item2 < 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = srcAlpha * (1 - dstAlpha);
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, sourceColor);
+                        outColor[c] = (byte)Math.Round(srcColor[c] * outAlpha);
                     }
-                    else
-                    {
-                        destinationColor.Item0 = 0;
-                        destinationColor.Item1 = 0;
-                        destinationColor.Item2 = 0;
-                        composition.Set<Vec4b>(i, j, destinationColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
         }
 
         /// <summary>
-        /// Composes an area of exclusion of two images using the Destination Out composition mode.
-        /// The area of the destination image not intersecting the source image is displayed as 
-        /// the destination color.
+        /// Composes two images using the Porter-Duff Destination Out composition mode.
+        /// The result shows the destination image only where it doesn't overlap with the source image.
         /// </summary>
-        /// <param name="source">The source image for the composit.</param>
-        /// <param name="destination">The destination image for the composit.</param>
+        /// <param name="source">The source image for the composition.</param>
+        /// <param name="destination">The destination image for the composition.</param>
         /// <returns>The composited image using the Destination Out composition mode.</returns>
         public Mat DestinationOut(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // The area of the destination image not intersecting
-                    // the source image is displayed as the destination color.
-                    if (sourceColor.Item0 < 100 && destinationColor.Item2 > 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = dstAlpha * (1 - srcAlpha);
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, destinationColor);
+                        outColor[c] = (byte)Math.Round(dstColor[c] * outAlpha);
                     }
-                    else
-                    {
-                        sourceColor.Item0 = 0;
-                        sourceColor.Item1 = 0;
-                        sourceColor.Item2 = 0;
-                        composition.Set<Vec4b>(i, j, sourceColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
         }
 
         /// <summary>
-        /// Composes areas of both intersection and exclusion of two images using the SourceAtop composition mode.
-        /// The intersection of source and destination images is displayed as the source color and the remaining 
-        /// destination area is displayed also.
+        /// Composes two images using the Porter-Duff Source Atop composition mode.
+        /// The result shows the source image on top of the destination image, but only where the destination is opaque.
         /// </summary>
-        /// <param name="source">The source image for the composit.</param>
-        /// <param name="destination">The destination image for the composit.</param>
-        /// <returns>The composited image using the SourceAtop composition mode.</returns>
+        /// <param name="source">The source image for the composition.</param>
+        /// <param name="destination">The destination image for the composition.</param>
+        /// <returns>The composited image using the Source Atop composition mode.</returns>
         public Mat SourceAtop(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // The intersection of source and destination images 
-                    // is displayed as the source color and the remaining destination
-                    // area is displayed also.
-                    if (sourceColor.Item0 > 100 && destinationColor.Item2 > 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = srcAlpha * dstAlpha + dstAlpha * (1 - srcAlpha);
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, sourceColor);
+                        double blended = (srcColor[c] * srcAlpha * dstAlpha + dstColor[c] * dstAlpha * (1 - srcAlpha)) / outAlpha;
+                        outColor[c] = (byte)Math.Round(blended);
                     }
-                    else if (sourceColor.Item0 < 100 && destinationColor.Item2 > 100)
-                    {
-                        composition.Set<Vec4b>(i, j, destinationColor);
-                    }
-                    else
-                    {
-                        sourceColor.Item0 = 0;
-                        sourceColor.Item1 = 0;
-                        sourceColor.Item2 = 0;
-                        composition.Set<Vec4b>(i, j, sourceColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
         }
 
         /// <summary>
-        /// Composes areas of both intersection and exclusion of two images using the DestinationAtop composition mode.
-        /// The intersection of source and destination images is displayed as the destination color and the remaining 
-        /// source area is displayed also.
+        /// Composes two images using the Porter-Duff Destination Atop composition mode.
+        /// The result shows the destination image on top of the source image, but only where the source is opaque.
         /// </summary>
-        /// <param name="source">The source image for the composit.</param>
-        /// <param name="destination">The destination image for the composit.</param>
-        /// <returns>The composited image using the DestinationAtop composition mode.</returns>
+        /// <param name="source">The source image for the composition.</param>
+        /// <param name="destination">The destination image for the composition.</param>
+        /// <returns>The composited image using the Destination Atop composition mode.</returns>
         public Mat DestinationAtop(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // The intersection of source and destination images 
-                    // is displayed as the destination color and the remaining source
-                    // area is displayed also.
-                    if (sourceColor.Item0 > 100 && destinationColor.Item2 > 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = dstAlpha * srcAlpha + srcAlpha * (1 - dstAlpha);
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, destinationColor);
+                        double blended = (dstColor[c] * dstAlpha * srcAlpha + srcColor[c] * srcAlpha * (1 - dstAlpha)) / outAlpha;
+                        outColor[c] = (byte)Math.Round(blended);
                     }
-                    else if (sourceColor.Item0 > 100 && destinationColor.Item2 < 100)
-                    {
-                        composition.Set<Vec4b>(i, j, sourceColor);
-                    }
-                    else
-                    {
-                        sourceColor.Item0 = 0;
-                        sourceColor.Item1 = 0;
-                        sourceColor.Item2 = 0;
-                        composition.Set<Vec4b>(i, j, sourceColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
         }
 
         /// <summary>
-        /// Composes a blank/clear image using the Clear composition mode.
-        /// The composition image is blank/clear.
+        /// Composes a blank/clear image using the Porter-Duff Clear composition mode.
+        /// The resulting image is fully transparent (clear) regardless of the input images.
         /// </summary>
-        /// <param name="source">The source image for the composit.</param>
-        /// <param name="destination">The destination image for the composit.</param>
-        /// <returns>The composited image using the Clear composition mode.</returns>
+        /// <param name="source">The source image (not used in this operation).</param>
+        /// <param name="destination">The destination image (not used in this operation).</param>
+        /// <returns>A fully transparent image of the same size as the input images.</returns>
         public Mat Clear(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
-
-            // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC4);
-
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            // Ensure both images have the same size
+            if (source.Size() != destination.Size())
             {
-                for (int j = 0; j < width; j++)
-                {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    sourceColor.Item0 = 0;
-                    sourceColor.Item1 = 0;
-                    sourceColor.Item2 = 0;
-                    sourceColor.Item3 = 255;
-                    composition.Set<Vec4b>(i, j, sourceColor);
-                }
+                throw new ArgumentException("Both images must have the same size.");
             }
+
+            // Create a new Mat with the same size as the input images, filled with zeros (fully transparent)
+            Mat composition = new Mat(source.Size(), MatType.CV_8UC4, new Scalar(0, 0, 0, 0));
+
             return composition;
         }
 
-
         /// <summary>
-        /// Composes an image of mutual exclusion using the XOR composition mode.
-        /// The areas of source and destination images that
-        /// are mutually exclusive are each displayed.
+        /// Composes two images using the Porter-Duff XOR composition mode.
+        /// The result shows areas where either the source or destination is opaque, but not both.
         /// </summary>
-        /// <param name="source">The source image for the composit.</param>
-        /// <param name="destination">The destination image for the composit.</param>
+        /// <param name="source">The source image for the composition.</param>
+        /// <param name="destination">The destination image for the composition.</param>
         /// <returns>The composited image using the XOR composition mode.</returns>
         public Mat XOR(Mat source, Mat destination)
         {
-            // Get pixel data
-            int width = source.Width;
-            int height = source.Height;
+            // Ensure both images have the same size and 4 channels (BGRA)
+            if (source.Size() != destination.Size() || source.Channels() != 4 || destination.Channels() != 4)
+            {
+                throw new ArgumentException("Both images must have the same size and 4 channels (BGRA).");
+            }
 
-            // Instantiate composition matrix
+            int width = source.Cols;
+            int height = source.Rows;
             Mat composition = new Mat(height, width, MatType.CV_8UC4);
 
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
+            for (int y = 0; y < height; y++)
             {
-                for (int j = 0; j < width; j++)
+                for (int x = 0; x < width; x++)
                 {
-                    // Create composition image from source and destination images                    
-                    Vec4b sourceColor = source.At<Vec4b>(i, j);
-                    Vec4b destinationColor = destination.At<Vec4b>(i, j);
+                    Vec4b srcColor = source.Get<Vec4b>(y, x);
+                    Vec4b dstColor = destination.Get<Vec4b>(y, x);
 
-                    // The areas of source and destination images that
-                    // are mutually exclusive are each displayed.
-                    if (sourceColor.Item0 > 100 && destinationColor.Item2 < 100)
+                    // Normalize alpha values to 0-1 range
+                    double srcAlpha = srcColor[3] / 255.0;
+                    double dstAlpha = dstColor[3] / 255.0;
+
+                    // Calculate resulting alpha
+                    double outAlpha = srcAlpha + dstAlpha - 2 * srcAlpha * dstAlpha;
+
+                    Vec4b outColor = new Vec4b();
+                    for (int c = 0; c < 3; c++) // For each color channel (BGR)
                     {
-                        composition.Set<Vec4b>(i, j, sourceColor);
+                        double blended = (srcColor[c] * srcAlpha * (1 - dstAlpha) + dstColor[c] * dstAlpha * (1 - srcAlpha)) / outAlpha;
+                        outColor[c] = (byte)Math.Round(blended);
                     }
-                    else if (sourceColor.Item0 < 100 && destinationColor.Item2 > 100)
-                    {
-                        composition.Set<Vec4b>(i, j, destinationColor);
-                    }
-                    else
-                    {
-                        sourceColor.Item0 = 0;
-                        sourceColor.Item1 = 0;
-                        sourceColor.Item2 = 0;
-                        composition.Set<Vec4b>(i, j, sourceColor);
-                    }
+                    outColor[3] = (byte)Math.Round(outAlpha * 255); // Convert alpha back to 0-255 range
+
+                    composition.Set(y, x, outColor);
                 }
             }
+
             return composition;
-        }
-
-        public Mat SourceInBlend(Mat src, Mat dst)
-        {
-            Mat result = new Mat();
-            Mat[] srcChannels = src.Split();
-            Mat[] dstChannels = dst.Split();
-
-            for (int i = 0; i < 3; i++) // For RGB channels
-            {
-                Cv2.Multiply(srcChannels[i], dstChannels[3], srcChannels[i], 1.0 / 255.0);
-            }
-
-            Cv2.Merge(new[] { srcChannels[0], srcChannels[1], srcChannels[2], dstChannels[3] }, result);
-            return result;
-        }
-
-        public Mat DestinationAtopBlend(Mat src, Mat dst)
-        {
-            Mat result = new Mat();
-            Mat[] srcChannels = src.Split();
-            Mat[] dstChannels = dst.Split();
-
-            Mat invSrcAlpha = new Mat();
-            Cv2.Subtract(new Mat(src.Rows, src.Cols, MatType.CV_8UC1, new Scalar(255)), srcChannels[3], invSrcAlpha);
-
-            for (int i = 0; i < 3; i++) // For RGB channels
-            {
-                Mat temp1 = new Mat();
-                Mat temp2 = new Mat();
-                Cv2.Multiply(dstChannels[i], srcChannels[3], temp1, 1.0 / 255.0);
-                Cv2.Multiply(srcChannels[i], invSrcAlpha, temp2, 1.0 / 255.0);
-                Cv2.Add(temp1, temp2, dstChannels[i]);
-            }
-
-            Cv2.Merge(new[] { dstChannels[0], dstChannels[1], dstChannels[2], srcChannels[3] }, result);
-            return result;
-        }
-
-        public Mat XorBlend(Mat src1, Mat src2)
-        {
-            Mat result = new Mat();
-            Cv2.BitwiseXor(src1, src2, result);
-            return result;
         }
     }
 }

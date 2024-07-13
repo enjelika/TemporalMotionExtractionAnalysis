@@ -1457,7 +1457,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 case "DestinationOver":
                     return compositeModeRendering.DestinationOver(sourceImage, destinationImage);
                 case "SourceIn":
-                    return compositeModeRendering.SourceInBlend(sourceImage, destinationImage);
+                    return compositeModeRendering.SourceIn(sourceImage, destinationImage);
                 case "DestinationIn":
                     return compositeModeRendering.DestinationIn(sourceImage, destinationImage);
                 case "SourceOut":
@@ -1467,11 +1467,11 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 case "SourceAtop":
                     return compositeModeRendering.SourceAtop(sourceImage, destinationImage);
                 case "DestinationAtop":
-                    return compositeModeRendering.DestinationAtopBlend(sourceImage, destinationImage);
+                    return compositeModeRendering.DestinationAtop(sourceImage, destinationImage);
                 case "Clear":
                     return compositeModeRendering.Clear(sourceImage, destinationImage);
                 case "XOR":
-                    return compositeModeRendering.XorBlend(sourceImage, destinationImage);
+                    return compositeModeRendering.XOR(sourceImage, destinationImage);
                 default:
                     throw new ArgumentException("Invalid composition mode selected.", nameof(SelectedForegroundCompositionMode));
             }
