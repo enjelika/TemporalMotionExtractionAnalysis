@@ -171,7 +171,7 @@
                                         <Label FontWeight="Bold">Composition Mode:</Label>
                                         <!-- TODO: convert to combobox -->
                                         <ComboBox x:Name="ForegroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" 
-                                                  SelectedValue="{Binding SelectedForegroundCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                                  SelectedValue="{Binding SelectedForegroundCompositionMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                                             <ComboBox.Style>
                                                 <Style TargetType="{x:Type ComboBox}">
                                                     <Style.Triggers>
@@ -317,7 +317,7 @@
                                     <Label FontWeight="Bold">Composition Mode:</Label>
                                     <!-- TODO: Add Combobox for Background Composition Mode Selections -->
                                     <ComboBox x:Name="BackgroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" 
-                                              SelectedValue="{Binding SelectedBackgroundCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                              SelectedValue="{Binding SelectedBackgroundCompositionMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                                         <ComboBox.Style>
                                             <Style TargetType="{x:Type ComboBox}">
                                                 <Style.Triggers>

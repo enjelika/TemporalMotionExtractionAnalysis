@@ -783,7 +783,6 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             StopCommand = new RelayCommand(OnStop);
             PreviousCommand = new RelayCommand(OnPrevious);
             NextCommand = new RelayCommand(OnNext);
-            SelectedForegroundCompositionMode = "SourceOver";
 
             // Initialize the MarkRendering class with default glyphs
             glyphRendering = new MarkRendering("▲", "▼", "■");
