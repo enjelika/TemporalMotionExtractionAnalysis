@@ -1273,10 +1273,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             destBackground = ApplyMask(destBackground, destinationBGMask);
 
             // Save debug images
-            sourceForeground.SaveImage("debug_images/debug_sourceFG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
-            destForeground.SaveImage("debug_images/debug_destFG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
-            sourceBackground.SaveImage("debug_images/debug_sourceBG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
-            destBackground.SaveImage("debug_images/debug_destBG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            //sourceForeground.SaveImage("debug_images/debug_sourceFG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            //destForeground.SaveImage("debug_images/debug_destFG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            //sourceBackground.SaveImage("debug_images/debug_sourceBG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            //destBackground.SaveImage("debug_images/debug_destBG_image" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
 
             Mat foregroundResult = new Mat(sourceImage.Height, sourceImage.Width, MatType.CV_8UC4, new Scalar(0, 0, 0, 128));
             Mat backgroundResult = new Mat();
@@ -1286,7 +1286,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 CompositionModeRendering compositeModeRendering = new CompositionModeRendering();
                 foregroundResult = RenderForeground(sourceForeground, destForeground, compositeModeRendering);                
-                foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+                //foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
             }
             else if (IsForeMarksModeSelected)
             {
@@ -1295,7 +1295,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 glyphRendering.NegativeMark = NegativeMark;
                 glyphRendering.NoMotionMark = NoDifferenceMark;
                 foregroundResult = glyphRendering.RenderDifferences(sourceForeground, destForeground, AreaSize, instanceMask);
-                foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+                //foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
             }
             else
             {
@@ -1306,12 +1306,12 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             {
                 CompositionModeRendering compositionModeRendering = new CompositionModeRendering();
                 backgroundResult = RenderForeground(sourceBackground, destBackground, compositionModeRendering);
-                backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+                //backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
             }
             else if (IsBackMarksModeSelected)
             {
                 backgroundResult = RenderBackground(sourceBackground, destBackground, instanceMask);
-                backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+                //backgroundResult.SaveImage("debug_images/debug_BGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
 
                 backgroundResult = ApplyColorTint(backgroundResult, SelectedSourceBrush);
             }
@@ -1323,7 +1323,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Combine foreground and background
             Mat comboResult = CombineWithBackground(backgroundResult, sourceBackground);
             result = CombineWithBackground(foregroundResult, comboResult);
-            result.SaveImage("debug_images/debug_COMBOresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
+            //result.SaveImage("debug_images/debug_COMBOresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
 
             // Clean up
             foreach (var channel in sourceChannels) channel.Dispose();
