@@ -214,15 +214,15 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="Positive Difference: " />
                                         <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
+                                                     IsChecked="{Binding PositiveMark, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="△" Foreground="Green"/>
                                         </RadioButton>
                                         <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
+                                                     IsChecked="{Binding PositiveMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="▲" Foreground="Green"/>
                                         </RadioButton>
                                         <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding PositiveGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
+                                                     IsChecked="{Binding PositiveMark, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="◆" Foreground="Green"/>
                                         </RadioButton>
                                     </StackPanel>
@@ -230,15 +230,15 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="Negative Difference: " />
                                         <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▽}">
+                                                     IsChecked="{Binding NegativeMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▽}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="▽" Foreground="Red"/>
                                         </RadioButton>
                                         <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=▼}">
+                                                     IsChecked="{Binding NegativeMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▼}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="▼" Foreground="Red"/>
                                         </RadioButton>
                                         <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NegativeGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=★}">
+                                                     IsChecked="{Binding NegativeMark, Converter={StaticResource GlyphConverter}, ConverterParameter=★}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="★" Foreground="Red"/>
                                         </RadioButton>
                                     </StackPanel>
@@ -246,15 +246,15 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Label Content="No Difference: "/>
                                         <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=■}">
+                                                     IsChecked="{Binding NoDifferenceMark, Converter={StaticResource GlyphConverter}, ConverterParameter=■}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="■" Foreground="Blue"/>
                                         </RadioButton>
                                         <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=□}">
+                                                     IsChecked="{Binding NoDifferenceMark, Converter={StaticResource GlyphConverter}, ConverterParameter=□}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="□" Foreground="Blue"/>
                                         </RadioButton>
                                         <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NoDifferenceGlyph, Converter={StaticResource GlyphConverter}, ConverterParameter=●}">
+                                                     IsChecked="{Binding NoDifferenceMark, Converter={StaticResource GlyphConverter}, ConverterParameter=●}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="●" Foreground="Blue"/>
                                         </RadioButton>
                                     </StackPanel>
