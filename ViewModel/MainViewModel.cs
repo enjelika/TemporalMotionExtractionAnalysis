@@ -1478,7 +1478,90 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        private Mat RenderBackground( Mat sourceImageBackground, Mat destinationImageBackground, Mat mask)
+        private Mat RenderBackground(Mat sourceImageBackground, Mat destinationImageBackground, Mat mask)
+        {
+            // Create a result Mat of the same size and type as the original mask
+            Mat result = new Mat(mask.Size(), mask.Type());
+            mask.CopyTo(result);
+
+            int areaSize = 20;
+
+            Bitmap bitmap = new Bitmap(result.Width, result.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            // Extract color from SolidColorBrush and convert to System.Drawing.Color
+            System.Windows.Media.Color mediaColor = (SelectedTextureBrush as SolidColorBrush).Color;
+            System.Drawing.Color backgroundColor = System.Drawing.Color.FromArgb(
+                mediaColor.A,
+                mediaColor.R,
+                mediaColor.G,
+                mediaColor.B
+            );
+
+            System.Drawing.Brush fontColor = System.Drawing.Brushes.Black;
+
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.TextRenderingHint = TextRenderingHint.AntiAlias;
+
+                // Fill the entire bitmap with the SelectedSourceBrush color
+                g.Clear(backgroundColor);
+
+                Font font = new Font("Segoe UI", 20, System.Drawing.FontStyle.Regular);
+
+                for (int y = -areaSize; y < result.Rows; y += areaSize)
+                {
+                    for (int x = -areaSize; x < result.Cols; x += areaSize)
+                    {
+                        if (x >= 0 && y >= 0)
+                        {
+                            PointF position = new PointF(x, y - (int)(0.75 * areaSize));
+
+                            switch (SelectedBackgroundMarksTextures)
+                            {
+                                case "Crosshatch":
+                                    font = new Font("Segoe UI", 22, System.Drawing.FontStyle.Regular);
+                                    g.DrawString("\u00D7", font, fontColor, position);
+                                    break;
+                                case "Double Helix":
+                                    font = new Font("Segoe UI", 22, System.Drawing.FontStyle.Regular);
+                                    g.DrawString("X", font, fontColor, position);
+                                    break;
+                                case "Slash":
+                                    g.DrawString("/", font, fontColor, position);
+                                    break;
+                                case "Plus":
+                                    g.DrawString("+", font, fontColor, position);
+                                    break;
+                                case "Minus":
+                                    g.DrawString("-", font, fontColor, position);
+                                    break;
+                                case "Circle":
+                                    g.DrawString("○", font, fontColor, position);
+                                    break;
+                                case "Double Circle":
+                                    g.DrawString("⦾", font, fontColor, position);
+                                    break;
+                                case "Dot":
+                                    g.DrawString("•", font, fontColor, position);
+                                    break;
+                                case "Asterisk":
+                                    font = new Font("Segoe UI", 30, System.Drawing.FontStyle.Regular);
+                                    g.DrawString("*", font, fontColor, position);
+                                    break;
+                                default:
+                                    g.DrawString("X", font, fontColor, position);
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Convert the bitmap back to a Mat
+            return BitmapConverter.ToMat(bitmap);
+        }
+
+        private Mat OldRenderBackground( Mat sourceImageBackground, Mat destinationImageBackground, Mat mask)
         {
             // Create a result Mat of the same size and type as the original mask
             Mat result = new Mat(mask.Size(), mask.Type());
