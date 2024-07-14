@@ -1323,6 +1323,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             // Combine foreground and background
             Mat comboResult = CombineWithBackground(backgroundResult, sourceBackground);
             result = CombineWithBackground(foregroundResult, comboResult);
+            result.SaveImage("debug_images/debug_COMBOresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
 
             // Clean up
             foreach (var channel in sourceChannels) channel.Dispose();
