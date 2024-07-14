@@ -212,82 +212,80 @@
 
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="Significant Motion: " />
-                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,0,0,0" 
+                                        <Label Content="Significant Motion: " FontWeight="Bold"/>
+                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="△" Foreground="Green"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="▲" Foreground="Green"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="◆" Foreground="Green"/>
                                         </RadioButton>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="Noticeable Motion: " />
-                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,0,0,0" 
+                                        <Label Content="Noticeable Motion: " FontWeight="Bold"/>
+                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="△" Foreground="Red"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="▲" Foreground="Red"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="◆" Foreground="Red"/>
                                         </RadioButton>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="Slight Motion: " />
-                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,0,0,0" 
+                                        <Label Content="Slight Motion: " FontWeight="Bold"/>
+                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=•}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="•" Foreground="Gold"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=*}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="*" Foreground="Gold"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=★}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="★" Foreground="Gold"/>
                                         </RadioButton>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="No Motion: "/>
-                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,0,0,0" 
+                                        <Label Content="No Motion:" FontWeight="Bold"/>
+                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=■}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="■" Foreground="Blue"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=□}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="□" Foreground="Blue"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,8,0,0" 
                                                      IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=●}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="●" Foreground="Blue"/>
                                         </RadioButton>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <!--<Label FontWeight="Bold">Area Size:</Label>
-                                        <TextBox Width="100" Margin="5" Text="{Binding AreaSize}" />-->
-                                        <Label Content="Area Size: "/>
-                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                        <Label Content="Area Size: " FontWeight="Bold"/>
+                                        <RadioButton GroupName="AreaSize" Margin="5,8,0,0" 
                                                     IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=20}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="20"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="AreaSize" Margin="5,8,0,0" 
                                                     IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=40}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="40"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                        <RadioButton GroupName="AreaSize" Margin="5,8,0,0" 
                                                     IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=80}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="80"/>
                                         </RadioButton>
