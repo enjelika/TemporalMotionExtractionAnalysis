@@ -53,7 +53,6 @@ namespace TemporalMotionExtractionAnalysis.Model
             Mat result = currentImage.Clone();
             // Create a bitmap with transparency
             Bitmap bitmap = new Bitmap(currentImage.Width, currentImage.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            //Bitmap bitmap = BitmapConverter.ToBitmap(result);
 
             List<MarkData> glyphsToDraw = new List<MarkData>();
 
