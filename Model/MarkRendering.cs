@@ -26,15 +26,16 @@ namespace TemporalMotionExtractionAnalysis.Model
     {
         // Glyphs for positive, negative, and no difference areas
         public string StrongMotionMark { get; set; }
+        public string ModerateMotionMark { get; set; }
         public string SlightMotionMark { get; set; }
-        public string NegativeMark { get; set; }
         public string NoMotionMark { get; set; }
 
-        public MarkRendering(string positiveMark, string negativeMark, string noDifferenceMark)
+        public MarkRendering(string strongMotionMark, string moderateMotionMark, string slightMotionMark, string noMotionMark)
         {
-            StrongMotionMark = positiveMark;
-            NegativeMark = negativeMark;
-            NoMotionMark = noDifferenceMark;
+            StrongMotionMark = strongMotionMark;
+            ModerateMotionMark = moderateMotionMark;
+            SlightMotionMark = slightMotionMark;
+            NoMotionMark = noMotionMark;
         }
             
         /// <summary>
@@ -94,13 +95,13 @@ namespace TemporalMotionExtractionAnalysis.Model
                     }
                     else if (ssim > 0.97) // High similarity - possible slight motion, could be camouflaged animal
                     {
-                        mark = NegativeMark;
-                        brush = Brushes.Red;
+                        mark = SlightMotionMark; // For subtle changes
+                        brush = Brushes.Gold;
                     }
                     else if (ssim > 0.95) // Moderate similarity - more noticeable motion
                     {
-                        mark = "•"; // Small dot for subtle changes
-                        brush = Brushes.Yellow;
+                        mark = ModerateMotionMark;
+                        brush = Brushes.Red;
                     }
                     else // Lower similarity - significant motion
                     {
