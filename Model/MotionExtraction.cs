@@ -5,6 +5,15 @@ using OpenCvSharp.Quality;
 using System.Windows.Media.Media3D;
 using System.Windows.Xps.Packaging;
 using System.Windows.Media;
+using OpenCvSharp.Dnn;
+using static OpenCvSharp.FileStorage;
+using static OpenCvSharp.ML.DTrees;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Drawing;
+using System.Numerics;
+using System.Security.Policy;
+using System.Security.Principal;
+using System.Threading.Channels;
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -76,7 +85,7 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// <param name="sourceImage">The source image Mat to blur.</param>
         /// <param name="kernelSize">The size of the Gaussian kernel for blurring.</param>
         /// <returns>The blurred image as a Mat.</returns>
-        public Mat BlurImage(Mat sourceImage, Size kernelSize)
+        public Mat BlurImage(Mat sourceImage, OpenCvSharp.Size kernelSize)
         {
             if (sourceImage == null)
             {
@@ -243,7 +252,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             //    # Get the number of folders in the JPEGImages directory
             //    num_folders = sum(os.path.isdir(os.path.join(jpeg_images_folder, item)) for item in os.listdir(jpeg_images_folder))
             //    print("Number of Folders: " + str(num_folders))
-            string jpeg_images_folder = selectedPath; 
+            string jpeg_images_folder = selectedPath;
             var directories = Directory.GetDirectories(jpeg_images_folder);
             int num_folders = directories.Length;
             Console.WriteLine("Number of Folders: " + num_folders.ToString());
@@ -327,54 +336,129 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
         #region InstanceMask
-        public Mat InstanceMask(Mat source, Mat destination, Color sourceTint, Color destinationTint)
+        public (Mat sourceMask, Mat destMask, Mat instanceMask) InstanceMask(Mat source, Mat destination, System.Windows.Media.Color sourceTint, System.Windows.Media.Color destinationTint)
         {
-            Mat tintedSource0 = ApplyTint(source, Colors.Red);
-            Mat tintedDestination0 = ApplyTint(destination, Colors.Red);
+            Mat sourceMask = CreateHybridForegroundMask(source);
+            Mat destMask = CreateHybridForegroundMask(destination);
 
-            // Create binary masks using color thresholding
-            Mat redMask0 = CreateColorMask(tintedSource0, new Scalar(0, 0, 150), new Scalar(100, 100, 255));
-            Mat blueMask0 = CreateColorMask(tintedDestination0, new Scalar(0, 0, 150), new Scalar(100, 100, 255)); // Purposely using Red to filter out the background
+            // Create BGRA images with alpha channel
+            Mat sourceBGRA = new Mat();
+            Mat destBGRA = new Mat();
+            Cv2.CvtColor(source, sourceBGRA, ColorConversionCodes.BGR2BGRA);
+            Cv2.CvtColor(destination, destBGRA, ColorConversionCodes.BGR2BGRA);
 
-            Mat tintedSource = new Mat();
-            Mat redMask = new Mat();
-            if (sourceTint != null && !sourceTint.Equals(Colors.Transparent)) 
-            {
-                tintedSource = ApplyTint(source, sourceTint);
-                redMask = ApplyTint(redMask0, sourceTint);
-            }
-            if(sourceTint == null || sourceTint.Equals(Colors.Transparent)) 
-            {
-                tintedSource = ApplyTint(source, Colors.White);
-                redMask = ApplyTint(redMask0, Colors.White);
-            }
+            // Apply user-specified tints
+            Mat tintedSource = ApplyTintWithAlpha(sourceMask, sourceTint); //sourceBGRA
+            Mat tintedDestination = ApplyTintWithAlpha(destMask, destinationTint); //destBGRA
 
-            Mat tintedDestination = new Mat();
-            Mat blueMask = new Mat();
-            if (destinationTint != null && !destinationTint.Equals(Colors.Transparent))
+            // Perform XOR blend
+            Mat xorResult = PerformXORBlend(tintedSource, tintedDestination);
+
+            return (tintedSource, tintedDestination, xorResult);
+        }      
+
+        private Mat ApplyTintWithAlpha(Mat image, System.Windows.Media.Color tint)
+        {
+            Mat tinted = new Mat(image.Size(), MatType.CV_8UC4);
+            var channels = image.Split();
+
+            for (int i = 0; i < 3; i++)
             {
-                tintedDestination = ApplyTint(destination, destinationTint);
-                blueMask = ApplyTint(blueMask0, destinationTint);
-            }
-            if (destinationTint == null || destinationTint.Equals(Colors.Transparent))
-            {
-                tintedDestination = ApplyTint(destination, Colors.DarkGray);
-                blueMask = ApplyTint(blueMask0, Colors.DarkGray);
+                Cv2.Multiply(channels[i], new Scalar(tint.B, tint.G, tint.R)[i] / 255.0, channels[i]);
             }
 
-            // Apply masks to original images
-            Mat redHighlighted = ApplyMask(tintedSource, redMask);
-            Mat blueHighlighted = ApplyMask(tintedDestination, blueMask);
-
-            // Apply masks to original image
-            // Combine the highlighted areas
-            Mat combinedImage = new Mat();
-            Cv2.AddWeighted(redHighlighted, 1.0, blueHighlighted, 1.0, 0.0, combinedImage);
-
-            return combinedImage;
+            Cv2.Merge(channels, tinted);
+            return tinted;
         }
 
-        static Mat CreateColorMask(Mat tintedImage, Scalar lowerBound, Scalar upperBound)
+        private Mat CreateHybridForegroundMask(Mat image)
+        {
+            // Step 1: Color-based masking (from your original approach)
+            Mat redTinted = ApplyTint(image, Colors.Red);
+            Mat colorMask = CreateColorMask(redTinted, new Scalar(0, 0, 150), new Scalar(100, 100, 255));
+
+            // Step 2: Edge-based masking
+            Mat gray = new Mat();
+            Cv2.CvtColor(image, gray, ColorConversionCodes.BGR2GRAY);
+            Cv2.GaussianBlur(gray, gray, new OpenCvSharp.Size(5, 5), 0);
+            Mat edges = new Mat();
+            Cv2.Canny(gray, edges, 50, 150);
+            Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(3, 3));
+            Cv2.Dilate(edges, edges, kernel, iterations: 2);
+
+            // Create initial mask from edges
+            Mat edgeMask = new Mat(image.Size(), MatType.CV_8UC1, new Scalar(0));
+            Cv2.FloodFill(edgeMask, new OpenCvSharp.Point(0, 0), new Scalar(255));
+            Cv2.FloodFill(edgeMask, new OpenCvSharp.Point(edgeMask.Cols - 1, 0), new Scalar(255));
+            Cv2.FloodFill(edgeMask, new OpenCvSharp.Point(0, edgeMask.Rows - 1), new Scalar(255));
+            Cv2.FloodFill(edgeMask, new OpenCvSharp.Point(edgeMask.Cols - 1, edgeMask.Rows - 1), new Scalar(255));
+            Cv2.BitwiseNot(edgeMask, edgeMask);
+            Cv2.BitwiseOr(edgeMask, edges, edgeMask);
+
+            // Step 3: Combine color-based and edge-based masks
+            Mat combinedMask = new Mat();
+            Cv2.BitwiseOr(colorMask, edgeMask, combinedMask);
+
+            // Step 4: Clean up the final mask
+            Cv2.MorphologyEx(combinedMask, combinedMask, MorphTypes.Close, kernel, iterations: 2);
+            Cv2.MorphologyEx(combinedMask, combinedMask, MorphTypes.Open, kernel, iterations: 1);
+
+            // Step 5: Create a transparent mask and add foreground information
+            Mat transparentMask = new Mat(image.Size(), MatType.CV_8UC4, new Scalar(0, 0, 0, 0));
+
+            // Use the combined mask to add foreground information
+            for (int y = 0; y < image.Rows; y++)
+            {
+                for (int x = 0; x < image.Cols; x++)
+                {
+                    if (combinedMask.Get<byte>(y, x) > 0)
+                    {
+                        Vec3b pixel = image.Get<Vec3b>(y, x);
+                        transparentMask.Set(y, x, new Vec4b(pixel.Item0, pixel.Item1, pixel.Item2, 255));
+                    }
+                }
+            }
+
+            return transparentMask;
+        }
+
+        private Mat PerformXORBlend(Mat source, Mat destination)
+        {
+            Mat result = new Mat(source.Size(), MatType.CV_8UC4);
+
+            // Split the source and destination into channels
+            Mat[] srcChannels = source.Split();
+            Mat[] dstChannels = destination.Split();
+            Mat[] resChannels = new Mat[4];
+
+            // Calculate alpha channels
+            Mat srcAlpha = srcChannels[3].Clone();
+            Mat dstAlpha = dstChannels[3].Clone();
+            Cv2.ConvertScaleAbs(srcAlpha, srcAlpha, 1.0 / 255);
+            Cv2.ConvertScaleAbs(dstAlpha, dstAlpha, 1.0 / 255);
+
+            // Calculate output alpha channel
+            resChannels[3] = new Mat(source.Size(), MatType.CV_8UC1);
+            Cv2.Multiply(srcAlpha, dstAlpha, resChannels[3]);
+            Cv2.ConvertScaleAbs(resChannels[3], resChannels[3], 255);
+
+            // Calculate color channels
+            for (int i = 0; i < 3; i++)
+            {
+                resChannels[i] = new Mat(source.Size(), MatType.CV_8UC1);
+                Mat temp = new Mat();
+
+                Cv2.Multiply(srcChannels[i], dstChannels[i], temp, 1.0 / 255);
+                Cv2.Multiply(temp, resChannels[3], resChannels[i], 1.0 / 255);
+            }
+
+            // Merge channels
+            Cv2.Merge(resChannels, result);
+
+            return result;
+        }
+
+        private Mat CreateColorMask(Mat tintedImage, Scalar lowerBound, Scalar upperBound)
         {
             Mat mask = new Mat();
             Cv2.InRange(tintedImage, lowerBound, upperBound, mask);
@@ -387,28 +471,7 @@ namespace TemporalMotionExtractionAnalysis.Model
             Cv2.BitwiseAnd(image, image, result, mask);
             return result;
         }
-               
-        static Mat CombineMasks(Mat redTintedImage, Mat blueTintedImage, Mat redMask, Mat blueMask)
-        {
-            // Apply masks to the tinted images
-            Mat redHighlighted = new Mat();
-            Mat blueHighlighted = new Mat();
-            Cv2.BitwiseAnd(redTintedImage, redTintedImage, redHighlighted, redMask);
-            Cv2.BitwiseAnd(blueTintedImage, blueTintedImage, blueHighlighted, blueMask);
 
-            // Combine the highlighted areas
-            Mat combinedImage = new Mat();
-            Cv2.AddWeighted(redHighlighted, 1.0, blueHighlighted, 1.0, 0.0, combinedImage);
-
-            return combinedImage;
-        }
-
-        /// <summary>
-        /// Applies a tint to an image.
-        /// </summary>
-        /// <param name="image">Source image matrix.</param>
-        /// <param name="tint">Tint applied to the image.</param>
-        /// <returns>Tinted image.</returns>
         public Mat ApplyTint(Mat image, System.Windows.Media.Color tint)
         {
             // Convert the image to the same type as the input image if necessary
@@ -416,11 +479,14 @@ namespace TemporalMotionExtractionAnalysis.Model
             {
                 image.ConvertTo(image, MatType.CV_8UC3);
             }
+
             // Create a new Mat with the same size and type as the input image to store the tinted image
             Mat tintedImage = new Mat(image.Size(), image.Type());
+
             // Create a Scalar with the tint color
             Scalar tintScalar = new Scalar(tint.B, tint.G, tint.R); // Note the order BGR for OpenCV
-                                                                    // Iterate through each pixel and apply the tint
+
+            // Iterate through each pixel and apply the tint
             for (int i = 0; i < image.Rows; i++)
             {
                 for (int j = 0; j < image.Cols; j++)
@@ -436,48 +502,6 @@ namespace TemporalMotionExtractionAnalysis.Model
                 }
             }
             return tintedImage;
-        }
-        #endregion
-
-        #region DrawForeground 
-        /// <summary>
-        /// Creates an image containing only the foreground pixels.
-        /// </summary>
-        /// <param name="instanceMask">masked instance image matrix.</param>
-        /// <returns>Foreground image.</returns>
-        public Mat DrawForeground(Mat instanceMask)
-        {
-            // Get pixel data
-            int width = instanceMask.Width;
-            int height = instanceMask.Height;
-
-            // Instantiate composition matrix
-            Mat composition = new Mat(height, width, MatType.CV_8UC3);
-
-            // Iterate through each pixel and adjust opacity
-            for (int i = 0; i < height; i++)
-            {
-                for (int j = 0; j < width; j++)
-                {
-                    // Create foreground composition image from instanceMask                    
-                    Vec4b instanceMaskColor = instanceMask.At<Vec4b>(i, j);
-
-                    // Set pixel to mask color(s) or blank (if background color)
-                    if (instanceMaskColor.Item0 > 0 || instanceMaskColor.Item1 > 0 || instanceMaskColor.Item2 > 0)
-                    {
-                        composition.Set<Vec4b>(i, j, instanceMaskColor);
-                    }
-                    else
-                    {
-                        instanceMaskColor.Item0 = 0;
-                        instanceMaskColor.Item1 = 0;
-                        instanceMaskColor.Item2 = 0;
-                        instanceMaskColor.Item3 = 0;
-                        composition.Set<Vec4b>(i, j, instanceMaskColor);
-                    }
-                }
-            }
-            return composition;
         }
         #endregion
     }

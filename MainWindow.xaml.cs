@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
+using TemporalMotionExtractionAnalysis.Controls;
 using TemporalMotionExtractionAnalysis.Model;
 using TemporalMotionExtractionAnalysis.ViewModel;
 
@@ -11,10 +12,16 @@ namespace TemporalMotionExtractionAnalysis
     /// </summary>
     public partial class MainWindow : Window
     {
+        private SSIMImageControl _ssimImageControl;
+        private MainViewModel _viewModel;
+
         public MainWindow()
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
+            _viewModel = new MainViewModel();
+            DataContext = _viewModel;
+
+            _ssimImageControl = new SSIMImageControl();
         }
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

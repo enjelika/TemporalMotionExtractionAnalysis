@@ -41,6 +41,7 @@
         <converters:RadioButtonConverter x:Key="RadioButtonConverter"/>
         <converters:StringToColorConverter x:Key="StringToColorConverter"/>
         <converters:GlyphConverter x:Key="GlyphConverter" />
+        <converters:GlyphConverter x:Key="AreaSizeConverter" />
     </Window.Resources>
     <Grid>
         <StackPanel Orientation="Horizontal">
@@ -170,7 +171,7 @@
                                         <Label FontWeight="Bold">Composition Mode:</Label>
                                         <!-- TODO: convert to combobox -->
                                         <ComboBox x:Name="ForegroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" 
-                                                  SelectedValue="{Binding SelectedForegroundCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                                  SelectedValue="{Binding SelectedForegroundCompositionMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                                             <ComboBox.Style>
                                                 <Style TargetType="{x:Type ComboBox}">
                                                     <Style.Triggers>
@@ -259,8 +260,21 @@
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <Label FontWeight="Bold">Area Size:</Label>
-                                        <TextBox Width="100" Margin="5" Text="{Binding AreaSize}" />
+                                        <!--<Label FontWeight="Bold">Area Size:</Label>
+                                        <TextBox Width="100" Margin="5" Text="{Binding AreaSize}" />-->
+                                        <Label Content="Area Size: "/>
+                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                                    IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=20}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="20"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                                    IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=40}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="40"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="AreaSize" Margin="5,0,0,0" 
+                                                    IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=80}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="80"/>
+                                        </RadioButton>
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>
@@ -302,8 +316,8 @@
 
                                     <Label FontWeight="Bold">Composition Mode:</Label>
                                     <!-- TODO: Add Combobox for Background Composition Mode Selections -->
-                                    <ComboBox x:Name="BackgroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" 
-                                              SelectedValue="{Binding SelectedBackgroundCompositionModes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                    <ComboBox x:Name="BackgroundCompositionModes" Width="150" Margin="5" ItemsSource="{Binding CompositionModes}" 
+                                              SelectedValue="{Binding SelectedBackgroundCompositionMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
                                         <ComboBox.Style>
                                             <Style TargetType="{x:Type ComboBox}">
                                                 <Style.Triggers>
@@ -342,8 +356,16 @@
                                 </StackPanel.Style>
 
                                 <Label FontWeight="Bold" Content="Texture/Marks:"/>
-                                <!-- TODO: Combobox for Background Marks/Texture Selections -->
                                 <ComboBox x:Name="BackgroundMarksTextures" Width="100" Margin="5" ItemsSource="{Binding BackgroundMarksTextures}" SelectedValue="{Binding SelectedBackgroundMarksTextures, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+
+                                <Label Content="Background Color:" FontWeight="Bold"/>
+                                <ComboBox x:Name="BackgroundTexturesColor" Width="100" Margin="5" ItemsSource="{Binding BackgroundMarksColors}" SelectedValue="{Binding SelectedTextureColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding}" />
@@ -594,7 +616,7 @@
 
                                     <!-- Transparency Slider -->
                                     <StackPanel>
-                                        <TextBlock Text = "Transparency" Margin = "5,0,0,0" FontWeight="Bold" />
+                                        <TextBlock Text = "Transparency" Margin = "5" FontWeight="Bold" />
                                         <Slider x:Name = "CurrentFrameTransparency" Minimum = "0" Maximum = "100" TickFrequency = "2"
                                                 Margin = "5" Value="{Binding CurrentFrameTransparency, Mode=TwoWay}">
                                             <Slider.Background>
@@ -608,7 +630,7 @@
                                                    Text ="{Binding Path=CurrentFrameTransparency, Mode=TwoWay, Converter={StaticResource StringToIntConverter}}"/>
                                     </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" Margin="0,5">
                                         <Label Content="Tint Color:" FontWeight="Bold"/>
                                         <ComboBox x:Name="CurrentFrameSourceColor" Width="100" Margin="5" 
                                                   ItemsSource="{Binding SourceColors}" 
@@ -621,7 +643,7 @@
                                         </ComboBox>
                                     </StackPanel>
 
-                                    <StackPanel Orientation="Horizontal">
+                                    <StackPanel Orientation="Horizontal" Margin="0,5">
                                         <Label FontWeight="Bold">Blur:</Label>
                                         <ComboBox Width="100" Margin="5,0,0,0" 
                                                   ItemsSource="{Binding BlurValue}" 
@@ -645,12 +667,10 @@
                         <DockPanel Background="White" Margin="0">
                             <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
 
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                 <!-- Composite Image from the SelectedFrames -->
-                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="625" Margin="0,-10,0,0"/>
-
+                                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="625" Margin="0,10,0,0"/>
                             </StackPanel>
-
                         </DockPanel>
                     </Border>
 
@@ -683,7 +703,7 @@
                                                    Text ="{Binding Path=OffsetFrameTransparency, Mode=TwoWay, Converter={StaticResource StringToIntConverter}}"/>
                                     </StackPanel>
 
-                                    <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Vertical" Margin="0,5">
                                         <StackPanel Orientation="Horizontal">
                                             <Label Content="Tint Color:" FontWeight="Bold"/>
                                             <ComboBox x:Name="OffsetFrameDestinationColor" Width="100" Margin="5" 
@@ -698,7 +718,7 @@
                                         </StackPanel>
 
                                         <!-- Current Blur Kernel Size Selection -->
-                                        <StackPanel Orientation="Horizontal">
+                                        <StackPanel Orientation="Horizontal" Margin="0,5">
                                             <Label FontWeight="Bold">Blur:</Label>
                                             <ComboBox Width="100" Margin="5,0,0,0" ItemsSource="{Binding BlurValue}" SelectedValue="{Binding SelectedOffsetBlurSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource StringToIntConverter}}" >
                                                 <ComboBox.ItemTemplate>
