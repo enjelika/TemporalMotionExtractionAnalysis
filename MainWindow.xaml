@@ -212,49 +212,65 @@
 
                                 <StackPanel Orientation="Vertical">
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="Positive Difference: " />
-                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding PositiveMark, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
+                                        <Label Content="Significant Motion: " />
+                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="△" Foreground="Green"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding PositiveMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
+                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="▲" Foreground="Green"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="PositiveGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding PositiveMark, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
+                                        <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="◆" Foreground="Green"/>
                                         </RadioButton>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="Negative Difference: " />
-                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NegativeMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▽}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▽" Foreground="Red"/>
+                                        <Label Content="Noticeable Motion: " />
+                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="△" Foreground="Red"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NegativeMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▼}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▼" Foreground="Red"/>
+                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="▲" Foreground="Red"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="NegativeGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NegativeMark, Converter={StaticResource GlyphConverter}, ConverterParameter=★}">
-                                            <TextBlock FontFamily="Segoe UI Symbol" Text="★" Foreground="Red"/>
+                                        <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="◆" Foreground="Red"/>
                                         </RadioButton>
                                     </StackPanel>
 
                                     <StackPanel Orientation="Horizontal">
-                                        <Label Content="No Difference: "/>
-                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NoDifferenceMark, Converter={StaticResource GlyphConverter}, ConverterParameter=■}">
+                                        <Label Content="Slight Motion: " />
+                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=•}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="•" Foreground="Gold"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=*}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="*" Foreground="Gold"/>
+                                        </RadioButton>
+                                        <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=★}">
+                                            <TextBlock FontFamily="Segoe UI Symbol" Text="★" Foreground="Gold"/>
+                                        </RadioButton>
+                                    </StackPanel>
+
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="No Motion: "/>
+                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=■}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="■" Foreground="Blue"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NoDifferenceMark, Converter={StaticResource GlyphConverter}, ConverterParameter=□}">
+                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=□}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="□" Foreground="Blue"/>
                                         </RadioButton>
-                                        <RadioButton GroupName="NoDifferenceGlyphOptions" Margin="5,0,0,0" 
-                                                     IsChecked="{Binding NoDifferenceMark, Converter={StaticResource GlyphConverter}, ConverterParameter=●}">
+                                        <RadioButton GroupName="NoMotionMarkOptions" Margin="5,0,0,0" 
+                                                     IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=●}">
                                             <TextBlock FontFamily="Segoe UI Symbol" Text="●" Foreground="Blue"/>
                                         </RadioButton>
                                     </StackPanel>

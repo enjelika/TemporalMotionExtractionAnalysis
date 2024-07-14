@@ -79,9 +79,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         private string _selectedForegroundCompositionMode;
         private string _selectedBackgroundCompositionMode;
         private string _selectedBackgroundMarksTextures;
-        private string _positiveGlyph = "▲";
-        private string _negativeGlyph = "▼";
-        private string _noDifferenceGlyph = "■";
+        private string _strongMotionMark = "▲";
+        private string _moderateMotionMark = "△";
+        private string _slightMotionMark = "*";
+        private string _noMotionMark = "■";
 
         private ObservableCollection<string> composedImagePaths = new ObservableCollection<string>();
         private ObservableCollection<string> transformedCurrentImagePaths = new ObservableCollection<string>();
@@ -363,33 +364,43 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             }
         }
 
-        public string NegativeMark
+        public string StrongMotionMark
         {
-            get => _negativeGlyph;
+            get => _strongMotionMark;
             set
             {
-                _negativeGlyph = value;
-                OnPropertyChanged(nameof(NegativeMark));
+                _strongMotionMark = value;
+                OnPropertyChanged(nameof(StrongMotionMark));
             }
         }
 
-        public string NoDifferenceMark
+        public string ModerateMotionMark
         {
-            get => _noDifferenceGlyph;
+            get => _moderateMotionMark;
             set
             {
-                _noDifferenceGlyph = value;
-                OnPropertyChanged(nameof(NoDifferenceMark));
+                _moderateMotionMark = value;
+                OnPropertyChanged(nameof(ModerateMotionMark));
             }
         }
 
-        public string PositiveMark
+        public string SlightMotionMark
         {
-            get => _positiveGlyph;
+            get => _slightMotionMark;
             set
             {
-                _positiveGlyph = value;
-                OnPropertyChanged(nameof(PositiveMark));
+                _slightMotionMark = value;
+                OnPropertyChanged(nameof(SlightMotionMark));
+            }
+        }
+
+        public string NoMotionMark
+        {
+            get => _noMotionMark;
+            set
+            {
+                _noMotionMark = value;
+                OnPropertyChanged(nameof(NoMotionMark));
             }
         }
         #endregion
@@ -823,7 +834,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             NextCommand = new RelayCommand(OnNext);
 
             // Initialize the MarkRendering class with default glyphs
-            glyphRendering = new MarkRendering("▲", "▼", "■");
+            glyphRendering = new MarkRendering(StrongMotionMark, ModerateMotionMark, SlightMotionMark, NoMotionMark);
 
             // Initialize commands or event handlers for composition mode changes
             // For simplicity, assume there's a PropertyChanged event handler wired up to trigger composition
@@ -1092,7 +1103,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
         public void UpdateGlyphs(string positive, string negative, string noDifference)
         {
             glyphRendering.StrongMotionMark = positive;
-            glyphRendering.NegativeMark = negative;
+            glyphRendering.ModerateMotionMark = negative;
             glyphRendering.NoMotionMark = noDifference;
         }
 
@@ -1291,9 +1302,10 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
             else if (IsForeMarksModeSelected)
             {
                 // Mark Rendering
-                glyphRendering.StrongMotionMark = PositiveMark;
-                glyphRendering.NegativeMark = NegativeMark;
-                glyphRendering.NoMotionMark = NoDifferenceMark;
+                glyphRendering.StrongMotionMark = StrongMotionMark;
+                glyphRendering.ModerateMotionMark = ModerateMotionMark;
+                glyphRendering.SlightMotionMark = SlightMotionMark;
+                glyphRendering.NoMotionMark = NoMotionMark;
                 foregroundResult = glyphRendering.RenderDifferences(sourceForeground, destForeground, AreaSize, instanceMask);
                 //foregroundResult.SaveImage("debug_images/debug_FGresult" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".png");
             }
