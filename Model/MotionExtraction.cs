@@ -2,18 +2,7 @@
 using MOIE = Microsoft.Office.Interop.Excel;
 using OpenCvSharp;
 using OpenCvSharp.Quality;
-using System.Windows.Media.Media3D;
-using System.Windows.Xps.Packaging;
-using System.Windows.Media;
-using OpenCvSharp.Dnn;
-using static OpenCvSharp.FileStorage;
-using static OpenCvSharp.ML.DTrees;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Drawing;
-using System.Numerics;
-using System.Security.Policy;
-using System.Security.Principal;
-using System.Threading.Channels;
+using Python.Runtime; // Ensure this namespace is recognized without errors
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -336,6 +325,14 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
         #region InstanceMask
+        /// <summary>
+        /// Using AI to create a mask of the foreground in the source and destination images, then applying a user-specified tint to each image.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
+        /// <param name="sourceTint"></param>
+        /// <param name="destinationTint"></param>
+        /// <returns></returns>
         public (Mat sourceMask, Mat destMask, Mat instanceMask) InstanceMask(Mat source, Mat destination, System.Windows.Media.Color sourceTint, System.Windows.Media.Color destinationTint)
         {
             Mat sourceMask = CreateHybridForegroundMask(source);
@@ -371,37 +368,15 @@ namespace TemporalMotionExtractionAnalysis.Model
             return tinted;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
         private Mat CreateHybridForegroundMask(Mat image)
         {
-            // Step 1: Color-based masking (from your original approach)
-            Mat redTinted = ApplyTint(image, Colors.Red);
-            Mat colorMask = CreateColorMask(redTinted, new Scalar(0, 0, 150), new Scalar(100, 100, 255));
-
-            // Step 2: Edge-based masking
-            Mat gray = new Mat();
-            Cv2.CvtColor(image, gray, ColorConversionCodes.BGR2GRAY);
-            Cv2.GaussianBlur(gray, gray, new OpenCvSharp.Size(5, 5), 0);
-            Mat edges = new Mat();
-            Cv2.Canny(gray, edges, 50, 150);
-            Mat kernel = Cv2.GetStructuringElement(MorphShapes.Rect, new OpenCvSharp.Size(3, 3));
-            Cv2.Dilate(edges, edges, kernel, iterations: 2);
-
-            // Create initial mask from edges
-            Mat edgeMask = new Mat(image.Size(), MatType.CV_8UC1, new Scalar(0));
-            Cv2.FloodFill(edgeMask, new OpenCvSharp.Point(0, 0), new Scalar(255));
-            Cv2.FloodFill(edgeMask, new OpenCvSharp.Point(edgeMask.Cols - 1, 0), new Scalar(255));
-            Cv2.FloodFill(edgeMask, new OpenCvSharp.Point(0, edgeMask.Rows - 1), new Scalar(255));
-            Cv2.FloodFill(edgeMask, new OpenCvSharp.Point(edgeMask.Cols - 1, edgeMask.Rows - 1), new Scalar(255));
-            Cv2.BitwiseNot(edgeMask, edgeMask);
-            Cv2.BitwiseOr(edgeMask, edges, edgeMask);
-
-            // Step 3: Combine color-based and edge-based masks
-            Mat combinedMask = new Mat();
-            Cv2.BitwiseOr(colorMask, edgeMask, combinedMask);
-
-            // Step 4: Clean up the final mask
-            Cv2.MorphologyEx(combinedMask, combinedMask, MorphTypes.Close, kernel, iterations: 2);
-            Cv2.MorphologyEx(combinedMask, combinedMask, MorphTypes.Open, kernel, iterations: 1);
+            // Call Python
+            
 
             // Step 5: Create a transparent mask and add foreground information
             Mat transparentMask = new Mat(image.Size(), MatType.CV_8UC4, new Scalar(0, 0, 0, 0));
