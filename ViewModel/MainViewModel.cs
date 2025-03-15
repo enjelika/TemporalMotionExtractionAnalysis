@@ -1225,7 +1225,7 @@ namespace TemporalMotionExtractionAnalysis.ViewModel
                 Mat sourceFGMask = new Mat();
                 Mat destinationFGMask = new Mat();
                 Mat instanceMask = new Mat();
-                (sourceFGMask, destinationFGMask, instanceMask) =  motionExtraction.InstanceMask(processedSourceImage, processedDestinationImage, SelectedSourceColor, SelectedDestinationColor);
+                (sourceFGMask, destinationFGMask, instanceMask) =  motionExtraction.InstanceMask(sourceImagePath, destinationImagePath, processedSourceImage, processedDestinationImage, SelectedSourceColor, SelectedDestinationColor);
                 string savedSourceMask = SaveComposedImage(sourceFGMask);
                 string savedDestMask = SaveComposedImage(destinationFGMask);
                 string savedInstanceMask = SaveComposedImage(instanceMask);

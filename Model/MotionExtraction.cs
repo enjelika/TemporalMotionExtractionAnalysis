@@ -2,7 +2,8 @@
 using MOIE = Microsoft.Office.Interop.Excel;
 using OpenCvSharp;
 using OpenCvSharp.Quality;
-using Python.Runtime; // Ensure this namespace is recognized without errors
+using Python.Runtime;
+using System.Windows.Input; // Ensure this namespace is recognized without errors
 
 namespace TemporalMotionExtractionAnalysis.Model
 {
@@ -212,6 +213,10 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
         #endregion
 
+        /// <summary>
+        /// Extracts motion analysis metrics from a set of images and saves the results to an Excel spreadsheet.
+        /// </summary>
+        /// <param name="selectedPath"></param>
         public void MotionExtractionToExcel(string selectedPath)
         {
             //if __name__ == "__main__":
@@ -289,8 +294,8 @@ namespace TemporalMotionExtractionAnalysis.Model
                     //#if is_folder_empty("./extracted_gif_frames/" + file_name) and folder_has_multiple_files("./extracted_gif_frames/" + file_name):
                     //# extract_frames(gif_root + "/"+ file_name + ".gif", "./extracted_gif_frames/" + file_name)
 
-                    //                average_MAE, average_Em, average_SSIM = motion_extraction(folder_path, folder_name, output_folder="./output_masks")
-                    (double average_MAE, double average_Em, double average_SSIM) averages; // = motion_extraction(folder_path, folder_name, output_folder = "output_masks");
+                    //                average_MAE, average_Em, average_SSIM = get_binary_mask(folder_path, folder_name, output_folder="./output_masks")
+                    (double average_MAE, double average_Em, double average_SSIM) averages; // = get_binary_mask(folder_path, folder_name, output_folder = "output_masks");
                     //                json_file_path = f"./results/{folder_name}_metrics_results.json"
                     string json_file_path = "results\\" + folder_name + "_metrics_results.json";
                     //                output_masks_path = f"./output_masks/{folder_name}"
@@ -333,12 +338,17 @@ namespace TemporalMotionExtractionAnalysis.Model
         /// <param name="sourceTint"></param>
         /// <param name="destinationTint"></param>
         /// <returns></returns>
-        public (Mat sourceMask, Mat destMask, Mat instanceMask) InstanceMask(Mat source, Mat destination, System.Windows.Media.Color sourceTint, System.Windows.Media.Color destinationTint)
+        public (Mat sourceMask, Mat destMask, Mat instanceMask) InstanceMask(string sourceFile, string destFile, Mat source, Mat destination, System.Windows.Media.Color sourceTint, System.Windows.Media.Color destinationTint)
         {
+            // Step 1: Get the binary mack for the source and destination images using the Python script
+            CreateBinaryMask(sourceFile); // source image
+            CreateBinaryMask(destFile); // destination image
+
+            // Step 2: 
             Mat sourceMask = CreateHybridForegroundMask(source);
             Mat destMask = CreateHybridForegroundMask(destination);
 
-            // Create BGRA images with alpha channel
+            // Step 3: Create BGRA images with alpha channel
             Mat sourceBGRA = new Mat();
             Mat destBGRA = new Mat();
             Cv2.CvtColor(source, sourceBGRA, ColorConversionCodes.BGR2BGRA);
@@ -369,24 +379,69 @@ namespace TemporalMotionExtractionAnalysis.Model
         }
 
         /// <summary>
+        /// Creates the binary mask of the foreground in the source and destination images using a Python script.
+        /// </summary>
+        /// <param name="filename"></param>
+        private void CreateBinaryMask(string filename)
+        {
+            Mat binaryMask = new Mat();
+
+            try
+            {
+                // Change cursor to wait cursor
+                Mouse.OverrideCursor = Cursors.Wait;
+                string PythonOutput = "Initializing Python environment...\n";
+
+                // Check if the Python script exists
+                string scriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\", "Model", "CODS_segmentation.py");
+                if (!File.Exists(scriptPath))
+                {
+                    PythonOutput += $"Error: Python script not found at {scriptPath}\n";
+                    Console.WriteLine(PythonOutput);
+                    return;
+                }
+
+                // Step 1: Call Python
+                using (Py.GIL()) // Acquire the Python GIL (Global Interpreter Lock)
+                {
+                    dynamic get_binary_mask = Py.Import("CODS_segmentation");
+
+                    // Step 2 : Use RankNet to get the binary masking that will be used for both foreground and background masking of the image
+                    string result = get_binary_mask.segmentation(filename);
+
+                    // Assuming the Python function returns a file location
+                    binaryMask = new Mat(result); // Convert the result to a Mat
+                }
+            }
+            catch (PythonException ex)
+            {
+                // Handle Python exceptions
+                Console.WriteLine("Python error: " + ex.Message);
+            }
+            finally
+            {
+                // Reset cursor to default
+                Mouse.OverrideCursor = null;
+            }
+            
+            return;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="image"></param>
         /// <returns></returns>
         private Mat CreateHybridForegroundMask(Mat image)
         {
-            // Call Python
-            
-
-            // Step 5: Create a transparent mask and add foreground information
             Mat transparentMask = new Mat(image.Size(), MatType.CV_8UC4, new Scalar(0, 0, 0, 0));
 
-            // Use the combined mask to add foreground information
+            // Step 3: Use the combined mask to add foreground information
             for (int y = 0; y < image.Rows; y++)
             {
                 for (int x = 0; x < image.Cols; x++)
                 {
-                    if (combinedMask.Get<byte>(y, x) > 0)
+                    if (image.Get<byte>(y, x) > 0)
                     {
                         Vec3b pixel = image.Get<Vec3b>(y, x);
                         transparentMask.Set(y, x, new Vec4b(pixel.Item0, pixel.Item1, pixel.Item2, 255));

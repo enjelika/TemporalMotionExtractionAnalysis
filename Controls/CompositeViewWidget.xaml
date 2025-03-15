@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="TemporalMotionExtractionAnalysis.Controls.CompositeViewWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="419" d:DesignWidth="640">
+    <Grid>
+        <DockPanel Background="White" Margin="0">
+            <TextBlock DockPanel.Dock="Top" Text="Composite View" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                <!-- Composite Image from the SelectedFrames -->
+                <Image Source="{Binding CompositedImage.ImagePath}" Height="Auto" Width="625" Margin="0,10,0,0"/>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>

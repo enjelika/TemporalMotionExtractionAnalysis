@@ -1,0 +1,101 @@
+﻿<UserControl x:Class="TemporalMotionExtractionAnalysis.Controls.BackgroundVisualEncodingWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="217" d:DesignWidth="250">
+    <Grid>
+        <DockPanel Background="White" Margin="0,0,0,-1">
+            <TextBlock DockPanel.Dock="Top" Text="Background Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+            <StackPanel Orientation="Vertical" Margin="5,0">
+
+                <StackPanel Orientation="Vertical">
+                    <!-- Radio Buttons for Pixel and Marks -->
+                    <StackPanel Orientation="Horizontal">
+                        <DockPanel VerticalAlignment="Center" Margin="5">
+                            <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
+                            <RadioButton x:Name="BackPixelRadioButton" Content="Pixel" GroupName="BackMode" Margin="5" IsChecked="{Binding IsBackPixelModeSelected}" />
+                            <RadioButton x:Name="BackMarksRadioButton" Content="Marks" GroupName="BackMode" Margin="5" IsChecked="{Binding IsBackMarksModeSelected}" />
+                        </DockPanel>
+                    </StackPanel>
+
+                    <!-- Submenu for Composition Modes, visible only when Pixel is selected -->
+                    <StackPanel Orientation="Vertical" Margin="5">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBackPixelModeSelected}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsBackPixelModeSelected}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <Label FontWeight="Bold">Composition Mode:</Label>
+                        <!-- TODO: Add Combobox for Background Composition Mode Selections -->
+                        <ComboBox x:Name="BackgroundCompositionModes" Width="150" Margin="5" ItemsSource="{Binding CompositionModes}" 
+                          SelectedValue="{Binding SelectedBackgroundCompositionMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                            <ComboBox.Style>
+                                <Style TargetType="{x:Type ComboBox}">
+                                    <Style.Triggers>
+                                        <EventTrigger RoutedEvent="Loaded">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <Int32Animation Storyboard.TargetProperty="SelectedIndex" To="9"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ComboBox.Style>
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Submenu for Marks, visible only when Marks is selected -->
+                <StackPanel Orientation="Vertical" Margin="5">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsBackMarksModeSelected}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsBackMarksModeSelected}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <Label FontWeight="Bold" Content="Texture/Marks:"/>
+                    <ComboBox x:Name="BackgroundMarksTextures" Width="100" Margin="5" ItemsSource="{Binding BackgroundMarksTextures}" SelectedValue="{Binding SelectedBackgroundMarksTextures, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+
+                    <Label Content="Background Color:" FontWeight="Bold"/>
+                    <ComboBox x:Name="BackgroundTexturesColor" Width="100" Margin="5" ItemsSource="{Binding BackgroundMarksColors}" SelectedValue="{Binding SelectedTextureColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>

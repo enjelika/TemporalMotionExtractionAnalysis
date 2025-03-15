@@ -1,0 +1,173 @@
+﻿<UserControl x:Class="TemporalMotionExtractionAnalysis.Controls.ForegroundVisualEncodingWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis.Controls"
+             xmlns:converters="clr-namespace:TemporalMotionExtractionAnalysis.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="209" d:DesignWidth="250">
+    <UserControl.Resources>
+        <converters:GlyphConverter x:Key="GlyphConverter" />
+        <converters:GlyphConverter x:Key="AreaSizeConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <DockPanel Background="White">
+            <TextBlock DockPanel.Dock="Top" Text="Foreground Visual Encoding Options" FontWeight="Bold" HorizontalAlignment="Center" Margin="5"/>
+            <StackPanel Orientation="Vertical" Margin="5,0">
+
+                <StackPanel Orientation="Vertical">
+                    <!-- Radio Buttons for Pixel and Marks -->
+                    <StackPanel Orientation="Horizontal">
+                        <DockPanel VerticalAlignment="Center" Margin="5">
+                            <Label DockPanel.Dock="Left" FontWeight="Bold">Select Mode:</Label>
+                            <RadioButton x:Name="ForePixelRadioButton" Content="Pixel" GroupName="ForeMode" Margin="5" IsChecked="{Binding IsForePixelModeSelected}" />
+                            <RadioButton x:Name="ForeMarksRadioButton" Content="Marks" GroupName="ForeMode" Margin="5" IsChecked="{Binding IsForeMarksModeSelected}" />
+                        </DockPanel>
+                    </StackPanel>
+
+                    <!-- Submenu for Composition Modes, visible only when Pixel is selected -->
+                    <StackPanel Orientation="Vertical" Margin="5">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsForePixelModeSelected}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsForePixelModeSelected}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Label FontWeight="Bold">Composition Mode:</Label>
+                            <!-- TODO: convert to combobox -->
+                            <ComboBox x:Name="ForegroundCompositionModes" Width="100" Margin="5" ItemsSource="{Binding CompositionModes}" 
+                              SelectedValue="{Binding SelectedForegroundCompositionMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                                <ComboBox.Style>
+                                    <Style TargetType="{x:Type ComboBox}">
+                                        <Style.Triggers>
+                                            <EventTrigger RoutedEvent="Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard>
+                                                        <Int32Animation Storyboard.TargetProperty="SelectedIndex" To="9"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ComboBox.Style>
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Submenu for Marks, visible only when Marks is selected -->
+                <StackPanel Orientation="Vertical" Margin="5">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsForeMarksModeSelected}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsForeMarksModeSelected}" Value="False">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Significant Motion: " FontWeight="Bold"/>
+                            <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="△" Foreground="Green"/>
+                            </RadioButton>
+                            <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="▲" Foreground="Green"/>
+                            </RadioButton>
+                            <RadioButton GroupName="StrongMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding StrongMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="◆" Foreground="Green"/>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Noticeable Motion: " FontWeight="Bold"/>
+                            <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=△}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="△" Foreground="Red"/>
+                            </RadioButton>
+                            <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=▲}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="▲" Foreground="Red"/>
+                            </RadioButton>
+                            <RadioButton GroupName="NoticeableMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding ModerateMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=◆}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="◆" Foreground="Red"/>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Slight Motion: " FontWeight="Bold"/>
+                            <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=•}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="•" Foreground="Gold"/>
+                            </RadioButton>
+                            <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=*}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="*" Foreground="Gold"/>
+                            </RadioButton>
+                            <RadioButton GroupName="SlightMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding SlightMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=★}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="★" Foreground="Gold"/>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="No Motion:" FontWeight="Bold"/>
+                            <RadioButton GroupName="NoMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=■}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="■" Foreground="Blue"/>
+                            </RadioButton>
+                            <RadioButton GroupName="NoMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=□}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="□" Foreground="Blue"/>
+                            </RadioButton>
+                            <RadioButton GroupName="NoMotionMarkOptions" Margin="5,8,0,0" 
+                                 IsChecked="{Binding NoMotionMark, Converter={StaticResource GlyphConverter}, ConverterParameter=●}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="●" Foreground="Blue"/>
+                            </RadioButton>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Area Size: " FontWeight="Bold"/>
+                            <RadioButton GroupName="AreaSize" Margin="5,8,0,0" 
+                                IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=20}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="20"/>
+                            </RadioButton>
+                            <RadioButton GroupName="AreaSize" Margin="5,8,0,0" 
+                                IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=40}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="40"/>
+                            </RadioButton>
+                            <RadioButton GroupName="AreaSize" Margin="5,8,0,0" 
+                                IsChecked="{Binding AreaSize, Converter={StaticResource AreaSizeConverter}, ConverterParameter=80}">
+                                <TextBlock FontFamily="Segoe UI Symbol" Text="80"/>
+                            </RadioButton>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>

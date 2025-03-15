@@ -256,7 +256,7 @@ def segmentation(file_path):
         bm_image_resized.save(f'results/segmented_{file_name}.jpg')
 
         log_step("segmentation complete")
-        return message
+        return (f'results/segmented_{file_name}.jpg')
 
     except Exception as e:
         error_message = f"An error occurred: {str(e)}\nTraceback: {traceback.format_exc()}"

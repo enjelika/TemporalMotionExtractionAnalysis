@@ -1,0 +1,63 @@
+﻿<UserControl x:Class="TemporalMotionExtractionAnalysis.Controls.OffsetPaneWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TemporalMotionExtractionAnalysis.Controls"
+             xmlns:converters="clr-namespace:TemporalMotionExtractionAnalysis.Converters"
+             xmlns:models="clr-namespace:TemporalMotionExtractionAnalysis.Model"
+             mc:Ignorable="d" 
+             d:DesignHeight="220" d:DesignWidth="545">
+    <UserControl.Resources>
+        <!-- Data Template Resources -->
+        <DataTemplate x:Key="SecondItemTemplate">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding ImagePath}" Height="Auto" Width="350" Margin="30,2,0,0"
+               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="DefaultTemplate">
+            <StackPanel Orientation="Horizontal">
+                <!-- Empty template for non-second items -->
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- Converter Resources -->
+        <models:IndexBasedTemplateSelector x:Key="IndexBasedTemplateSelector"
+                          SecondItemTemplate="{StaticResource SecondItemTemplate}"
+                          DefaultTemplate="{StaticResource DefaultTemplate}"/>
+        <converters:IndexConverter x:Key="IndexConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <DockPanel Background="White">
+            <TextBlock DockPanel.Dock="Top" Text="Offset Frame" FontWeight="Bold" HorizontalAlignment="Right" Margin="5,10,20,0"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="-15,-20,0,0">
+                <ItemsControl ItemsSource="{Binding SelectedFrames}" 
+                ItemTemplateSelector="{StaticResource IndexBasedTemplateSelector}" Height="Auto" Width="400"/>
+
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="10,0,0,0" Width="120">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                        <Label Content="Frame Offset:" FontWeight="Bold"/>
+                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.OffsetValue, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="E-measure:" FontWeight="Bold"/>
+                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedEmeasure, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="MAE:" FontWeight="Bold"/>
+                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedMAE, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="SSIM:" FontWeight="Bold"/>
+                        <TextBlock VerticalAlignment="Center" Text="{Binding DataContext.CalculatedSSIM, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>
